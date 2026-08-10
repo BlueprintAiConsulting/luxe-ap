@@ -1,0 +1,139 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'admin';
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // -------------------------------------------------------------------------
+    // Global Deny
+    // -------------------------------------------------------------------------
+    // Block all recursive access by default to prevent accidental data leaks
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Users
+    // -------------------------------------------------------------------------
+    match /users/{uid} {
+      // Read: owner or admin
+      allow read: if isOwner(uid) || isAdmin();
+      // Write: never from client (functions only)
+      allow write: if false;
+      
+      match /savedPlaces/{placeId} {
+        // Read: owner or admin
+        allow read: if isOwner(uid) || isAdmin();
+        // Write: owner (safe from client)
+        allow write: if isOwner(uid);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Drivers
+    // -------------------------------------------------------------------------
+    match /drivers/{driverId} {
+      // Read: any signed-in user
+      allow read: if isAuthenticated();
+      // Write: admin only
+      allow write: if isAdmin();
+      
+      match /private/{document=**} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Fleet (Vehicles & Classes)
+    // -------------------------------------------------------------------------
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /vehicleClasses/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Reservations
+    // -------------------------------------------------------------------------
+    match /reservations/{reservationId} {
+      // Read: riderId == uid OR driverId == uid OR admin
+      allow read: if isAdmin() || (isAuthenticated() && (resource.data.riderId == request.auth.uid || resource.data.driverId == request.auth.uid));
+      // Write: never from client
+      allow write: if false;
+      
+      match /statusEvents/{eventId} {
+        // Same as parent. Need to check parent document (get() is slow, but we must check parent's riderId/driverId if it's not duplicated. Wait, get() is allowed if needed, but better to avoid.
+        // Actually, the spec says "Same as parent". Let's use get() since statusEvent might not have riderId/driverId on the document itself.
+        // Or if statusEvent has them, we can check resource.data. 
+        // Let's assume it doesn't have it and use get().
+        allow read: if isAdmin() || (isAuthenticated() && (
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.riderId == request.auth.uid ||
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.driverId == request.auth.uid
+        ));
+        allow write: if false;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Pricing Rule Sets
+    // -------------------------------------------------------------------------
+    match /pricingRuleSets/{ruleSetId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Airports
+    // -------------------------------------------------------------------------
+    match /airports/{airportCode} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Settings
+    // -------------------------------------------------------------------------
+    match /settings/global {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Webhook Events
+    // -------------------------------------------------------------------------
+    match /webhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Driver Locations
+    // -------------------------------------------------------------------------
+    match /driverLocations/{locationId} {
+      // Read: assigned rider or admin
+      // The `driverLocationStubSchema` has `reservationId`. We can fetch the reservation to check if the rider is assigned.
+      allow read: if isAdmin() || (isAuthenticated() && (
+        resource.data.reservationId != null &&
+        get(/databases/$(database)/documents/reservations/$(resource.data.reservationId)).data.riderId == request.auth.uid
+      ));
+      allow write: if false;
+    }
+  }
+}

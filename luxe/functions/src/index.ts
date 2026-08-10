@@ -1,0 +1,13 @@
+import { setGlobalOptions } from "firebase-functions/v2";
+
+setGlobalOptions({ maxInstances: 10 });
+
+export * from "./auth/triggers";
+export * from "./auth/callables";
+export * from "./api/booking";
+export * from "./api/trip";
+export * from "./api/dispatch";
+export * from "./api/webhook";
+export * from "./crons/stripe";
+
+export * from "./triggers/notifications";

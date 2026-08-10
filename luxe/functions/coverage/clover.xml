@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1786325904858" clover="3.2.0">
+  <project timestamp="1786325904858" name="All files">
+    <metrics statements="138" coveredstatements="136" conditionals="142" coveredconditionals="129" methods="6" coveredmethods="5" elements="286" coveredelements="270" complexity="0" loc="138" ncloc="138" packages="2" files="6" classes="6"/>
+    <package name="pricing">
+      <metrics statements="116" coveredstatements="116" conditionals="96" coveredconditionals="87" methods="4" coveredmethods="4"/>
+      <file name="index.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/pricing/index.ts">
+        <metrics statements="116" coveredstatements="116" conditionals="96" coveredconditionals="87" methods="4" coveredmethods="4"/>
+        <line num="10" count="32" type="stmt"/>
+        <line num="11" count="32" type="stmt"/>
+        <line num="12" count="32" type="stmt"/>
+        <line num="15" count="32" type="stmt"/>
+        <line num="16" count="32" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="20" count="31" type="stmt"/>
+        <line num="22" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="23" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="25" count="2" type="stmt"/>
+        <line num="31" count="29" type="cond" truecount="2" falsecount="0"/>
+        <line num="35" count="5" type="stmt"/>
+        <line num="36" count="5" type="cond" truecount="4" falsecount="0"/>
+        <line num="37" count="3" type="stmt"/>
+        <line num="38" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="46" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="47" count="2" type="stmt"/>
+        <line num="48" count="2" type="stmt"/>
+        <line num="56" count="3" type="stmt"/>
+        <line num="62" count="3" type="stmt"/>
+        <line num="71" count="24" type="stmt"/>
+        <line num="77" count="24" type="stmt"/>
+        <line num="85" count="31" type="stmt"/>
+        <line num="86" count="31" type="stmt"/>
+        <line num="89" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="90" count="2" type="stmt"/>
+        <line num="91" count="2" type="stmt"/>
+        <line num="97" count="2" type="stmt"/>
+        <line num="101" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="109" count="1" type="stmt"/>
+        <line num="113" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="114" count="1" type="stmt"/>
+        <line num="115" count="1" type="stmt"/>
+        <line num="121" count="1" type="stmt"/>
+        <line num="125" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="127" count="7" type="cond" truecount="4" falsecount="0"/>
+        <line num="131" count="7" type="stmt"/>
+        <line num="132" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="133" count="4" type="stmt"/>
+        <line num="134" count="4" type="stmt"/>
+        <line num="135" count="4" type="stmt"/>
+        <line num="136" count="4" type="stmt"/>
+        <line num="137" count="4" type="stmt"/>
+        <line num="143" count="4" type="stmt"/>
+        <line num="148" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="149" count="1" type="stmt"/>
+        <line num="155" count="1" type="stmt"/>
+        <line num="157" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="158" count="1" type="stmt"/>
+        <line num="164" count="1" type="stmt"/>
+        <line num="170" count="31" type="cond" truecount="1" falsecount="1"/>
+        <line num="174" count="32" type="stmt"/>
+        <line num="177" count="32" type="cond" truecount="2" falsecount="0"/>
+        <line num="178" count="31" type="stmt"/>
+        <line num="179" count="31" type="stmt"/>
+        <line num="180" count="31" type="stmt"/>
+        <line num="181" count="31" type="stmt"/>
+        <line num="183" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="185" count="30" type="cond" truecount="2" falsecount="0"/>
+        <line num="188" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="191" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="192" count="4" type="stmt"/>
+        <line num="193" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="194" count="1" type="stmt"/>
+        <line num="198" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="199" count="4" type="stmt"/>
+        <line num="205" count="4" type="stmt"/>
+        <line num="211" count="31" type="stmt"/>
+        <line num="212" count="31" type="stmt"/>
+        <line num="213" count="31" type="stmt"/>
+        <line num="214" count="31" type="cond" truecount="4" falsecount="0"/>
+        <line num="215" count="2" type="stmt"/>
+        <line num="216" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="217" count="1" type="stmt"/>
+        <line num="219" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="220" count="2" type="stmt"/>
+        <line num="226" count="2" type="stmt"/>
+        <line num="228" count="2" type="stmt"/>
+        <line num="233" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="235" count="1" type="stmt"/>
+        <line num="236" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="237" count="1" type="stmt"/>
+        <line num="243" count="1" type="stmt"/>
+        <line num="248" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="252" count="1" type="stmt"/>
+        <line num="253" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="254" count="1" type="stmt"/>
+        <line num="256" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="257" count="1" type="stmt"/>
+        <line num="263" count="1" type="stmt"/>
+        <line num="270" count="31" type="stmt"/>
+        <line num="271" count="31" type="cond" truecount="4" falsecount="0"/>
+        <line num="273" count="30" type="cond" truecount="2" falsecount="0"/>
+        <line num="274" count="30" type="stmt"/>
+        <line num="278" count="31" type="stmt"/>
+        <line num="279" count="31" type="cond" truecount="2" falsecount="0"/>
+        <line num="280" count="1" type="stmt"/>
+        <line num="284" count="31" type="stmt"/>
+        <line num="286" count="31" type="stmt"/>
+        <line num="308" count="6" type="cond" truecount="1" falsecount="1"/>
+        <line num="312" count="6" type="stmt"/>
+        <line num="313" count="6" type="stmt"/>
+        <line num="316" count="6" type="stmt"/>
+        <line num="318" count="6" type="stmt"/>
+        <line num="319" count="10" type="cond" truecount="4" falsecount="0"/>
+        <line num="320" count="1" type="stmt"/>
+        <line num="322" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="323" count="5" type="stmt"/>
+        <line num="324" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="325" count="5" type="stmt"/>
+        <line num="327" count="5" type="stmt"/>
+        <line num="331" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="shared">
+      <metrics statements="22" coveredstatements="20" conditionals="46" coveredconditionals="42" methods="2" coveredmethods="1"/>
+      <file name="address.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/shared/address.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="1" type="stmt"/>
+      </file>
+      <file name="preferences.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/shared/preferences.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+      <file name="pricing.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/shared/pricing.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="97" count="1" type="stmt"/>
+      </file>
+      <file name="reservation.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/shared/reservation.ts">
+        <metrics statements="15" coveredstatements="14" conditionals="43" coveredconditionals="42" methods="1" coveredmethods="1"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="107" count="1" type="stmt"/>
+        <line num="130" count="33" type="cond" truecount="2" falsecount="0"/>
+        <line num="132" count="31" type="cond" truecount="10" falsecount="1"/>
+        <line num="134" count="3" type="cond" truecount="3" falsecount="0"/>
+        <line num="136" count="5" type="stmt"/>
+        <line num="141" count="4" type="stmt"/>
+        <line num="146" count="4" type="stmt"/>
+        <line num="152" count="4" type="stmt"/>
+        <line num="157" count="4" type="stmt"/>
+        <line num="163" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="168" count="4" type="stmt"/>
+        <line num="170" count="0" type="stmt"/>
+      </file>
+      <file name="timestamp.ts" path="/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/functions/src/shared/timestamp.ts">
+        <metrics statements="2" coveredstatements="1" conditionals="3" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="0" type="cond" truecount="0" falsecount="3"/>
+      </file>
+    </package>
+  </project>
+</coverage>

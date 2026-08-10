@@ -1,0 +1,70 @@
+
+> luxe@0.1.0 build
+> next build
+
+▲ Next.js 16.3.0 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 9ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 146ms
+  Running TypeScript ...
+  Finished TypeScript in 667ms ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/8) ...
+Connecting to Firebase Emulators...
+WARNING: You are using the Auth Emulator, which is intended for local testing only.  Do not use with production credentials.
+⨯ useSearchParams() should be wrapped in a suspense boundary at page "/login". Read more: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
+    at Object.X (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/.next/server/chunks/ssr/node_modules_next_1v1tkgs._.js:149:3038)
+    at q (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/.next/server/chunks/ssr/node_modules_next_1v1tkgs._.js:1:8425)
+    at /Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/.next/server/chunks/ssr/_13ev8l4._.js:1:1575
+    at al (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:85944)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87760)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at au (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:86296)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87805)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106280)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at aS (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:114685)
+    at ap (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:111684)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109897)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:100962)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:105898)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at au (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:86296)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87805)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at aS (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:114685)
+    at ap (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:111684)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109897)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87724)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at au (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:86296)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87805)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:100962)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at au (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:86296)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87805)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:100962)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+    at af (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:106940)
+    at au (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:86296)
+    at ac (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:87805)
+    at ah (/Users/drewsmacbookpro/Documents/antigravity/goofy-meitner/luxe/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:109623)
+Error occurred prerendering page "/login". Read more: https://nextjs.org/docs/messages/prerender-error
+Export encountered an error on /login/page: /login, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null

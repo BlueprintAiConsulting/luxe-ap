@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'admin';
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // -------------------------------------------------------------------------
+    // Avatars / Profile Pictures / Vehicles
+    // -------------------------------------------------------------------------
+    match /{allImages=**} {
+      // Readable by signed-in users
+      allow read: if isAuthenticated();
+      
+      // Writable only by admin
+      allow write: if isAdmin();
+    }
+  }
+}
