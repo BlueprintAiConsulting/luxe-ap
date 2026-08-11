@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,6 +9,7 @@ import { PricingRuleSet, QuoteInput } from '@/lib/types/pricing';
 import { GlobalSettings } from '@/lib/types/settings';
 import { Airport } from '@/lib/types/airport';
 import { Loader2, Plus, Trash2, Edit2, CheckCircle2 } from 'lucide-react';
+import { formatMoney } from '@/lib/format';
 
 import { calculatePrice } from '../../../../functions/src/pricing/index';
 import { Timestamp } from 'firebase/firestore';
@@ -20,10 +21,10 @@ export default function PricingAdminPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Pricing & Rules</h1>
-        <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-          <button onClick={() => setTab('rules')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'rules' ? 'bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>Rule Set Editor</button>
-          <button onClick={() => setTab('airports')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'airports' ? 'bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>Airports & Zones</button>
-          <button onClick={() => setTab('test')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'test' ? 'bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>Test Panel</button>
+        <div className="flex space-x-2 bg-neutral-100 p-1 rounded-lg">
+          <button onClick={() => setTab('rules')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'rules' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Rule Set Editor</button>
+          <button onClick={() => setTab('airports')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'airports' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Airports & Zones</button>
+          <button onClick={() => setTab('test')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'test' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Test Panel</button>
         </div>
       </div>
 
@@ -88,10 +89,10 @@ function RuleSetEditorTab() {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-gray-400" /></div>;
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-400" /></div>;
 
   if (!ruleSet) {
-    return <div className="p-8 text-center border rounded-xl bg-gray-50 text-gray-500">No active rule set found. Please run the seed script.</div>;
+    return <div className="p-8 text-center border rounded-xl bg-neutral-50 text-neutral-500">No active rule set found. Please run the seed script.</div>;
   }
 
   // Helper for deeply nested updates
@@ -113,15 +114,15 @@ function RuleSetEditorTab() {
 
   return (
     <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
-      <div className="bg-gray-50 border-b p-6 flex justify-between items-center">
+      <div className="bg-neutral-50 border-b p-6 flex justify-between items-center">
         <div>
           <h2 className="text-xl font-bold">Active Rules: v{ruleSet.version}</h2>
-          <p className="text-sm text-gray-500 mb-1">Editing this will create v{ruleSet.version + 1} upon publishing.</p>
+          <p className="text-sm text-neutral-500 mb-1">Editing this will create v{ruleSet.version + 1} upon publishing.</p>
           <div className="text-xs bg-yellow-100 text-yellow-800 p-2 rounded border border-yellow-200 inline-block">
             <strong>Note:</strong> These values come from the client's discovery answers and should not be guessed.
           </div>
         </div>
-        <button onClick={handlePublish} disabled={saving} className="bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 flex items-center">
+        <button onClick={handlePublish} disabled={saving} className="bg-brand text-white px-6 py-2 rounded-lg font-medium hover:bg-neutral-800 flex items-center">
           {saving ? <Loader2 className="animate-spin mr-2" size={18} /> : <CheckCircle2 className="mr-2" size={18} />}
           Publish New Version
         </button>
@@ -134,15 +135,15 @@ function RuleSetEditorTab() {
             {Object.keys(ruleSet.classRates).map(classId => {
               const rates = ruleSet.classRates[classId];
               return (
-                <div key={classId} className="border p-4 rounded-lg bg-gray-50">
+                <div key={classId} className="border p-4 rounded-lg bg-neutral-50">
                   <h4 className="font-bold text-md capitalize mb-3">{classId}</h4>
                   <div className="space-y-3">
-                    <div><label className="block text-xs text-gray-500">Base Fare ($)</label><input type="number" value={rates.baseFareCents / 100} onChange={e => updateRates(classId, 'baseFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-gray-500">Per Mile ($)</label><input type="number" value={rates.perMileCents / 100} onChange={e => updateRates(classId, 'perMileCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-gray-500">Per Minute ($)</label><input type="number" value={rates.perMinuteCents / 100} onChange={e => updateRates(classId, 'perMinuteCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-gray-500">Minimum Fare ($)</label><input type="number" value={rates.minimumFareCents / 100} onChange={e => updateRates(classId, 'minimumFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-gray-500">Hourly Rate ($)</label><input type="number" value={rates.hourlyRateCents / 100} onChange={e => updateRates(classId, 'hourlyRateCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-gray-500">Hourly Min (Hours)</label><input type="number" value={rates.hourlyMinimumHours} onChange={e => updateRates(classId, 'hourlyMinimumHours', parseInt(e.target.value))} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Base Fare ($)</label><input type="number" value={rates.baseFareCents / 100} onChange={e => updateRates(classId, 'baseFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Per Mile ($)</label><input type="number" value={rates.perMileCents / 100} onChange={e => updateRates(classId, 'perMileCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Per Minute ($)</label><input type="number" value={rates.perMinuteCents / 100} onChange={e => updateRates(classId, 'perMinuteCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Minimum Fare ($)</label><input type="number" value={rates.minimumFareCents / 100} onChange={e => updateRates(classId, 'minimumFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Hourly Rate ($)</label><input type="number" value={rates.hourlyRateCents / 100} onChange={e => updateRates(classId, 'hourlyRateCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Hourly Min (Hours)</label><input type="number" value={rates.hourlyMinimumHours} onChange={e => updateRates(classId, 'hourlyMinimumHours', parseInt(e.target.value))} className="w-full border p-1 rounded" /></div>
                   </div>
                 </div>
               );
@@ -218,30 +219,30 @@ function RuleSetEditorTab() {
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Holidays</h3>
             <div className="space-y-4">
               {ruleSet.surcharges.holidays.map((h, i) => (
-                <div key={i} className="flex space-x-2 items-center bg-gray-50 p-2 border rounded">
+                <div key={i} className="flex space-x-2 items-center bg-neutral-50 p-2 border rounded">
                   <input type="date" value={h.date} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols[i].date = e.target.value;
-                    setRuleSet({...ruleSet, holidays: hols});
+                    setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
                   }} className="border p-1 rounded" />
                   <input type="text" placeholder="Name" value={h.name} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols[i].name = e.target.value;
-                    setRuleSet({...ruleSet, holidays: hols});
+                    setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
                   }} className="border p-1 rounded w-full" />
-                  <input type="number" step="0.1" placeholder="Multiplier" value={h.multiplier} onChange={e => {
+                  <input type="number" step="0.1" placeholder="Percent" value={h.percent} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
-                    hols[i].multiplier = parseFloat(e.target.value);
-                    setRuleSet({...ruleSet, holidays: hols});
+                    hols[i].percent = parseFloat(e.target.value);
+                    setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
                   }} className="border p-1 rounded w-24" />
                   <button onClick={() => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols.splice(i, 1);
-                    setRuleSet({...ruleSet, holidays: hols});
+                    setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
                   }} className="text-red-500 px-2">X</button>
                 </div>
               ))}
-              <button onClick={() => setRuleSet({...ruleSet, holidays: [...ruleSet.surcharges.holidays, {date: '', name: '', multiplier: 1.5}]})} className="text-sm text-blue-600 font-medium">+ Add Holiday</button>
+              <button onClick={() => setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: [...ruleSet.surcharges.holidays, {date: '', name: '', percent: 1.5, flatCents: 0}] } })} className="text-sm text-blue-600 font-medium">+ Add Holiday</button>
             </div>
           </div>
 
@@ -249,31 +250,31 @@ function RuleSetEditorTab() {
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Cancellation Windows</h3>
             <div className="space-y-4">
               {ruleSet.cancellation.map((cw: any, i: number) => (
-                <div key={i} className="flex space-x-2 items-center bg-gray-50 p-2 border rounded">
+                <div key={i} className="flex space-x-2 items-center bg-neutral-50 p-2 border rounded">
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 block">Hours Before</label>
-                    <input type="number" value={cw.hoursBefore} onChange={e => {
+                    <label className="text-xs text-neutral-500 block">Hours Before</label>
+                    <input type="number" value={cw.hoursBeforePickup} onChange={e => {
                       const cws = [...ruleSet.cancellation];
-                      cws[i].hoursBefore = parseInt(e.target.value);
-                      setRuleSet({...ruleSet, cancellationWindows: cws});
+                      cws[i].hoursBeforePickup = parseInt(e.target.value);
+                      setRuleSet({...ruleSet, cancellation: cws});
                     }} className="border p-1 rounded w-full" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 block">Fee %</label>
+                    <label className="text-xs text-neutral-500 block">Fee %</label>
                     <input type="number" value={cw.feePercent} onChange={e => {
                       const cws = [...ruleSet.cancellation];
                       cws[i].feePercent = parseFloat(e.target.value);
-                      setRuleSet({...ruleSet, cancellationWindows: cws});
+                      setRuleSet({...ruleSet, cancellation: cws});
                     }} className="border p-1 rounded w-full" />
                   </div>
                   <button onClick={() => {
                     const cws = [...ruleSet.cancellation];
                     cws.splice(i, 1);
-                    setRuleSet({...ruleSet, cancellationWindows: cws});
+                    setRuleSet({...ruleSet, cancellation: cws});
                   }} className="text-red-500 px-2 mt-4">X</button>
                 </div>
               ))}
-              <button onClick={() => setRuleSet({...ruleSet, cancellationWindows: [...ruleSet.cancellation, {hoursBefore: 24, feePercent: 50}]})} className="text-sm text-blue-600 font-medium">+ Add Window</button>
+              <button onClick={() => setRuleSet({...ruleSet, cancellation: [...ruleSet.cancellation, {hoursBeforePickup: 24, feePercent: 50, feeFlatCents: 0, appliesToClasses: "all"}]})} className="text-sm text-blue-600 font-medium">+ Add Window</button>
             </div>
           </div>
         </section>
@@ -296,29 +297,29 @@ function AirportsTab() {
     return unsub;
   }, []);
 
-  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-gray-400" /></div>;
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-400" /></div>;
 
   return (
     <div className="bg-white border rounded-xl overflow-hidden shadow-sm p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Airport Zones</h2>
-        <button className="bg-black text-white px-4 py-2 rounded-lg flex items-center"><Plus size={16} className="mr-2"/> Add Airport</button>
+        <button className="bg-brand text-white px-4 py-2 rounded-lg flex items-center"><Plus size={16} className="mr-2"/> Add Airport</button>
       </div>
 
       <div className="space-y-6">
         {airports.map(apt => (
           <div key={apt.code} className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-50 p-4 border-b flex justify-between items-center">
+            <div className="bg-neutral-50 p-4 border-b flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-lg">{apt.code} - {apt.name}</h3>
-                <p className="text-sm text-gray-500">TZ: {apt.timezone}</p>
+                <p className="text-sm text-neutral-500">TZ: {apt.timezone}</p>
               </div>
               <button className="text-blue-600 hover:text-blue-800"><Edit2 size={16}/></button>
             </div>
             <div className="p-4">
               <h4 className="font-medium mb-3">Zones</h4>
               <table className="w-full text-left text-sm">
-                <thead className="bg-gray-100">
+                <thead className="bg-neutral-100">
                   <tr>
                     <th className="p-2">Zone</th>
                     <th className="p-2">Class</th>
@@ -337,13 +338,13 @@ function AirportsTab() {
                       </tr>
                     ))
                   ))}
-                  {apt.zones.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-gray-500">No zones defined.</td></tr>}
+                  {apt.zones.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-neutral-500">No zones defined.</td></tr>}
                 </tbody>
               </table>
             </div>
           </div>
         ))}
-        {airports.length === 0 && <div className="text-center p-8 text-gray-500 border rounded-lg">No airports defined. Run seed script.</div>}
+        {airports.length === 0 && <div className="text-center p-8 text-neutral-500 border rounded-lg">No airports defined. Run seed script.</div>}
       </div>
     </div>
   );
@@ -450,7 +451,7 @@ function TestPanelTab() {
               </div>
             </div>
           )}
-          <button onClick={handleTest} className="w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-800">
+          <button onClick={handleTest} className="w-full bg-brand text-white py-3 rounded-lg font-bold hover:bg-neutral-800">
             Calculate Quote
           </button>
         </div>
@@ -461,14 +462,14 @@ function TestPanelTab() {
         {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
         {result && (
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg border">
-              <h3 className="font-bold text-gray-500 text-sm uppercase tracking-wider mb-3">Line Items</h3>
+            <div className="bg-neutral-50 p-4 rounded-lg border">
+              <h3 className="font-bold text-neutral-500 text-sm r mb-3">Line Items</h3>
               <div className="space-y-2">
                 {result.lineItems.map((item: any, i: number) => (
                   <div key={i} className="flex justify-between text-sm">
                     <div>
                       <span className="font-medium">{item.label}</span>
-                      {item.detail && <span className="text-gray-500 ml-2 text-xs">({item.detail})</span>}
+                      {item.detail && <span className="text-neutral-500 ml-2 text-xs">({item.detail})</span>}
                     </div>
                     <span>{formatMoney(item.amountCents)}</span>
                   </div>
@@ -479,11 +480,11 @@ function TestPanelTab() {
                   <span>Subtotal</span>
                   <span>${(result.subtotalCents / 100).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-neutral-600">
                   <span>Gratuity ({result.gratuityPercent}%)</span>
                   <span>${(result.gratuityCents / 100).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-neutral-600">
                   <span>Taxes</span>
                   <span>${(result.taxCents / 100).toFixed(2)}</span>
                 </div>

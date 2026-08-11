@@ -1,329 +1,219 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase/client";
-import { useAuth } from "@/lib/firebase/auth";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { signInWithGoogleEnsureProfile } from "@/lib/firebase/googleAuth";
+import { signInWithAppleEnsureProfile } from "@/lib/firebase/appleAuth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase/client";
+import { Shield, Mail, KeyRound, ChevronDown, ChevronUp } from "lucide-react";
 
-declare global {
-  interface Window {
-    recaptchaVerifier: RecaptchaVerifier | undefined;
-  }
-}
+const GoogleIcon = () => (
+  <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
-type AuthMode = "phone" | "email" | "profile";
+const AppleIcon = () => (
+  <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.641-.026 2.677-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.689.827-1.35 2.272-1.156 3.65 1.35.104 2.607-.636 3.443-1.638z" />
+  </svg>
+);
 
 function LoginContent() {
-  const [mode, setMode] = useState<AuthMode>("phone");
-  
-  // Phone State
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  
-  // Email State
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  
-  // Profile State
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [profileEmail, setProfileEmail] = useState("");
-  
-  // General State
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  
-  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [error, setError] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
 
-  // Handle Redirection and Profile Check
-  useEffect(() => {
-    if (user && mode !== "profile") {
-      const checkProfile = async () => {
-        setLoading(true);
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (!data.firstName || !data.lastName) {
-              setMode("profile");
-            } else {
-              const redirect = searchParams.get("redirect") || "/dashboard";
-              router.push(redirect);
-            }
-          } else {
-            // Document not created by trigger yet? Wait a bit or show profile
-            setMode("profile");
-          }
-        } catch (e) {
-          console.error("Error checking profile:", e);
-        } finally {
-          setLoading(false);
-        }
-      };
-      checkProfile();
-    }
-  }, [user, mode, router, searchParams]);
+  function navigateAfterAuth(path: string) {
+    router.replace(path);
+  }
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-      });
-    }
-  }, []);
-
-  const handleSendCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function handleGoogleSignIn() {
     setError("");
-    setLoading(true);
-    
+    setGoogleLoading(true);
     try {
-      let formattedPhone = phoneNumber.trim();
-      if (!formattedPhone.startsWith("+")) {
-        formattedPhone = "+1" + formattedPhone.replace(/\D/g, "");
-      }
-      
-      const appVerifier = window.recaptchaVerifier;
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-      setConfirmationResult(confirmation);
+      const nextPath = searchParams.get("redirect") || "/dashboard";
+      await signInWithGoogleEnsureProfile();
+      navigateAfterAuth(nextPath);
     } catch (err: any) {
       console.error(err);
-      if (err.code === "auth/too-many-requests") {
-        setError("Too many attempts. Please try again later.");
+      if (err?.code === "auth/popup-closed-by-user") {
+        // User closed the popup — no error needed.
       } else {
-        setError("Failed to send verification code. Please check your number.");
+        setError(`Google sign-in failed: ${err?.code || ""} ${err?.message || String(err)}`);
       }
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
-  };
+  }
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!confirmationResult) return;
+  async function handleAppleSignIn() {
     setError("");
-    setLoading(true);
+    setAppleLoading(true);
     try {
-      await confirmationResult.confirm(verificationCode);
-      // user state changes, triggering useEffect
+      const nextPath = searchParams.get("redirect") || "/dashboard";
+      await signInWithAppleEnsureProfile();
+      navigateAfterAuth(nextPath);
     } catch (err: any) {
       console.error(err);
-      setError("Invalid or expired verification code.");
-      setLoading(false);
+      if (err?.code === "auth/popup-closed-by-user" || err?.code === "auth/cancelled-popup-request") {
+        // User closed the popup — no error needed.
+      } else {
+        setError(`Apple sign-in failed: ${err?.code || ""} ${err?.message || String(err)}`);
+      }
+    } finally {
+      setAppleLoading(false);
     }
-  };
+  }
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  async function handleAdminSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // user state changes, triggering useEffect
-    } catch (err: any) {
-      console.error(err);
-      setError("Invalid email or password.");
-      setLoading(false);
-    }
-  };
+    setAdminLoading(true);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setError("");
-    setLoading(true);
-    try {
-      await updateDoc(doc(db, "users", user.uid), {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: profileEmail.trim() || null,
-        updatedAt: new Date()
-      });
-      const redirect = searchParams.get("redirect") || "/dashboard";
-      router.push(redirect);
-    } catch (err: any) {
-      console.error(err);
-      setError("Failed to save profile.");
-      setLoading(false);
+    const cleanEmail = adminEmail.trim().toLowerCase();
+    const cleanPassword = adminPassword.trim();
+
+    if (!cleanEmail || !cleanPassword) {
+      setError("Please enter your admin email and password.");
+      setAdminLoading(false);
+      return;
     }
-  };
+
+    try {
+      await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
+      // Ensure admin users go straight to dispatch/admin view or their specific redirect
+      const nextPath = searchParams.get("redirect") || "/dispatch";
+      navigateAfterAuth(nextPath);
+    } catch (err: any) {
+      console.error("Admin sign in failed:", err);
+      setError(err?.message || "Admin login failed. Check email & password.");
+    } finally {
+      setAdminLoading(false);
+    }
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-gray-50">
-      <div className="w-full max-w-sm p-6 bg-white border border-gray-200 rounded-xl shadow-lg sm:p-8">
-        <div className="flex justify-center mb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">LUXE</h1>
-        </div>
-        <h5 className="mb-6 text-xl font-medium text-center text-gray-900">
-          {mode === "profile" ? "Complete your profile" : (mode === "phone" ? "Sign in to Luxe" : "Admin Sign In")}
-        </h5>
-        
-        {error && (
-          <div className="mb-4 p-3 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200" role="alert">
-            {error}
+    <div className="min-h-[100dvh] flex items-center justify-center bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      
+      <div className="max-w-md w-full relative z-10 transition-all duration-500">
+        <div className="space-y-8 bg-white p-8 sm:p-10 rounded-2xl border border-neutral-200 shadow-xl relative overflow-hidden">
+          
+          <div className="relative flex flex-col items-center">
+            <div className="space-y-2 text-center mb-6">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-brand uppercase leading-none">
+                LUXE
+              </h1>
+              <p className="text-sm text-neutral-500 font-medium">
+                Sign in to book or manage rides.
+              </p>
+            </div>
           </div>
-        )}
 
-        {mode === "phone" && !confirmationResult && (
-          <form className="space-y-6" onSubmit={handleSendCode}>
-            <div>
-              <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-900">Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                id="phone"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                placeholder="(555) 123-4567"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-              />
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-xl flex items-start gap-3">
+              <div className="w-1 h-full bg-red-500 rounded-full mt-0.5 shrink-0" />
+              <p>{error}</p>
             </div>
-            <button
-              type="submit"
-              disabled={loading || !phoneNumber}
-              className="w-full text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors disabled:opacity-50"
-            >
-              {loading ? "Sending..." : "Send Verification Code"}
-            </button>
-            <div className="text-center mt-6">
-              <button type="button" onClick={() => setMode("email")} className="text-sm text-gray-500 hover:text-black transition-colors">
-                Sign in with email (Admin)
-              </button>
-            </div>
-          </form>
-        )}
+          )}
 
-        {mode === "phone" && confirmationResult && (
-          <form className="space-y-6" onSubmit={handleVerifyCode}>
-            <div>
-              <label htmlFor="code" className="block mb-2 text-sm font-medium text-gray-900">6-digit Verification Code</label>
-              <input
-                type="text"
-                name="code"
-                id="code"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3 text-center tracking-widest text-lg"
-                placeholder="123456"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                required
-                maxLength={6}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading || verificationCode.length < 6}
-              className="w-full text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors disabled:opacity-50"
-            >
-              {loading ? "Verifying..." : "Verify Code"}
-            </button>
+          <div className="mt-8 space-y-3">
             <button
               type="button"
-              className="w-full text-sm text-gray-500 hover:text-black transition-colors mt-4 block text-center"
-              onClick={() => {
-                setConfirmationResult(null);
-                setVerificationCode("");
-                setError("");
-              }}
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading || appleLoading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-white border border-neutral-300 text-brand font-semibold text-base transition-all hover:bg-neutral-50 disabled:opacity-50"
             >
-              Use a different phone number
+              <GoogleIcon />
+              <span>
+                {googleLoading ? "Authenticating..." : "Continue with Google"}
+              </span>
             </button>
-          </form>
-        )}
 
-        {mode === "email" && (
-          <form className="space-y-6" onSubmit={handleEmailLogin}>
-            <div>
-              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
-              <input
-                type="password"
-                id="password"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
             <button
-              type="submit"
-              disabled={loading || !email || !password}
-              className="w-full text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors disabled:opacity-50"
+              type="button"
+              onClick={handleAppleSignIn}
+              disabled={googleLoading || appleLoading}
+              className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-brand text-white font-semibold text-base transition-all hover:bg-neutral-900 disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              <AppleIcon />
+              <span>
+                {appleLoading ? "Authenticating..." : "Continue with Apple"}
+              </span>
             </button>
-            <div className="text-center mt-6">
-              <button type="button" onClick={() => setMode("phone")} className="text-sm text-gray-500 hover:text-black transition-colors">
-                Sign in with Phone (Rider)
-              </button>
-            </div>
-          </form>
-        )}
+          </div>
 
-        {mode === "profile" && (
-          <form className="space-y-6" onSubmit={handleSaveProfile}>
-            <p className="text-sm text-gray-600 text-center mb-4">Welcome! Let's get your name before booking a ride.</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block mb-2 text-sm font-medium text-gray-900">First Name</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block mb-2 text-sm font-medium text-gray-900">Last Name</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="profileEmail" className="block mb-2 text-sm font-medium text-gray-900">Email <span className="text-gray-400 font-normal">(Optional)</span></label>
-              <input
-                type="email"
-                id="profileEmail"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block w-full p-3"
-                value={profileEmail}
-                onChange={(e) => setProfileEmail(e.target.value)}
-                placeholder="For receipts"
-              />
-            </div>
+          {/* Staff & Admin Login Section */}
+          <div className="mt-8 pt-6 border-t border-neutral-200">
             <button
-              type="submit"
-              disabled={loading || !firstName || !lastName}
-              className="w-full text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors disabled:opacity-50"
+              type="button"
+              onClick={() => setShowAdminLogin(!showAdminLogin)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-neutral-500 hover:text-brand transition-colors py-3 px-3 rounded-lg"
             >
-              {loading ? "Saving..." : "Save Profile & Continue"}
+              <span className="flex items-center gap-2">
+                <Shield size={16} aria-hidden="true" /> Staff & Admin Login
+              </span>
+              {showAdminLogin ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
             </button>
-          </form>
-        )}
 
-        <div id="recaptcha-container"></div>
+            {showAdminLogin && (
+              <form onSubmit={handleAdminSignIn} className="mt-4 space-y-4 bg-neutral-50 p-5 rounded-xl">
+                <div className="text-sm font-semibold text-neutral-600 mb-2 flex items-center justify-between">
+                  <span>Admin Credentials</span>
+                  <span className="text-xs text-neutral-400 font-normal">Staff Portal</span>
+                </div>
+                <div>
+                  <label htmlFor="admin-email" className="block text-sm font-semibold text-neutral-700 mb-1">Admin Email</label>
+                  <div className="relative">
+                    <Mail size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      id="admin-email"
+                      type="email"
+                      required
+                      value={adminEmail}
+                      onChange={(e) => setAdminEmail(e.target.value)}
+                      placeholder="admin@luxe.com"
+                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="admin-password" className="block text-sm font-semibold text-neutral-700 mb-1">Password</label>
+                  <div className="relative">
+                    <KeyRound size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      id="admin-password"
+                      type="password"
+                      required
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      placeholder="Enter admin password"
+                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={adminLoading}
+                  className="w-full mt-4 py-3 px-4 rounded-xl bg-brand text-white font-semibold text-base hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Shield size={16} aria-hidden="true" />
+                  {adminLoading ? "Authenticating Admin..." : "Sign In as Admin"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -331,7 +221,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-[100dvh] flex items-center justify-center bg-neutral-50 py-12 px-4" />}>
       <LoginContent />
     </Suspense>
   );

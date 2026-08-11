@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 "use client";
 import { formatDateTime } from "@/lib/format";
 
@@ -155,7 +155,7 @@ export default function DispatchPage() {
                 )}
               </div>
               <div className="font-semibold text-sm mb-1">{trip.riderName}</div>
-              <div className="text-sm text-neutral-500 truncate">{trip.pickup.line1}</div>
+              <div className="text-sm text-neutral-500 truncate">{trip.pickup.line1 || ""}</div>
               <div className="mt-3 text-xs font-semibold bg-neutral-100 px-2 py-1 rounded w-max">
                 {trip.className}
               </div>
@@ -169,7 +169,7 @@ export default function DispatchPage() {
           <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-neutral-50 text-neutral-500 text-xs uppercase tracking-wider border-b border-neutral-200">
+                <tr className="bg-neutral-50 text-neutral-500 text-xs r border-b border-neutral-200">
                   <th className="p-4 font-bold">Time</th>
                   <th className="p-4 font-bold">Client</th>
                   <th className="p-4 font-bold">Route</th>
@@ -204,9 +204,9 @@ export default function DispatchPage() {
                         <div className="font-semibold text-sm">{trip.riderName}</div>
                       </td>
                       <td className="p-4 max-w-xs">
-                        <div className="text-sm truncate" title={trip.pickup.line1}>{trip.pickup.line1}</div>
+                        <div className="text-sm truncate" title={trip.pickup.line1 || undefined}>{trip.pickup.line1 || ""}</div>
                         {trip.dropoff && (
-                          <div className="text-xs text-neutral-400 truncate mt-1">→ {trip.dropoff.line1}</div>
+                          <div className="text-xs text-neutral-400 truncate mt-1">→ {trip.dropoff.line1 || ""}</div>
                         )}
                       </td>
                       <td className="p-4">

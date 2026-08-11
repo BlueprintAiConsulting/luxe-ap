@@ -45,7 +45,7 @@ exports.stripeWebhook = (0, https_1.onRequest)(async (req, res) => {
             }
             t.set(eventRef, {
                 type: event.type,
-                processedAt: new Date(),
+                processedAt: firestore_1.FieldValue.serverTimestamp(),
             });
             // Handle the event
             const supportedEvents = [
@@ -129,7 +129,7 @@ exports.stripeWebhook = (0, https_1.onRequest)(async (req, res) => {
                     paymentStatus,
                     authorizedAmountCents,
                     capturedAmountCents,
-                    updatedAt: new Date(),
+                    updatedAt: firestore_1.FieldValue.serverTimestamp(),
                 });
             }
         });

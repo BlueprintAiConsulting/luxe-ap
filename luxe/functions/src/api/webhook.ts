@@ -1,5 +1,5 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { Reservation } from "../shared";
 
@@ -50,7 +50,7 @@ export const stripeWebhook = onRequest(async (req, res) => {
 
       t.set(eventRef, {
         type: event.type,
-        processedAt: new Date() as any,
+        processedAt: FieldValue.serverTimestamp(),
       });
 
       // Handle the event
@@ -136,7 +136,7 @@ export const stripeWebhook = onRequest(async (req, res) => {
           paymentStatus,
           authorizedAmountCents,
           capturedAmountCents,
-          updatedAt: new Date() as any,
+          updatedAt: FieldValue.serverTimestamp(),
         });
       }
     });

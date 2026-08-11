@@ -1,21 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(99% 0.002 260); /* Almost white, very subtle tint */
+  --foreground: oklch(20% 0.01 260);
+
+  /* Deep Charcoal brand color */
+  --color-brand: oklch(20% 0.01 260);
+  
+  /* Warm Champagne accent */
+  --color-accent: oklch(85% 0.04 80);
+  --color-accent-hover: oklch(80% 0.05 80);
+
+  /* Neutrals tinted toward 260 (deep blue/charcoal) */
+  --color-neutral-50:  oklch(98% 0.005 260);
+  --color-neutral-100: oklch(95% 0.005 260);
+  --color-neutral-200: oklch(90% 0.005 260);
+  --color-neutral-300: oklch(80% 0.005 260);
+  --color-neutral-400: oklch(70% 0.005 260);
+  --color-neutral-500: oklch(60% 0.005 260);
+  --color-neutral-600: oklch(50% 0.005 260);
+  --color-neutral-700: oklch(40% 0.005 260);
+  --color-neutral-800: oklch(30% 0.005 260);
+  --color-neutral-900: oklch(20% 0.01 260);
+  --color-neutral-950: oklch(15% 0.01 260);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--color-brand);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-900: var(--color-neutral-900);
+  --color-neutral-950: var(--color-neutral-950);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: oklch(15% 0.01 260);
+    --foreground: oklch(90% 0.005 260);
   }
 }
 

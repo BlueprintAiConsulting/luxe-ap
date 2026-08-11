@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, connectAuthEmulator, Auth } from "firebase/auth";
+import { getAuth, connectAuthEmulator, Auth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator, Functions } from "firebase/functions";
 import { getStorage, connectStorageEmulator, FirebaseStorage } from "firebase/storage";
@@ -40,5 +40,8 @@ if (!getApps().length) {
   functions = getFunctions(app);
   storage = getStorage(app);
 }
+
+export const googleProvider = new GoogleAuthProvider();
+export const appleProvider = new OAuthProvider("apple.com");
 
 export { app, auth, db, functions, storage };

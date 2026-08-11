@@ -108,6 +108,7 @@ export type Reservation = z.infer<typeof reservationSchema>;
 export const createReservationInputSchema = z.object({
   idempotencyKey: z.string(),
   quote: quoteInputSchema,
+  requestedDriverId: z.string().nullable().optional(),
   pickup: addressSchema,
   dropoff: addressSchema.nullable(),
   stops: z.array(addressSchema),

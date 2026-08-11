@@ -93,6 +93,7 @@ exports.reservationSchema = zod_1.z.object({
 exports.createReservationInputSchema = zod_1.z.object({
     idempotencyKey: zod_1.z.string(),
     quote: pricing_1.quoteInputSchema,
+    requestedDriverId: zod_1.z.string().nullable().optional(),
     pickup: address_1.addressSchema,
     dropoff: address_1.addressSchema.nullable(),
     stops: zod_1.z.array(address_1.addressSchema),
