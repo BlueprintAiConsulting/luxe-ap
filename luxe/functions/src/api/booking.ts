@@ -147,9 +147,26 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
   const riderSnap = await db.collection("users").doc(request.auth.uid).get();
   const riderData = riderSnap.data();
   
+  // Check for Corporate Promo Code
+  let corporateAccountId: string | null = null;
+  let billedToCorporate = false;
+
+  if (resInput.promoCode) {
+    const corpCheck = await db.collection("corporate_accounts")
+      .where("promoCode", "==", resInput.promoCode)
+      .where("active", "==", true)
+      .limit(1)
+      .get();
+    
+    if (!corpCheck.empty) {
+      corporateAccountId = corpCheck.docs[0].id;
+      billedToCorporate = true;
+    }
+  }
+
   // Generate PaymentIntent or SetupIntent via Stripe
   let clientSecret = "mock_client_secret_for_emulator";
-  if (stripe) {
+  if (stripe && !billedToCorporate) {
     try {
       let customerId = riderData?.stripeCustomerId;
       if (!customerId) {
@@ -196,7 +213,7 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
     } catch (e: any) {
       throw new HttpsError("internal", `Stripe error: ${e.message}`);
     }
-  } else {
+  } else if (!stripe) {
     console.warn("STRIPE_SECRET_KEY not set. Using mock payment intent.");
   }
 
@@ -227,7 +244,9 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
     
     // Auth & Billing
     stripePaymentIntentId: null, // We'll update this once the payment succeeds via webhook
-    paymentStatus: "none",
+    corporateAccountId,
+    billedToCorporate,
+    paymentStatus: billedToCorporate ? "authorized" : "none",
     
     // Core details
     pickupAt: resInput.quote.pickupAt,

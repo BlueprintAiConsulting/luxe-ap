@@ -44,3 +44,20 @@ export const setUserRole = https.onCall(async (request) => {
     throw new https.HttpsError("internal", "Failed to update user role.");
   }
 });
+export const demoPromoteToAdmin = https.onCall(async (request) => {
+  if (!request.auth) {
+    throw new https.HttpsError("unauthenticated", "Must be logged in.");
+  }
+  const uid = request.auth.uid;
+  try {
+    await admin.auth().setCustomUserClaims(uid, { role: "admin" });
+    await admin.firestore().collection("users").doc(uid).update({ 
+      role: "admin",
+      updatedAt: admin.firestore.Timestamp.now(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error promoting to admin:", error);
+    throw new https.HttpsError("internal", "Failed to promote.");
+  }
+});

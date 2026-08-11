@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reservationStatusEventSchema = exports.reservationSchema = exports.driverLocationStubSchema = exports.reservationStatusSchema = void 0;
+exports.reservationStatusEventSchema = exports.createReservationInputSchema = exports.reservationSchema = exports.driverLocationStubSchema = exports.reservationStatusSchema = void 0;
 exports.canTransition = canTransition;
 const zod_1 = require("zod");
 const timestamp_1 = require("./timestamp");
@@ -63,6 +63,7 @@ exports.reservationSchema = zod_1.z.object({
     // --- Preferences (snapshotted at booking) ---
     preferences: preferences_1.preferenceProfileSchema.nullable(),
     specialInstructions: zod_1.z.string(),
+    prepChecklistState: zod_1.z.record(zod_1.z.string(), zod_1.z.boolean()).nullable().optional(),
     // --- Pricing (server-authored only) ---
     pricing: pricing_1.priceBreakdownSchema,
     pricingRuleSetId: zod_1.z.string(),
@@ -77,6 +78,8 @@ exports.reservationSchema = zod_1.z.object({
     driverNotes: zod_1.z.string(),
     // --- Payment ---
     stripePaymentIntentId: zod_1.z.string().nullable(),
+    corporateAccountId: zod_1.z.string().nullable().optional(),
+    billedToCorporate: zod_1.z.boolean().optional(),
     paymentStatus: zod_1.z.enum(["none", "authorized", "captured", "failed", "refunded"]),
     authorizedAmountCents: zod_1.z.number().int(),
     capturedAmountCents: zod_1.z.number().int(),
@@ -88,6 +91,20 @@ exports.reservationSchema = zod_1.z.object({
     createdAt: timestamp_1.timestampSchema,
     updatedAt: timestamp_1.timestampSchema,
     idempotencyKey: zod_1.z.string(),
+});
+exports.createReservationInputSchema = zod_1.z.object({
+    idempotencyKey: zod_1.z.string(),
+    quote: pricing_1.quoteInputSchema,
+    requestedDriverId: zod_1.z.string().nullable().optional(),
+    pickup: address_1.addressSchema,
+    dropoff: address_1.addressSchema.nullable(),
+    stops: zod_1.z.array(address_1.addressSchema),
+    passengers: zod_1.z.number().int(),
+    luggage: zod_1.z.number().int(),
+    flightNumber: zod_1.z.string().nullable(),
+    promoCode: zod_1.z.string().nullable().optional(),
+    preferences: preferences_1.preferenceProfileSchema.nullable(),
+    notes: zod_1.z.string().nullable(),
 });
 exports.reservationStatusEventSchema = zod_1.z.object({
     from: exports.reservationStatusSchema.nullable(),

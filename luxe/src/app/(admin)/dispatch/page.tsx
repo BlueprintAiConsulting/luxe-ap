@@ -97,20 +97,55 @@ export default function DispatchPage() {
     return { unassigned: un, timeline: tl };
   }, [reservations, currentTime]);
 
+  const [draggedResId, setDraggedResId] = useState<string | null>(null);
+  const [preSelectedDriverId, setPreSelectedDriverId] = useState<string | undefined>();
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, reservationId: string) => {
+    e.dataTransfer.setData("reservationId", reservationId);
+    setDraggedResId(reservationId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = () => {
+    setDraggedResId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, driverId: string) => {
+    e.preventDefault();
+    const reservationId = e.dataTransfer.getData("reservationId");
+    if (!reservationId) return;
+    
+    // Find the reservation and open the drawer with the driver preselected
+    const res = unassigned.find(r => r.reservationId === reservationId) || timeline.find(r => r.reservationId === reservationId);
+    if (res) {
+      setPreSelectedDriverId(driverId);
+      setSelectedReservation(res as Reservation);
+    }
+    setDraggedResId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
   if (role !== "admin") {
     return <div className="p-8 text-red-500">Access Denied</div>;
   }
 
+  // Calculate timeline bounds
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-neutral-50 text-neutral-900 font-sans relative">
+    <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-neutral-50 text-neutral-900 font-sans relative">
       
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Dispatch Board</h1>
-          <p className="text-neutral-500 text-sm mt-1">Manage and assign daily reservations.</p>
+          <p className="text-neutral-500 text-sm mt-1 font-medium">Manage and assign daily reservations.</p>
         </div>
         
-        <div className="flex items-center space-x-4 bg-white p-2 rounded-xl shadow-sm border border-neutral-200">
+        <div className="flex items-center space-x-4 bg-neutral-50 p-2 rounded-xl">
           <button onClick={handlePrevDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium">&larr;</button>
           <div className="flex items-center space-x-2 font-bold px-4">
             <Calendar size={18} className="text-neutral-500" />
@@ -120,115 +155,153 @@ export default function DispatchPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         
-        {/* Left Col: Unassigned Urgent */}
-        <div className="xl:col-span-1 space-y-4">
-          <h2 className="text-xl font-bold flex items-center mb-4">
+        {/* Left Col: Unassigned Trips (25%) */}
+        <div className="xl:col-span-1 flex flex-col h-[calc(100vh-160px)]">
+          <h2 className="text-xl font-semibold text-brand flex items-center mb-4 flex-shrink-0">
             Needs Assignment
             <span className="ml-3 bg-neutral-200 text-neutral-700 text-xs px-2 py-0.5 rounded-full">{unassigned.length}</span>
           </h2>
           
-          {loading && <div className="text-neutral-500">Loading...</div>}
-          {!loading && unassigned.length === 0 && (
-            <div className="p-6 bg-white border border-neutral-200 rounded-2xl text-center text-neutral-500">
-              All trips assigned!
-            </div>
-          )}
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-20">
+            {loading && <div className="text-neutral-500">Loading...</div>}
+            {!loading && unassigned.length === 0 && (
+              <div className="p-6 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl text-center text-neutral-500 font-semibold">
+                All trips assigned!
+              </div>
+            )}
 
-          {unassigned.map(trip => (
-            <button 
-              key={trip.reservationId}
-              onClick={() => setSelectedReservation(trip)}
-              className={`w-full text-left p-5 rounded-2xl border transition-all ${
-                trip.isUrgent 
-                  ? "bg-red-50 border-red-200 hover:border-red-300" 
-                  : "bg-white border-neutral-200 hover:border-neutral-300 shadow-sm"
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="font-bold text-lg">{formatDateTime(trip.dateObj, trip.timezone || "UTC")}</div>
-                {trip.isUrgent && (
-                  <div className="flex items-center text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
-                    <AlertCircle size={14} className="mr-1" /> URGENT
-                  </div>
-                )}
+            {unassigned.map(trip => (
+              <div
+                key={trip.reservationId}
+                draggable
+                onDragStart={(e) => handleDragStart(e, trip.reservationId)}
+                onDragEnd={handleDragEnd}
+                onClick={() => {
+                  setPreSelectedDriverId(undefined);
+                  setSelectedReservation(trip as Reservation);
+                }}
+                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md ${
+                  draggedResId === trip.reservationId ? "opacity-50 scale-95" : "opacity-100"
+                } ${
+                  trip.isUrgent 
+                    ? "bg-white border-brand hover:border-brand" 
+                    : "bg-white border-neutral-200 hover:border-neutral-300"
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-bold text-lg">{formatDateTime(trip.dateObj, trip.timezone || "UTC")}</div>
+                  {trip.isUrgent && (
+                    <div className="flex items-center text-xs font-bold text-white bg-brand px-2 py-1 rounded">
+                      <AlertCircle size={14} className="mr-1" /> URGENT
+                    </div>
+                  )}
+                </div>
+                <div className="font-semibold text-sm mb-1">{trip.riderName}</div>
+                <div className="text-xs text-neutral-500 truncate">{trip.pickup.line1 || ""}</div>
+                <div className="mt-3 text-[10px] font-bold uppercase tracking-wider bg-neutral-100 text-neutral-600 px-2 py-1 rounded w-max">
+                  {trip.className}
+                </div>
               </div>
-              <div className="font-semibold text-sm mb-1">{trip.riderName}</div>
-              <div className="text-sm text-neutral-500 truncate">{trip.pickup.line1 || ""}</div>
-              <div className="mt-3 text-xs font-semibold bg-neutral-100 px-2 py-1 rounded w-max">
-                {trip.className}
-              </div>
-            </button>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Right Col: Timeline */}
-        <div className="xl:col-span-2">
-          <h2 className="text-xl font-bold mb-4">Timeline</h2>
-          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-neutral-50 text-neutral-500 text-xs r border-b border-neutral-200">
-                  <th className="p-4 font-bold">Time</th>
-                  <th className="p-4 font-bold">Client</th>
-                  <th className="p-4 font-bold">Route</th>
-                  <th className="p-4 font-bold">Assignment</th>
-                  <th className="p-4 font-bold">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {timeline.length === 0 && !loading && (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-neutral-500">No assigned trips for this day.</td>
-                  </tr>
-                )}
-                {timeline.map(trip => {
-                  let statusColor = "bg-neutral-100 text-neutral-700";
-                  if (trip.status === "completed") statusColor = "bg-emerald-100 text-emerald-800";
-                  else if (trip.status === "cancelled" || trip.status === "no_show") statusColor = "bg-red-100 text-red-800";
-                  else if (trip.status === "onboard") statusColor = "bg-blue-100 text-blue-800";
-                  else if (trip.status === "arrived") statusColor = "bg-indigo-100 text-indigo-800";
-                  else if (trip.status === "en_route") statusColor = "bg-amber-100 text-amber-800";
+        {/* Right Col: Timeline (75%) */}
+        <div className="xl:col-span-3 flex flex-col h-[calc(100vh-160px)]">
+          <h2 className="text-xl font-semibold text-brand mb-4 flex-shrink-0">Timeline</h2>
+          
+          <div className="bg-white rounded-2xl border border-neutral-200 flex-1 flex flex-col overflow-hidden shadow-sm">
+            {/* Timeline Header */}
+            <div className="flex border-b border-neutral-200 bg-neutral-50">
+              <div className="w-48 flex-shrink-0 border-r border-neutral-200 p-4 font-bold text-sm text-neutral-500 flex items-center bg-neutral-50">
+                Chauffeurs
+              </div>
+              <div className="flex-1 relative overflow-hidden min-w-[800px]">
+                <div className="absolute inset-0 flex">
+                  {hours.map(h => (
+                    <div key={h} className="flex-1 border-r border-neutral-200 last:border-r-0 relative">
+                      <span className="absolute top-2 left-2 text-xs font-semibold text-neutral-400">
+                        {h.toString().padStart(2, '0')}:00
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-                  return (
-                    <tr 
-                      key={trip.reservationId} 
-                      onClick={() => setSelectedReservation(trip)}
-                      className="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer transition-colors"
+            {/* Timeline Body */}
+            <div className="flex-1 overflow-y-auto">
+              {drivers.length === 0 && !loading && (
+                <div className="p-8 text-center text-neutral-500 font-semibold">No active drivers found.</div>
+              )}
+              {drivers.map(driver => {
+                const driverTrips = timeline.filter(t => t.driverId === driver.driverId);
+                
+                return (
+                  <div key={driver.driverId} className="flex border-b border-neutral-100 group min-h-[80px]">
+                    <div className="w-48 flex-shrink-0 border-r border-neutral-200 p-4 bg-white z-10 flex flex-col justify-center">
+                      <div className="font-bold text-sm truncate">{driver.displayName}</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">{driver.active ? "Active" : "Inactive"}</div>
+                    </div>
+                    
+                    <div 
+                      className="flex-1 relative min-w-[800px] bg-white transition-colors duration-200 hover:bg-neutral-50"
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, driver.driverId)}
                     >
-                      <td className="p-4 whitespace-nowrap font-bold text-sm">
-                        {formatDateTime(trip.dateObj, trip.timezone || "UTC")}
-                      </td>
-                      <td className="p-4">
-                        <div className="font-semibold text-sm">{trip.riderName}</div>
-                      </td>
-                      <td className="p-4 max-w-xs">
-                        <div className="text-sm truncate" title={trip.pickup.line1 || undefined}>{trip.pickup.line1 || ""}</div>
-                        {trip.dropoff && (
-                          <div className="text-xs text-neutral-400 truncate mt-1">→ {trip.dropoff.line1 || ""}</div>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        {trip.driverId ? (
-                          <div>
-                            <div className="text-sm font-semibold">{trip.driverName}</div>
-                            <div className="text-xs text-neutral-500">{trip.vehicleDescription}</div>
+                      {/* Grid lines */}
+                      <div className="absolute inset-0 flex pointer-events-none">
+                        {hours.map(h => (
+                          <div key={h} className="flex-1 border-r border-neutral-100 border-dashed last:border-r-0"></div>
+                        ))}
+                      </div>
+
+                      {/* Render assigned trips */}
+                      {driverTrips.map(trip => {
+                        const tripHour = trip.dateObj.getHours();
+                        const tripMinute = trip.dateObj.getMinutes();
+                        const startPercent = ((tripHour + tripMinute / 60) / 24) * 100;
+                        // Estimate 2 hours for duration if dropoff isn't easily calculable
+                        const durationHours = 2; 
+                        const widthPercent = (durationHours / 24) * 100;
+                        
+                        let statusColor = "bg-neutral-800 text-white border-neutral-900";
+                        if (trip.status === "completed") statusColor = "bg-neutral-200 text-neutral-600 border-neutral-300";
+                        else if (trip.status === "cancelled" || trip.status === "no_show") statusColor = "bg-red-100 text-red-600 border-red-200 line-through opacity-70";
+                        else if (trip.status === "onboard") statusColor = "bg-brand text-white border-neutral-900";
+                        else if (trip.status === "arrived") statusColor = "bg-accent text-neutral-900 border-accent/80";
+                        else if (trip.status === "en_route") statusColor = "bg-amber-400 text-amber-900 border-amber-500";
+
+                        return (
+                          <div
+                            key={trip.reservationId}
+                            onClick={() => {
+                              setPreSelectedDriverId(undefined);
+                              setSelectedReservation(trip as Reservation);
+                            }}
+                            className={`absolute top-2 bottom-2 rounded-lg border p-2 text-xs font-semibold overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer z-10 ${statusColor}`}
+                            style={{ 
+                              left: `${startPercent}%`, 
+                              width: `${widthPercent}%`,
+                              minWidth: '80px'
+                            }}
+                            title={`${formatDateTime(trip.dateObj, trip.timezone || "UTC")} - ${trip.riderName}`}
+                          >
+                            <div className="truncate">{trip.riderName}</div>
+                            <div className="truncate opacity-80 text-[10px] mt-0.5">{trip.pickup.line1}</div>
+                            <div className="absolute bottom-1 right-2 text-[9px] font-bold uppercase opacity-60">
+                              {trip.status.replace("_", " ")}
+                            </div>
                           </div>
-                        ) : (
-                          <span className="text-xs text-neutral-400 italic">Unassigned</span>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap ${statusColor}`}>
-                          {trip.status.replace("_", " ").toUpperCase()}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -239,6 +312,7 @@ export default function DispatchPage() {
           reservation={selectedReservation} 
           drivers={drivers}
           vehicles={vehicles}
+          preSelectedDriverId={preSelectedDriverId}
           onClose={() => setSelectedReservation(null)} 
         />
       )}

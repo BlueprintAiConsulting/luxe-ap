@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setUserRole = void 0;
+exports.demoPromoteToAdmin = exports.setUserRole = void 0;
 const v2_1 = require("firebase-functions/v2");
 const admin_1 = require("../lib/admin");
 const zod_1 = require("zod");
@@ -33,6 +33,24 @@ exports.setUserRole = v2_1.https.onCall(async (request) => {
     catch (error) {
         console.error("Error setting user role:", error);
         throw new v2_1.https.HttpsError("internal", "Failed to update user role.");
+    }
+});
+exports.demoPromoteToAdmin = v2_1.https.onCall(async (request) => {
+    if (!request.auth) {
+        throw new v2_1.https.HttpsError("unauthenticated", "Must be logged in.");
+    }
+    const uid = request.auth.uid;
+    try {
+        await admin_1.admin.auth().setCustomUserClaims(uid, { role: "admin" });
+        await admin_1.admin.firestore().collection("users").doc(uid).update({
+            role: "admin",
+            updatedAt: admin_1.admin.firestore.Timestamp.now(),
+        });
+        return { success: true };
+    }
+    catch (error) {
+        console.error("Error promoting to admin:", error);
+        throw new v2_1.https.HttpsError("internal", "Failed to promote.");
     }
 });
 //# sourceMappingURL=callables.js.map

@@ -21,10 +21,10 @@ export default function PricingAdminPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Pricing & Rules</h1>
-        <div className="flex space-x-2 bg-neutral-100 p-1 rounded-lg">
-          <button onClick={() => setTab('rules')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'rules' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Rule Set Editor</button>
-          <button onClick={() => setTab('airports')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'airports' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Airports & Zones</button>
-          <button onClick={() => setTab('test')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'test' ? 'bg-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}>Test Panel</button>
+        <div className="flex space-x-2 bg-neutral-50 text-neutral-500 p-1 rounded-xl">
+          <button onClick={() => setTab('rules')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'rules' ? 'bg-white shadow-sm text-brand font-semibold' : 'text-neutral-500 hover:text-brand font-medium'}`}>Rule Set Editor</button>
+          <button onClick={() => setTab('airports')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'airports' ? 'bg-white shadow-sm text-brand font-semibold' : 'text-neutral-500 hover:text-brand font-medium'}`}>Airports & Zones</button>
+          <button onClick={() => setTab('test')} className={`px-4 py-2 rounded-md font-medium transition-colors ${tab === 'test' ? 'bg-white shadow-sm text-brand font-semibold' : 'text-neutral-500 hover:text-brand font-medium'}`}>Test Panel</button>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ function RuleSetEditorTab() {
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-400" /></div>;
 
   if (!ruleSet) {
-    return <div className="p-8 text-center border rounded-xl bg-neutral-50 text-neutral-500">No active rule set found. Please run the seed script.</div>;
+    return <div className="p-8 text-center rounded-2xl bg-neutral-50 text-neutral-500">No active rule set found. Please run the seed script.</div>;
   }
 
   // Helper for deeply nested updates
@@ -113,8 +113,8 @@ function RuleSetEditorTab() {
   };
 
   return (
-    <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
-      <div className="bg-neutral-50 border-b p-6 flex justify-between items-center">
+    <div className="bg-neutral-50 rounded-2xl overflow-hidden">
+      <div className="bg-white border-b border-neutral-100 p-6 flex justify-between items-center">
         <div>
           <h2 className="text-xl font-bold">Active Rules: v{ruleSet.version}</h2>
           <p className="text-sm text-neutral-500 mb-1">Editing this will create v{ruleSet.version + 1} upon publishing.</p>
@@ -135,15 +135,15 @@ function RuleSetEditorTab() {
             {Object.keys(ruleSet.classRates).map(classId => {
               const rates = ruleSet.classRates[classId];
               return (
-                <div key={classId} className="border p-4 rounded-lg bg-neutral-50">
+                <div key={classId} className="p-4 rounded-2xl bg-white border border-neutral-100">
                   <h4 className="font-bold text-md capitalize mb-3">{classId}</h4>
                   <div className="space-y-3">
-                    <div><label className="block text-xs text-neutral-500">Base Fare ($)</label><input type="number" value={rates.baseFareCents / 100} onChange={e => updateRates(classId, 'baseFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-neutral-500">Per Mile ($)</label><input type="number" value={rates.perMileCents / 100} onChange={e => updateRates(classId, 'perMileCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-neutral-500">Per Minute ($)</label><input type="number" value={rates.perMinuteCents / 100} onChange={e => updateRates(classId, 'perMinuteCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-neutral-500">Minimum Fare ($)</label><input type="number" value={rates.minimumFareCents / 100} onChange={e => updateRates(classId, 'minimumFareCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-neutral-500">Hourly Rate ($)</label><input type="number" value={rates.hourlyRateCents / 100} onChange={e => updateRates(classId, 'hourlyRateCents', parseFloat(e.target.value) * 100)} className="w-full border p-1 rounded" /></div>
-                    <div><label className="block text-xs text-neutral-500">Hourly Min (Hours)</label><input type="number" value={rates.hourlyMinimumHours} onChange={e => updateRates(classId, 'hourlyMinimumHours', parseInt(e.target.value))} className="w-full border p-1 rounded" /></div>
+                    <div><label className="block text-xs text-neutral-500">Base Fare ($)</label><input type="number" value={rates.baseFareCents / 100} onChange={e => updateRates(classId, 'baseFareCents', parseFloat(e.target.value) * 100)} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
+                    <div><label className="block text-xs text-neutral-500">Per Mile ($)</label><input type="number" value={rates.perMileCents / 100} onChange={e => updateRates(classId, 'perMileCents', parseFloat(e.target.value) * 100)} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
+                    <div><label className="block text-xs text-neutral-500">Per Minute ($)</label><input type="number" value={rates.perMinuteCents / 100} onChange={e => updateRates(classId, 'perMinuteCents', parseFloat(e.target.value) * 100)} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
+                    <div><label className="block text-xs text-neutral-500">Minimum Fare ($)</label><input type="number" value={rates.minimumFareCents / 100} onChange={e => updateRates(classId, 'minimumFareCents', parseFloat(e.target.value) * 100)} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
+                    <div><label className="block text-xs text-neutral-500">Hourly Rate ($)</label><input type="number" value={rates.hourlyRateCents / 100} onChange={e => updateRates(classId, 'hourlyRateCents', parseFloat(e.target.value) * 100)} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
+                    <div><label className="block text-xs text-neutral-500">Hourly Min (Hours)</label><input type="number" value={rates.hourlyMinimumHours} onChange={e => updateRates(classId, 'hourlyMinimumHours', parseInt(e.target.value))} className="w-full border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" /></div>
                   </div>
                 </div>
               );
@@ -161,11 +161,11 @@ function RuleSetEditorTab() {
               </div>
               <div>
                 <label className="block text-sm font-medium">Percent (%)</label>
-                <input type="number" value={ruleSet.gratuity.percent} onChange={e => setRuleSet({...ruleSet, gratuity: {...ruleSet.gratuity, percent: parseFloat(e.target.value)}})} className="border p-2 rounded w-full" />
+                <input type="number" value={ruleSet.gratuity.percent} onChange={e => setRuleSet({...ruleSet, gratuity: {...ruleSet.gratuity, percent: parseFloat(e.target.value)}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
               </div>
               <div>
                 <label className="block text-sm font-medium">Applies To</label>
-                <select value={ruleSet.gratuity.appliesTo} onChange={e => setRuleSet({...ruleSet, gratuity: {...ruleSet.gratuity, appliesTo: e.target.value as any}})} className="border p-2 rounded w-full">
+                <select value={ruleSet.gratuity.appliesTo} onChange={e => setRuleSet({...ruleSet, gratuity: {...ruleSet.gratuity, appliesTo: e.target.value as any}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full">
                   <option value="subtotal">Subtotal (incl surcharges)</option>
                   <option value="base_only">Base Fare Only</option>
                 </select>
@@ -178,15 +178,15 @@ function RuleSetEditorTab() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium">Free Minutes (Standard)</label>
-                <input type="number" value={ruleSet.waitTime.freeMinutesStandard} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, freeMinutesStandard: parseInt(e.target.value)}})} className="border p-2 rounded w-full" />
+                <input type="number" value={ruleSet.waitTime.freeMinutesStandard} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, freeMinutesStandard: parseInt(e.target.value)}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
               </div>
               <div>
                 <label className="block text-sm font-medium">Free Minutes (Airport)</label>
-                <input type="number" value={ruleSet.waitTime.freeMinutesAirport} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, freeMinutesAirport: parseInt(e.target.value)}})} className="border p-2 rounded w-full" />
+                <input type="number" value={ruleSet.waitTime.freeMinutesAirport} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, freeMinutesAirport: parseInt(e.target.value)}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
               </div>
               <div>
                 <label className="block text-sm font-medium">Per Minute Charge ($)</label>
-                <input type="number" value={ruleSet.waitTime.perMinuteCents / 100} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, perMinuteCents: parseFloat(e.target.value) * 100}})} className="border p-2 rounded w-full" />
+                <input type="number" value={ruleSet.waitTime.perMinuteCents / 100} onChange={e => setRuleSet({...ruleSet, waitTime: {...ruleSet.waitTime, perMinuteCents: parseFloat(e.target.value) * 100}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
               </div>
             </div>
           </div>
@@ -197,19 +197,19 @@ function RuleSetEditorTab() {
           <div className="grid grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium">Extra Stop Fee ($)</label>
-              <input type="number" value={ruleSet.surcharges.extraStopCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, extraStopCents: parseFloat(e.target.value) * 100}})} className="border p-2 rounded w-full" />
+              <input type="number" value={ruleSet.surcharges.extraStopCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, extraStopCents: parseFloat(e.target.value) * 100}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium">Meet & Greet Fee ($)</label>
-              <input type="number" value={ruleSet.surcharges.meetGreetCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, meetGreetCents: parseFloat(e.target.value) * 100}})} className="border p-2 rounded w-full" />
+              <input type="number" value={ruleSet.surcharges.meetGreetCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, meetGreetCents: parseFloat(e.target.value) * 100}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium">Child Seat Fee ($)</label>
-              <input type="number" value={ruleSet.surcharges.childSeatCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, childSeatCents: parseFloat(e.target.value) * 100}})} className="border p-2 rounded w-full" />
+              <input type="number" value={ruleSet.surcharges.childSeatCents / 100} onChange={e => setRuleSet({...ruleSet, surcharges: {...ruleSet.surcharges, childSeatCents: parseFloat(e.target.value) * 100}})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium">Tax Percent (%)</label>
-              <input type="number" value={ruleSet.taxPercent} onChange={e => setRuleSet({...ruleSet, taxPercent: parseFloat(e.target.value)})} className="border p-2 rounded w-full" />
+              <input type="number" value={ruleSet.taxPercent} onChange={e => setRuleSet({...ruleSet, taxPercent: parseFloat(e.target.value)})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
           </div>
         </section>
@@ -219,22 +219,22 @@ function RuleSetEditorTab() {
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Holidays</h3>
             <div className="space-y-4">
               {ruleSet.surcharges.holidays.map((h, i) => (
-                <div key={i} className="flex space-x-2 items-center bg-neutral-50 p-2 border rounded">
+                <div key={i} className="flex space-x-2 items-center bg-white p-2 rounded-xl border border-neutral-100">
                   <input type="date" value={h.date} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols[i].date = e.target.value;
                     setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
-                  }} className="border p-1 rounded" />
+                  }} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white" />
                   <input type="text" placeholder="Name" value={h.name} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols[i].name = e.target.value;
                     setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
-                  }} className="border p-1 rounded w-full" />
+                  }} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
                   <input type="number" step="0.1" placeholder="Percent" value={h.percent} onChange={e => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols[i].percent = parseFloat(e.target.value);
                     setRuleSet({...ruleSet, surcharges: { ...ruleSet.surcharges, holidays: hols } });
-                  }} className="border p-1 rounded w-24" />
+                  }} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-24" />
                   <button onClick={() => {
                     const hols = [...ruleSet.surcharges.holidays];
                     hols.splice(i, 1);
@@ -250,14 +250,14 @@ function RuleSetEditorTab() {
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Cancellation Windows</h3>
             <div className="space-y-4">
               {ruleSet.cancellation.map((cw: any, i: number) => (
-                <div key={i} className="flex space-x-2 items-center bg-neutral-50 p-2 border rounded">
+                <div key={i} className="flex space-x-2 items-center bg-white p-2 rounded-xl border border-neutral-100">
                   <div className="flex-1">
                     <label className="text-xs text-neutral-500 block">Hours Before</label>
                     <input type="number" value={cw.hoursBeforePickup} onChange={e => {
                       const cws = [...ruleSet.cancellation];
                       cws[i].hoursBeforePickup = parseInt(e.target.value);
                       setRuleSet({...ruleSet, cancellation: cws});
-                    }} className="border p-1 rounded w-full" />
+                    }} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
                   </div>
                   <div className="flex-1">
                     <label className="text-xs text-neutral-500 block">Fee %</label>
@@ -265,7 +265,7 @@ function RuleSetEditorTab() {
                       const cws = [...ruleSet.cancellation];
                       cws[i].feePercent = parseFloat(e.target.value);
                       setRuleSet({...ruleSet, cancellation: cws});
-                    }} className="border p-1 rounded w-full" />
+                    }} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
                   </div>
                   <button onClick={() => {
                     const cws = [...ruleSet.cancellation];
@@ -300,7 +300,7 @@ function AirportsTab() {
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-400" /></div>;
 
   return (
-    <div className="bg-white border rounded-xl overflow-hidden shadow-sm p-6">
+    <div className="bg-neutral-50 rounded-2xl overflow-hidden p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Airport Zones</h2>
         <button className="bg-brand text-white px-4 py-2 rounded-lg flex items-center"><Plus size={16} className="mr-2"/> Add Airport</button>
@@ -308,8 +308,8 @@ function AirportsTab() {
 
       <div className="space-y-6">
         {airports.map(apt => (
-          <div key={apt.code} className="border rounded-lg overflow-hidden">
-            <div className="bg-neutral-50 p-4 border-b flex justify-between items-center">
+          <div key={apt.code} className="rounded-2xl overflow-hidden border border-neutral-100 bg-white">
+            <div className="bg-white p-4 border-b border-neutral-100 flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-lg">{apt.code} - {apt.name}</h3>
                 <p className="text-sm text-neutral-500">TZ: {apt.timezone}</p>
@@ -319,7 +319,7 @@ function AirportsTab() {
             <div className="p-4">
               <h4 className="font-medium mb-3">Zones</h4>
               <table className="w-full text-left text-sm">
-                <thead className="bg-neutral-100">
+                <thead className="bg-neutral-50 text-neutral-500">
                   <tr>
                     <th className="p-2">Zone</th>
                     <th className="p-2">Class</th>
@@ -405,12 +405,12 @@ function TestPanelTab() {
 
   return (
     <div className="grid grid-cols-2 gap-8">
-      <div className="bg-white border rounded-xl p-6 shadow-sm">
+      <div className="bg-neutral-50 rounded-2xl p-6">
         <h2 className="text-xl font-bold mb-6">Quote Inputs</h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium">Trip Type</label>
-            <select value={input.tripType} onChange={e => setInput({...input, tripType: e.target.value as any})} className="border p-2 w-full rounded">
+            <select value={input.tripType} onChange={e => setInput({...input, tripType: e.target.value as any})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full">
               <option value="point_to_point">Point to Point</option>
               <option value="hourly">Hourly</option>
               <option value="airport_arrival">Airport Arrival</option>
@@ -419,35 +419,35 @@ function TestPanelTab() {
           </div>
           <div>
             <label className="block text-sm font-medium">Vehicle Class</label>
-            <select value={input.classId} onChange={e => setInput({...input, classId: e.target.value})} className="border p-2 w-full rounded">
+            <select value={input.classId} onChange={e => setInput({...input, classId: e.target.value})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full">
               {Object.keys(ruleSet.classRates).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium">Distance (Miles)</label>
-              <input type="number" step="0.1" value={input.estimatedDistanceMiles} onChange={e => setInput({...input, estimatedDistanceMiles: parseFloat(e.target.value)})} className="border p-2 w-full rounded" />
+              <input type="number" step="0.1" value={input.estimatedDistanceMiles} onChange={e => setInput({...input, estimatedDistanceMiles: parseFloat(e.target.value)})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
             <div>
               <label className="block text-sm font-medium">Duration (Minutes)</label>
-              <input type="number" value={input.estimatedDurationMinutes} onChange={e => setInput({...input, estimatedDurationMinutes: parseInt(e.target.value)})} className="border p-2 w-full rounded" />
+              <input type="number" value={input.estimatedDurationMinutes} onChange={e => setInput({...input, estimatedDurationMinutes: parseInt(e.target.value)})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
           </div>
           {input.tripType === 'hourly' && (
             <div>
               <label className="block text-sm font-medium">Hours</label>
-              <input type="number" value={input.hours || 0} onChange={e => setInput({...input, hours: parseInt(e.target.value)})} className="border p-2 w-full rounded" />
+              <input type="number" value={input.hours || 0} onChange={e => setInput({...input, hours: parseInt(e.target.value)})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
             </div>
           )}
           {(input.tripType === 'airport_arrival' || input.tripType === 'airport_departure') && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium">Airport Code</label>
-                <input type="text" value={input.airportCode || ''} onChange={e => setInput({...input, airportCode: e.target.value})} className="border p-2 w-full rounded uppercase" />
+                <input type="text" value={input.airportCode || ''} onChange={e => setInput({...input, airportCode: e.target.value})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full uppercase" />
               </div>
               <div>
                 <label className="block text-sm font-medium">Zone ID (e.g. downtown_la)</label>
-                <input type="text" value={input.airportZoneId || ''} onChange={e => setInput({...input, airportZoneId: e.target.value})} className="border p-2 w-full rounded" />
+                <input type="text" value={input.airportZoneId || ''} onChange={e => setInput({...input, airportZoneId: e.target.value})} className="border border-neutral-200 p-2 rounded-xl focus:ring-1 focus:ring-brand focus:border-brand outline-none bg-white w-full" />
               </div>
             </div>
           )}
@@ -457,12 +457,12 @@ function TestPanelTab() {
         </div>
       </div>
 
-      <div className="bg-white border rounded-xl p-6 shadow-sm">
+      <div className="bg-neutral-50 rounded-2xl p-6">
         <h2 className="text-xl font-bold mb-6">Price Breakdown</h2>
         {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
         {result && (
           <div className="space-y-4">
-            <div className="bg-neutral-50 p-4 rounded-lg border">
+            <div className="bg-white p-4 rounded-2xl border border-neutral-100">
               <h3 className="font-bold text-neutral-500 text-sm r mb-3">Line Items</h3>
               <div className="space-y-2">
                 {result.lineItems.map((item: any, i: number) => (

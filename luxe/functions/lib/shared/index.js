@@ -18,11 +18,11 @@ __exportStar(require("./timestamp"), exports);
 __exportStar(require("./address"), exports);
 __exportStar(require("./preferences"), exports);
 __exportStar(require("./pricing"), exports);
+__exportStar(require("./corporate"), exports);
 __exportStar(require("./user"), exports);
 __exportStar(require("./driver"), exports);
 __exportStar(require("./vehicle"), exports);
 __exportStar(require("./airport"), exports);
-__exportStar(require("./settings"), exports);
 __exportStar(require("./reservation"), exports);
 __exportStar(require("./webhook"), exports);
 //# sourceMappingURL=index.js.map

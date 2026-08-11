@@ -9,14 +9,18 @@ import { Reservation } from "@/lib/types";
 import { format } from "date-fns";
 import Link from "next/link";
 import { MapPin, Navigation } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function DriverTodayPage() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const searchParams = useSearchParams();
+  const targetDriverId = searchParams?.get("d") && role === "admin" ? searchParams.get("d") : user?.uid;
+
   const [trips, setTrips] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!targetDriverId) return;
 
     // Get today's bounds in local time (or driver timezone, but we'll use simple start/end of today)
     const now = new Date();
@@ -25,7 +29,7 @@ export default function DriverTodayPage() {
 
     const q = query(
       collection(db, "reservations"),
-      where("driverId", "==", user.uid),
+      where("driverId", "==", targetDriverId),
       where("pickupAt", ">=", startOfDay),
       where("pickupAt", "<=", endOfDay),
       orderBy("pickupAt", "asc")

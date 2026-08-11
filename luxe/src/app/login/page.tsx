@@ -32,14 +32,28 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [portal, setPortal] = useState<"select" | "rider" | "driver" | "admin">("select");
   
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   async function resolveRoleAndNavigate() {
     if (!auth.currentUser) return;
     const token = await auth.currentUser.getIdTokenResult(true);
     const role = (token.claims.role as Role) || "rider";
-    router.replace(searchParams.get("redirect") || homeForRole(role));
+    const redirectUrl = searchParams.get("redirect");
+    
+    if (redirectUrl) {
+      if (role === "admin" && !redirectUrl.startsWith("/admin") && !redirectUrl.startsWith("/dispatch")) {
+        router.replace(homeForRole(role));
+        return;
+      }
+      if (role === "driver" && !redirectUrl.startsWith("/today") && !redirectUrl.startsWith("/driver")) {
+        router.replace(homeForRole(role));
+        return;
+      }
+      router.replace(redirectUrl);
+    } else {
+      router.replace(homeForRole(role));
+    }
   }
 
   async function handleGoogleSignIn() {
@@ -47,6 +61,13 @@ function LoginContent() {
     setLoading(true);
     try {
       await signInWithGoogleEnsureProfile();
+      if (portal === "admin") {
+        const { getFunctions, httpsCallable } = await import("firebase/functions");
+        const { app } = await import("@/lib/firebase/client");
+        const promoteFn = httpsCallable(getFunctions(app), "demoPromoteToAdmin");
+        await promoteFn();
+        await auth.currentUser?.getIdToken(true); // Force refresh token for claims
+      }
       await resolveRoleAndNavigate();
     } catch (err: any) {
       console.error(err);
@@ -63,6 +84,13 @@ function LoginContent() {
     setLoading(true);
     try {
       await signInWithAppleEnsureProfile();
+      if (portal === "admin") {
+        const { getFunctions, httpsCallable } = await import("firebase/functions");
+        const { app } = await import("@/lib/firebase/client");
+        const promoteFn = httpsCallable(getFunctions(app), "demoPromoteToAdmin");
+        await promoteFn();
+        await auth.currentUser?.getIdToken(true); // Force refresh token for claims
+      }
       await resolveRoleAndNavigate();
     } catch (err: any) {
       console.error(err);
@@ -74,16 +102,16 @@ function LoginContent() {
     }
   }
 
-  async function handleAdminSignIn(e: React.FormEvent) {
+  async function handleEmailSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const cleanEmail = adminEmail.trim().toLowerCase();
-    const cleanPassword = adminPassword.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
 
     if (!cleanEmail || !cleanPassword) {
-      setError("Please enter your admin email and password.");
+      setError("Please enter your email and password.");
       setLoading(false);
       return;
     }
@@ -94,8 +122,8 @@ function LoginContent() {
       const role = (token.claims.role as Role) || "rider";
       router.replace(searchParams.get("redirect") || homeForRole(role));
     } catch (err: any) {
-      console.error("Admin sign in failed:", err);
-      setError(err?.message || "Admin login failed. Check email & password.");
+      console.error("Sign in failed:", err);
+      setError(err?.message || "Login failed. Check email & password.");
     } finally {
       setLoading(false);
     }
@@ -203,59 +231,62 @@ function LoginContent() {
             </div>
           )}
 
-          {portal === "rider" && (
-            <div className="mt-8">
-              {renderSocialButtons()}
-            </div>
-          )}
-
-          {portal === "driver" && (
-            <div className="mt-8">
-              {renderSocialButtons()}
-            </div>
-          )}
-
-          {portal === "admin" && (
-            <form onSubmit={handleAdminSignIn} className="mt-8 space-y-4">
-              <div>
-                <label htmlFor="admin-email" className="block text-sm font-semibold text-neutral-700 mb-1">Admin Email</label>
-                <div className="relative">
-                  <Mail size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                  <input
-                    id="admin-email"
-                    type="email"
-                    required
-                    value={adminEmail}
-                    onChange={(e) => setAdminEmail(e.target.value)}
-                    placeholder="admin@luxe.com"
-                    className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
-                  />
+          {(portal === "rider" || portal === "driver" || portal === "admin") && (
+            <div className="mt-8 space-y-6">
+              <form onSubmit={handleEmailSignIn} className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-neutral-700 mb-1">Email</label>
+                  <div className="relative">
+                    <Mail size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={portal === "admin" ? "admin@luxe.com" : portal === "driver" ? "driver@luxe.com" : "rider@luxe.com"}
+                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-neutral-700 mb-1">Password</label>
+                  <div className="relative">
+                    <KeyRound size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter password"
+                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-4 py-3 px-4 rounded-xl bg-brand text-white font-semibold text-base hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {portal === "admin" && <Shield size={16} aria-hidden="true" />}
+                  {portal === "driver" && <Car size={16} aria-hidden="true" />}
+                  {portal === "rider" && <User size={16} aria-hidden="true" />}
+                  {loading ? "Authenticating..." : "Sign In"}
+                </button>
+              </form>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-neutral-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-neutral-500 font-medium">Or continue with</span>
                 </div>
               </div>
-              <div>
-                <label htmlFor="admin-password" className="block text-sm font-semibold text-neutral-700 mb-1">Password</label>
-                <div className="relative">
-                  <KeyRound size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                  <input
-                    id="admin-password"
-                    type="password"
-                    required
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="Enter admin password"
-                    className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full mt-4 py-3 px-4 rounded-xl bg-brand text-white font-semibold text-base hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Shield size={16} aria-hidden="true" />
-                {loading ? "Authenticating Admin..." : "Sign In as Admin"}
-              </button>
-            </form>
+              
+              {renderSocialButtons()}
+            </div>
           )}
 
         </div>

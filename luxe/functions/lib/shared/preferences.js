@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.preferenceProfileSchema = void 0;
+exports.defaultPreferences = exports.preferenceProfileSchema = void 0;
 const zod_1 = require("zod");
 const timestamp_1 = require("./timestamp");
 exports.preferenceProfileSchema = zod_1.z.object({
     beverage: zod_1.z.object({
-        preference: zod_1.z.enum(["none", "water_still", "water_sparkling", "soda", "coffee", "other"]),
+        preference: zod_1.z.enum(["none", "water_still", "water_sparkling", "soda", "coffee", "other", "no_preference"]),
         brand: zod_1.z.string().nullable(),
         temperature: zod_1.z.enum(["chilled", "room"]).nullable(),
         notes: zod_1.z.string().nullable(),
@@ -51,4 +51,25 @@ exports.preferenceProfileSchema = zod_1.z.object({
     freeText: zod_1.z.string().nullable(),
     updatedAt: timestamp_1.timestampSchema,
 });
+exports.defaultPreferences = {
+    beverage: { preference: "no_preference", brand: null, temperature: null, notes: null },
+    conversation: "no_preference",
+    cabinTempF: null,
+    audio: { mode: "no_preference", value: null, volume: null },
+    scent: "no_preference",
+    scentAllergy: false,
+    chargerType: "none",
+    reading: null,
+    greeting: { style: "no_preference", nameSign: false, signText: null },
+    seating: { preferredSeat: null, partition: null, shades: null },
+    accessibility: { mobilityAssist: false, serviceAnimal: false, notes: null },
+    childSeats: [],
+    route: { avoidHighways: false, avoidTolls: false, preference: "no_preference" },
+    preferredDriverIds: [],
+    blockedDriverIds: [],
+    medicalNotes: null,
+    freeText: null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    updatedAt: { seconds: 0, nanoseconds: 0 }, // Mock timestamp
+};
 //# sourceMappingURL=preferences.js.map

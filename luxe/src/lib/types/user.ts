@@ -14,6 +14,7 @@ export const userSchema = z.object({
   searchName: z.string(),
   stripeCustomerId: z.string().nullable(),
   defaultPaymentMethodId: z.string().nullable(),
+  corporateAccountId: z.string().nullable().optional(),
   preferences: preferenceProfileSchema.nullable(),
   notes: z.string(),
   totalRides: z.number().int(),

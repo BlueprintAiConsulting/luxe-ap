@@ -2,7 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { admin } from "../lib/admin";
-import { Reservation, Driver, Vehicle } from "../../../src/lib/types";
+import { Reservation, Driver, Vehicle } from "../shared";
 
 const adminDb = admin.firestore();
 
@@ -188,7 +188,7 @@ const createAdminResSchema = z.object({
 });
 
 import { calculatePrice } from "../pricing";
-import { Airport, PricingRuleSet } from "../../../src/lib/types";
+import { Airport, PricingRuleSet } from "../shared";
 
 export const createAdminReservation = onCall(async (request) => {
   if (!request.auth || request.auth.token.role !== "admin") {

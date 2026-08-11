@@ -81,73 +81,66 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto font-sans">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand uppercase tracking-tight">Operations Cockpit</h1>
-        <p className="text-neutral-500 mt-2">Overview of today's operations and tasks needing attention.</p>
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold text-brand tracking-tight">Operations Cockpit</h1>
+        <p className="text-neutral-500 mt-2 text-lg">Overview of today's operations and tasks needing attention.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center justify-between">
+      <div className="bg-white rounded-3xl shadow-sm ring-1 ring-neutral-900/5 mb-12 flex flex-col lg:flex-row overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-neutral-100">
+        <div className="p-10 flex-1 flex items-center justify-between group hover:bg-neutral-50/50 transition-colors">
           <div>
-            <div className="text-sm font-semibold text-neutral-500 mb-1">Today's Trips</div>
-            <div className="text-3xl font-bold text-brand">{stats.todayReservations}</div>
+            <div className="text-sm font-semibold text-neutral-400 uppercase tracking-widest mb-3">Today's Trips</div>
+            <div className="text-6xl font-bold text-brand tracking-tighter">{stats.todayReservations}</div>
           </div>
-          <div className="w-12 h-12 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-600">
-            <Calendar size={24} />
-          </div>
+          <Calendar size={48} strokeWidth={1} className="text-neutral-200 group-hover:text-brand/20 transition-colors" />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center justify-between">
+        <div className="p-10 flex-1 bg-brand flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-neutral-500 mb-1">Needs Dispatch</div>
-            <div className="text-3xl font-bold text-amber-500">{stats.unassignedTrips}</div>
+            <div className="text-sm font-semibold text-accent uppercase tracking-widest mb-3">Needs Dispatch</div>
+            <div className="text-6xl font-bold text-white tracking-tighter">{stats.unassignedTrips}</div>
           </div>
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-            <Car size={24} />
-          </div>
+          <Car size={48} strokeWidth={1} className="text-white/10" />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center justify-between">
+        <div className="p-10 flex-1 flex items-center justify-between group hover:bg-neutral-50/50 transition-colors">
           <div>
-            <div className="text-sm font-semibold text-neutral-500 mb-1">Active Drivers</div>
-            <div className="text-3xl font-bold text-emerald-500">{stats.activeDrivers}</div>
+            <div className="text-sm font-semibold text-neutral-400 uppercase tracking-widest mb-3">Active Drivers</div>
+            <div className="text-6xl font-bold text-brand tracking-tighter">{stats.activeDrivers}</div>
           </div>
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <UserCheck size={24} />
-          </div>
+          <UserCheck size={48} strokeWidth={1} className="text-neutral-200 group-hover:text-brand/20 transition-colors" />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex items-center justify-between">
+        <div className="p-10 flex-1 flex items-center justify-between group hover:bg-neutral-50/50 transition-colors">
           <div>
-            <div className="text-sm font-semibold text-neutral-500 mb-1">In Progress</div>
-            <div className="text-3xl font-bold text-blue-500">{stats.inProgressTrips}</div>
+            <div className="text-sm font-semibold text-neutral-400 uppercase tracking-widest mb-3">In Progress</div>
+            <div className="text-6xl font-bold text-brand tracking-tighter">{stats.inProgressTrips}</div>
           </div>
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-            <Activity size={24} />
-          </div>
+          <Activity size={48} strokeWidth={1} className="text-neutral-200 group-hover:text-brand/20 transition-colors" />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-brand">Needs Attention</h2>
-          <Link href="/dispatch" className="text-sm font-semibold text-neutral-500 hover:text-brand flex items-center gap-1 transition-colors">
+      <div className="bg-white rounded-3xl shadow-sm ring-1 ring-neutral-900/5 overflow-hidden">
+        <div className="p-8 border-b border-neutral-100 flex items-center justify-between bg-white">
+          <h2 className="text-2xl font-bold text-brand tracking-tight">Needs Attention</h2>
+          <Link href="/dispatch" className="text-sm font-semibold text-neutral-400 hover:text-brand flex items-center gap-1 transition-colors">
             Go to Dispatch <ArrowRight size={16} />
           </Link>
         </div>
         
         {needsAttention.length === 0 ? (
-          <div className="p-8 text-center text-neutral-500">
+          <div className="p-8 text-center text-neutral-500 bg-white">
             All confirmed trips have been assigned. Great job!
           </div>
         ) : (
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-neutral-50 text-neutral-500 text-xs uppercase tracking-wider">
-                <th className="p-4 font-bold">Pickup</th>
-                <th className="p-4 font-bold">Client</th>
-                <th className="p-4 font-bold">Route</th>
-                <th className="p-4 font-bold text-right">Action</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left bg-white min-w-[600px]">
+              <thead>
+                <tr className="border-b border-neutral-100 text-neutral-500 text-xs font-semibold">
+                  <th className="p-4 font-semibold">Pickup</th>
+                <th className="p-4 font-semibold">Client</th>
+                <th className="p-4 font-semibold">Route</th>
+                <th className="p-4 font-semibold text-right">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -157,16 +150,16 @@ export default function AdminDashboardPage() {
                 return (
                   <tr key={trip.reservationId} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-sm">{format(pickupDate, "MMM d, yyyy")}</div>
+                      <div className="font-semibold text-sm text-brand">{format(pickupDate, "MMM d, yyyy")}</div>
                       <div className="text-xs text-neutral-500">{format(pickupDate, "h:mm a")}</div>
                     </td>
-                    <td className="p-4 text-sm font-semibold">{trip.riderName}</td>
+                    <td className="p-4 text-sm font-medium text-brand">{trip.riderName}</td>
                     <td className="p-4">
-                      <div className="text-sm font-semibold truncate max-w-[200px]">{trip.pickup?.formatted}</div>
+                      <div className="text-sm font-medium text-brand truncate max-w-[200px]">{trip.pickup?.formatted}</div>
                       <div className="text-xs text-neutral-500">to {trip.dropoff?.formatted || "As directed"}</div>
                     </td>
                     <td className="p-4 text-right">
-                      <Link href={`/dispatch?tripId=${trip.reservationId}`} className="inline-block px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg hover:bg-neutral-800 transition-colors">
+                      <Link href={`/dispatch?tripId=${trip.reservationId}`} className="inline-block px-4 py-2 bg-brand text-white text-xs font-semibold rounded-lg hover:bg-neutral-900 transition-colors">
                         Assign
                       </Link>
                     </td>
@@ -175,6 +168,7 @@ export default function AdminDashboardPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

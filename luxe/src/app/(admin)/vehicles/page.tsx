@@ -8,6 +8,7 @@ import { VehicleClass, Vehicle } from '@/lib/types/vehicle';
 import { uploadImage } from '@/lib/uploadImage';
 import { Plus, Trash2, Edit2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
+import Image from 'next/image';
 
 const toDateString = (ts: Timestamp | null | undefined): string => {
   if (!ts) return '';
@@ -29,11 +30,11 @@ export default function VehiclesAdminPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Fleet Management</h1>
-        <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+        <div className="flex space-x-2 bg-neutral-100 p-1 rounded-xl">
           <button
             onClick={() => setTab('classes')}
             className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              tab === 'classes' ? 'bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              tab === 'classes' ? 'bg-white shadow-sm text-brand' : 'text-neutral-500 hover:text-brand'
             }`}
           >
             Vehicle Classes
@@ -41,7 +42,7 @@ export default function VehiclesAdminPage() {
           <button
             onClick={() => setTab('vehicles')}
             className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              tab === 'vehicles' ? 'bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              tab === 'vehicles' ? 'bg-white shadow-sm text-brand' : 'text-neutral-500 hover:text-brand'
             }`}
           >
             Vehicles
@@ -72,7 +73,7 @@ function VehicleClassesTab() {
     return unsubscribe;
   }, []);
 
-  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-gray-400" /></div>;
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-300" /></div>;
 
   return (
     <div>
@@ -81,7 +82,7 @@ function VehicleClassesTab() {
           onClick={() => setEditingClass({
             classId: '', name: '', description: '', maxPassengers: 4, maxLuggage: 2, heroImageUrl: '', sortOrder: 0, active: true
           })}
-          className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+          className="flex items-center space-x-2 bg-brand text-white px-4 py-2 rounded-lg hover:bg-neutral-900"
         >
           <Plus size={18} />
           <span>Add Class</span>
@@ -96,23 +97,23 @@ function VehicleClassesTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {classes.map((vc) => (
-            <div key={vc.classId} className="border rounded-xl overflow-hidden bg-white shadow-sm">
-              <div className="h-48 bg-gray-100 relative">
+            <div key={vc.classId} className="bg-neutral-50 rounded-2xl overflow-hidden text-brand">
+              <div className="h-48 bg-neutral-100 relative">
                 {vc.heroImageUrl ? (
                   <img src={vc.heroImageUrl} alt={vc.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-neutral-300">
                     <ImageIcon size={48} />
                   </div>
                 )}
                 {!vc.active && (
-                  <div className="absolute top-2 right-2 bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">Inactive</div>
+                  <div className="absolute top-2 right-2 bg-neutral-200 text-neutral-600 text-xs font-bold px-2 py-1 rounded">Inactive</div>
                 )}
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-lg">{vc.name}</h3>
-                <p className="text-gray-500 text-sm mt-1">{vc.description}</p>
-                <div className="flex items-center space-x-4 mt-4 text-sm text-gray-600">
+                <p className="text-neutral-500 text-sm mt-1">{vc.description}</p>
+                <div className="flex items-center space-x-4 mt-4 text-sm text-neutral-500">
                   <span>{vc.maxPassengers} Passengers</span>
                   <span>{vc.maxLuggage} Luggage</span>
                 </div>
@@ -123,18 +124,18 @@ function VehicleClassesTab() {
                         await deleteDoc(doc(db, 'vehicleClasses', vc.classId));
                       }
                     }} 
-                    className="text-red-600 hover:text-red-800 flex items-center"
+                    className="text-neutral-400 hover:text-red-800 flex items-center"
                   >
                     <Trash2 size={16} className="mr-1" /> Delete
                   </button>
-                  <button onClick={() => setEditingClass(vc)} className="text-blue-600 hover:text-blue-800 flex items-center">
+                  <button onClick={() => setEditingClass(vc)} className="text-neutral-400 hover:text-brand flex items-center">
                     <Edit2 size={16} className="mr-1" /> Edit
                   </button>
                 </div>
               </div>
             </div>
           ))}
-          {classes.length === 0 && <div className="col-span-full text-center py-12 text-gray-500">No vehicle classes defined.</div>}
+          {classes.length === 0 && <div className="col-span-full text-center py-12 text-neutral-500">No vehicle classes defined.</div>}
         </div>
       )}
     </div>
@@ -174,39 +175,39 @@ function VehicleClassForm({ initialData, onClose }: { initialData: VehicleClass,
   };
 
   return (
-    <div className="bg-white border rounded-xl p-6 shadow-sm">
+    <div className="bg-neutral-50 rounded-2xl p-6">
       <h2 className="text-xl font-bold mb-6">{isNew ? 'New Vehicle Class' : 'Edit Vehicle Class'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
-            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border p-2 rounded" />
+            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Sort Order</label>
-            <input required type="number" value={formData.sortOrder} onChange={e => setFormData({...formData, sortOrder: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.sortOrder} onChange={e => setFormData({...formData, sortOrder: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
         </div>
         
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded h-24" />
+          <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none h-24" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Max Passengers</label>
-            <input required type="number" value={formData.maxPassengers} onChange={e => setFormData({...formData, maxPassengers: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.maxPassengers} onChange={e => setFormData({...formData, maxPassengers: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Max Luggage</label>
-            <input required type="number" value={formData.maxLuggage} onChange={e => setFormData({...formData, maxLuggage: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.maxLuggage} onChange={e => setFormData({...formData, maxLuggage: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Hero Image</label>
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full border p-2 rounded" />
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           {formData.heroImageUrl && !imageFile && (
             <img src={formData.heroImageUrl} alt="Current hero" className="mt-2 h-32 rounded object-cover" />
           )}
@@ -218,8 +219,8 @@ function VehicleClassForm({ initialData, onClose }: { initialData: VehicleClass,
         </div>
 
         <div className="flex justify-end space-x-3 pt-6 border-t">
-          <button type="button" onClick={onClose} disabled={saving} className="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
-          <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center">
+          <button type="button" onClick={onClose} disabled={saving} className="px-4 py-2 border rounded-lg hover:bg-neutral-100">Cancel</button>
+          <button type="submit" disabled={saving} className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-neutral-900 flex items-center">
             {saving && <Loader2 className="animate-spin mr-2" size={16} />}
             Save Class
           </button>
@@ -252,7 +253,7 @@ function VehiclesTab() {
     return () => { unsubClasses(); unsubVehicles(); };
   }, []);
 
-  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-gray-400" /></div>;
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-300" /></div>;
 
   return (
     <div>
@@ -261,7 +262,7 @@ function VehiclesTab() {
           onClick={() => setEditingVehicle({
             vehicleId: '', classId: classes[0]?.classId || '', year: new Date().getFullYear(), make: '', model: '', color: '', licensePlate: '', photoUrls: [], maxPassengers: 4, maxLuggage: 2, active: true, outOfServiceUntil: null
           })}
-          className="flex items-center space-x-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+          className="flex items-center space-x-2 bg-brand text-white px-4 py-2 rounded-lg hover:bg-neutral-900"
         >
           <Plus size={18} />
           <span>Add Vehicle</span>
@@ -275,39 +276,46 @@ function VehiclesTab() {
           onClose={() => setEditingVehicle(null)} 
         />
       ) : (
-        <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-neutral-50 rounded-2xl overflow-hidden">
           <table className="w-full text-left">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-white border-b border-neutral-200">
               <tr>
-                <th className="p-4 font-medium text-gray-500">Vehicle</th>
-                <th className="p-4 font-medium text-gray-500">Class</th>
-                <th className="p-4 font-medium text-gray-500">Plate</th>
-                <th className="p-4 font-medium text-gray-500">Status</th>
-                <th className="p-4 font-medium text-gray-500 text-right">Actions</th>
+                <th className="p-4 font-medium text-neutral-500">Vehicle</th>
+                <th className="p-4 font-medium text-neutral-500">Class</th>
+                <th className="p-4 font-medium text-neutral-500">Plate</th>
+                <th className="p-4 font-medium text-neutral-500">Status</th>
+                <th className="p-4 font-medium text-neutral-500 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {vehicles.map(v => (
                 <tr key={v.vehicleId} className="border-b last:border-0">
-                  <td className="p-4">
-                    <div className="font-medium">{v.year} {v.make} {v.model}</div>
-                    <div className="text-sm text-gray-500">{v.color}</div>
+                  <td className="p-4 w-16">
+                    {v.photoUrls && v.photoUrls.length > 0 ? (
+                      <Image src={v.photoUrls[0]} alt={`${v.make} ${v.model}`} width={48} height={48} className="w-12 h-12 object-cover rounded-lg" />
+                    ) : (
+                      <ImageIcon size={48} className="text-neutral-300" />
+                    )}
                   </td>
                   <td className="p-4">
-                    <span className="bg-gray-100 px-2 py-1 rounded text-sm">
+                    <div className="font-medium">{v.year} {v.make} {v.model}</div>
+                    <div className="text-sm text-neutral-500">{v.color}</div>
+                  </td>
+                  <td className="p-4">
+                    <span className="bg-neutral-200 px-2 py-1 rounded text-sm">
                       {classes.find(c => c.classId === v.classId)?.name || v.classId}
                     </span>
                   </td>
                   <td className="p-4 font-mono text-sm">{v.licensePlate}</td>
                   <td className="p-4">
                     {v.active ? (
-                      <span className="text-green-600 flex items-center"><span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span> Active</span>
+                      <span className="text-brand flex items-center"><span className="w-2 h-2 rounded-full bg-accent mr-2"></span> Active</span>
                     ) : (
-                      <span className="text-red-600 flex items-center"><span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span> Out of Service</span>
+                      <span className="text-neutral-400 flex items-center"><span className="w-2 h-2 rounded-full bg-neutral-300 mr-2"></span> Out of Service</span>
                     )}
                   </td>
                   <td className="p-4 text-right flex justify-end space-x-2">
-                    <button onClick={() => setEditingVehicle(v)} className="text-blue-600 hover:text-blue-800 p-2">
+                    <button onClick={() => setEditingVehicle(v)} className="text-neutral-400 hover:text-brand p-2">
                       <Edit2 size={16} />
                     </button>
                     <button 
@@ -316,7 +324,7 @@ function VehiclesTab() {
                           await deleteDoc(doc(db, 'vehicles', v.vehicleId));
                         }
                       }} 
-                      className="text-red-600 hover:text-red-800 p-2"
+                      className="text-neutral-400 hover:text-red-800 p-2"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -325,7 +333,7 @@ function VehiclesTab() {
               ))}
               {vehicles.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">No vehicles in fleet.</td>
+                  <td colSpan={5} className="p-8 text-center text-neutral-500">No vehicles in fleet.</td>
                 </tr>
               )}
             </tbody>
@@ -378,39 +386,39 @@ function VehicleForm({ initialData, classes, onClose }: { initialData: Vehicle, 
   };
 
   return (
-    <div className="bg-white border rounded-xl p-6 shadow-sm">
+    <div className="bg-neutral-50 rounded-2xl p-6">
       <h2 className="text-xl font-bold mb-6">{isNew ? 'New Vehicle' : 'Edit Vehicle'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Year</label>
-            <input required type="number" value={formData.year} onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.year} onChange={e => setFormData({...formData, year: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Make</label>
-            <input required type="text" placeholder="Cadillac" value={formData.make} onChange={e => setFormData({...formData, make: e.target.value})} className="w-full border p-2 rounded" />
+            <input required type="text" placeholder="Cadillac" value={formData.make} onChange={e => setFormData({...formData, make: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Model</label>
-            <input required type="text" placeholder="Escalade" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} className="w-full border p-2 rounded" />
+            <input required type="text" placeholder="Escalade" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Color</label>
-            <input required type="text" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} className="w-full border p-2 rounded" />
+            <input required type="text" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">License Plate</label>
-            <input required type="text" value={formData.licensePlate} onChange={e => setFormData({...formData, licensePlate: e.target.value.toUpperCase()})} className="w-full border p-2 rounded uppercase font-mono" />
+            <input required type="text" value={formData.licensePlate} onChange={e => setFormData({...formData, licensePlate: e.target.value.toUpperCase()})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none uppercase font-mono" />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Vehicle Class</label>
-            <select required value={formData.classId} onChange={e => setFormData({...formData, classId: e.target.value})} className="w-full border p-2 rounded">
+            <select required value={formData.classId} onChange={e => setFormData({...formData, classId: e.target.value})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none">
               {classes.map(c => (
                 <option key={c.classId} value={c.classId}>{c.name}</option>
               ))}
@@ -418,24 +426,24 @@ function VehicleForm({ initialData, classes, onClose }: { initialData: Vehicle, 
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Max Passengers</label>
-            <input required type="number" value={formData.maxPassengers} onChange={e => setFormData({...formData, maxPassengers: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.maxPassengers} onChange={e => setFormData({...formData, maxPassengers: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Max Luggage</label>
-            <input required type="number" value={formData.maxLuggage} onChange={e => setFormData({...formData, maxLuggage: parseInt(e.target.value)})} className="w-full border p-2 rounded" />
+            <input required type="number" value={formData.maxLuggage} onChange={e => setFormData({...formData, maxLuggage: parseInt(e.target.value)})} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>
-          <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={e => setPhotos(Array.from(e.target.files || []))} className="w-full border p-2 rounded" />
+          <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={e => setPhotos(Array.from(e.target.files || []))} className="w-full border border-neutral-200 p-2 rounded focus:ring-1 focus:ring-brand focus:border-brand outline-none" />
           
           {formData.photoUrls.length > 0 && (
             <div className="flex gap-2 mt-2 overflow-x-auto">
               {formData.photoUrls.map((url, idx) => (
                 <div key={idx} className="relative w-24 h-24 flex-shrink-0">
                   <img src={url} alt={`Vehicle ${idx}`} className="w-full h-full object-cover rounded border" />
-                  <button type="button" onClick={() => removePhoto(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow">
+                  <button type="button" onClick={() => removePhoto(idx)} className="absolute -top-2 -right-2 bg-neutral-300 text-white rounded-full p-1 shadow">
                     <Trash2 size={12} />
                   </button>
                 </div>
@@ -456,8 +464,8 @@ function VehicleForm({ initialData, classes, onClose }: { initialData: Vehicle, 
         </div>
 
         <div className="flex justify-end space-x-3 pt-6 border-t">
-          <button type="button" onClick={onClose} disabled={saving} className="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
-          <button type="submit" disabled={saving} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center">
+          <button type="button" onClick={onClose} disabled={saving} className="px-4 py-2 border rounded-lg hover:bg-neutral-100">Cancel</button>
+          <button type="submit" disabled={saving} className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-neutral-900 flex items-center">
             {saving && <Loader2 className="animate-spin mr-2" size={16} />}
             Save Vehicle
           </button>

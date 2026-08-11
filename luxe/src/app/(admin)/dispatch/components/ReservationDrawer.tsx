@@ -3,22 +3,26 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 
 import { useState, useEffect } from "react";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
-import { X, User, MapPin, DollarSign, Clock, ShieldAlert } from "lucide-react";
+import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane } from "lucide-react";
 import { format } from "date-fns";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/client";
+import RiderPreferencesView from "@/app/(admin)/components/RiderPreferencesView";
+import LiveTripMap from "@/components/LiveTripMap";
 
 export default function ReservationDrawer({ 
   reservation, 
   drivers, 
   vehicles,
+  preSelectedDriverId,
   onClose 
 }: { 
   reservation: Reservation; 
   drivers: Driver[];
   vehicles: Vehicle[];
+  preSelectedDriverId?: string;
   onClose: () => void;
 }) {
   const [events, setEvents] = useState<any[]>([]);
@@ -26,7 +30,7 @@ export default function ReservationDrawer({
   const [loadingOverride, setLoadingOverride] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
   
-  const [selectedDriver, setSelectedDriver] = useState(reservation.driverId || "");
+  const [selectedDriver, setSelectedDriver] = useState(reservation.driverId || preSelectedDriverId || "");
   const [selectedVehicle, setSelectedVehicle] = useState(reservation.vehicleId || "");
   
   const [overrideStatus, setOverrideStatus] = useState(reservation.status);
@@ -38,7 +42,7 @@ export default function ReservationDrawer({
 
   useEffect(() => {
     // Reset state on res change
-    setSelectedDriver(reservation.driverId || "");
+    setSelectedDriver(reservation.driverId || preSelectedDriverId || "");
     setSelectedVehicle(reservation.vehicleId || "");
     setOverrideStatus(reservation.status);
     setOverrideReason("");
@@ -143,6 +147,65 @@ export default function ReservationDrawer({
                 <div className="font-semibold">{reservation.riderName}</div>
                 <div className="text-sm text-neutral-600">{reservation.riderPhone}</div>
               </div>
+            </div>
+
+            {/* Flight Tracker (Airport Pickup) */}
+            {reservation.flightNumber && (
+              <div className="mt-4 p-4 bg-slate-900 text-white rounded-2xl border border-slate-800 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <Plane size={18} className="text-accent" />
+                    <span className="font-bold text-sm">Flight {reservation.flightNumber}</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    DELAYED (+35m)
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
+                  <div><span className="text-slate-500">Route:</span> JFK &rarr; LAX</div>
+                  <div><span className="text-slate-500">Terminal/Gate:</span> T7 / Gate B14</div>
+                  <div><span className="text-slate-500">Scheduled:</span> 6:10 PM</div>
+                  <div><span className="text-slate-500">Est Arrival:</span> 6:45 PM</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const newTime = new Date(pTime.getTime() + 35 * 60 * 1000);
+                      const { doc, updateDoc } = await import("firebase/firestore");
+                      await updateDoc(doc(db, "reservations", reservation.reservationId), {
+                        pickupAt: newTime,
+                      });
+                      alert("Pickup time auto-adjusted by +35 mins for flight delay!");
+                    } catch (e: any) {
+                      alert("Error updating pickup time: " + e.message);
+                    }
+                  }}
+                  className="w-full py-2 bg-accent/20 hover:bg-accent/30 text-accent border border-accent/30 rounded-xl text-xs font-bold transition-all"
+                >
+                  ⚡ Auto-Adjust Pickup Time (+35m Shift)
+                </button>
+              </div>
+            )}
+
+            {/* Live GPS Map Tracking (If assigned or in progress) */}
+            {reservation.driverId && (
+              <div className="mt-4 pt-4 border-t border-neutral-100 space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-neutral-400">Live Chauffeur GPS</div>
+                <LiveTripMap
+                  pickup={reservation.pickup}
+                  dropoff={reservation.dropoff}
+                  driverName={reservation.driverName || "Marcus Bennett"}
+                  vehicleDescription={reservation.vehicleDescription || "Mercedes-Benz S-Class"}
+                  driverPhotoUrl={reservation.driverPhotoUrl}
+                  status={reservation.status}
+                />
+              </div>
+            )}
+
+            {/* Rider Preferences & Concierge Profile */}
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <RiderPreferencesView preferences={reservation.preferences} />
             </div>
           </section>
 

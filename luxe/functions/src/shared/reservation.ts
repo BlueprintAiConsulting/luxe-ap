@@ -88,6 +88,8 @@ export const reservationSchema = z.object({
 
   // --- Payment ---
   stripePaymentIntentId: z.string().nullable(),
+  corporateAccountId: z.string().nullable().optional(),
+  billedToCorporate: z.boolean().optional(),
   paymentStatus: z.enum(["none", "authorized", "captured", "failed", "refunded"]),
   authorizedAmountCents: z.number().int(),
   capturedAmountCents: z.number().int(),
@@ -115,6 +117,7 @@ export const createReservationInputSchema = z.object({
   passengers: z.number().int(),
   luggage: z.number().int(),
   flightNumber: z.string().nullable(),
+  promoCode: z.string().nullable().optional(),
   preferences: preferenceProfileSchema.nullable(),
   notes: z.string().nullable(),
 });
