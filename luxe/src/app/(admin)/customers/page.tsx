@@ -124,8 +124,12 @@ export default function CustomersPage() {
                   <tr key={c.uid} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-500 mr-3">
-                          <UserIcon size={20} />
+                        <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-500 mr-3 overflow-hidden">
+                          {c.photoUrl ? (
+                            <img src={c.photoUrl} alt={`${c.firstName} ${c.lastName}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <UserIcon size={20} />
+                          )}
                         </div>
                         <div>
                           <div className="font-bold text-sm">{c.firstName} {c.lastName}</div>

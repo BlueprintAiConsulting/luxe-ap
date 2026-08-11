@@ -5,8 +5,9 @@ import { useAuth } from "@/lib/firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { PreferenceProfile } from "@/lib/types";
-import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Camera, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { uploadImage } from "@/lib/uploadImage";
 
 // Utility to deeply count non-null fields
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,8 +59,10 @@ export default function PreferencesPage() {
   const router = useRouter();
   
   const [preferences, setPreferences] = useState<PreferenceProfile>(defaultPreferences);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch preferences on mount
@@ -67,8 +70,14 @@ export default function PreferencesPage() {
     if (!user) return;
     const fetchPrefs = async () => {
       const d = await getDoc(doc(db, "users", user.uid));
-      if (d.exists() && d.data().preferences) {
-        setPreferences({ ...defaultPreferences, ...d.data().preferences });
+      if (d.exists()) {
+        const data = d.data();
+        if (data.preferences) {
+          setPreferences({ ...defaultPreferences, ...data.preferences });
+        }
+        if (data.photoUrl) {
+          setPhotoUrl(data.photoUrl);
+        }
       }
       setLoading(false);
     };
@@ -99,6 +108,26 @@ export default function PreferencesPage() {
 
       return next;
     });
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploadingPhoto(true);
+    try {
+      const result = await uploadImage(file, `users/${user.uid}/profile-${Date.now()}.jpg`);
+      await updateDoc(doc(db, "users", user.uid), {
+        photoUrl: result.url,
+        updatedAt: new Date()
+      });
+      setPhotoUrl(result.url);
+    } catch (error) {
+      console.error("Failed to upload photo", error);
+      alert("Failed to upload profile picture.");
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   if (authLoading || loading) {
@@ -136,6 +165,27 @@ export default function PreferencesPage() {
         <p className="text-sm text-gray-600 text-center px-4">
           Tell us how you like to ride. We&apos;ll automatically prepare your chauffeur and vehicle for every trip.
         </p>
+
+        {/* PROFILE PICTURE */}
+        <section className="bg-white p-5 rounded-2xl border flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border">
+              {uploadingPhoto ? (
+                <Loader2 className="animate-spin text-gray-400" />
+              ) : photoUrl ? (
+                <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <UserIcon size={40} className="text-gray-400" />
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full cursor-pointer hover:bg-gray-800 shadow-md">
+              <Camera size={16} />
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
+            </label>
+          </div>
+          <h2 className="font-bold text-lg text-center">Profile Picture</h2>
+          <p className="text-sm text-gray-500 text-center">Your chauffeur will use this to identify you at pickup.</p>
+        </section>
 
         {/* REFRESHMENTS */}
         <section className="bg-white p-5 rounded-2xl border space-y-4">

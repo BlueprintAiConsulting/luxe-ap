@@ -8,6 +8,7 @@ export const userSchema = z.object({
   role: z.enum(["rider", "driver", "admin"]),
   phone: z.string(),
   email: z.string().nullable(),
+  photoUrl: z.string().nullable().optional(),
   firstName: z.string(),
   lastName: z.string(),
   searchName: z.string(),
