@@ -127,18 +127,18 @@ exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) 
     const batch = db.batch();
     batch.update(resRef, {
         status: "completed",
-        actualEndAt: new Date(),
+        actualEndAt: firestore_1.FieldValue.serverTimestamp(),
         pricing: finalBreakdown,
         waitMinutes,
         tollsCents,
         parkingCents,
-        updatedAt: new Date(),
+        updatedAt: firestore_1.FieldValue.serverTimestamp(),
     });
-    const eventRef = db.collection("statusEvents").doc();
+    const eventRef = resRef.collection("statusEvents").doc();
     const statusEvent = {
         from: reservation.status,
         to: "completed",
-        at: new Date(),
+        at: firestore_1.FieldValue.serverTimestamp(),
         actorId: request.auth.uid,
         actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
         note: "Trip completed",
@@ -168,19 +168,19 @@ exports.updateTripStatus = (0, https_1.onCall)({ minInstances: 1 }, async (reque
         }
         const updates = {
             status,
-            updatedAt: new Date()
+            updatedAt: firestore_1.FieldValue.serverTimestamp()
         };
         if (status === "en_route" && !reservation.actualStartAt) {
-            updates.actualStartAt = new Date();
+            updates.actualStartAt = firestore_1.FieldValue.serverTimestamp();
         }
         t.update(resRef, updates);
-        const eventRef = db.collection("statusEvents").doc();
+        const eventRef = resRef.collection("statusEvents").doc();
         const event = {
             from: reservation.status,
             to: status,
             actorId: request.auth.uid,
             actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
-            at: new Date(),
+            at: firestore_1.FieldValue.serverTimestamp(),
             note: null,
             location: location || null
         };
@@ -205,7 +205,7 @@ exports.updateTripChecklist = (0, https_1.onCall)({ minInstances: 1 }, async (re
     }
     await resRef.update({
         [`prepChecklistState.${key}`]: checked,
-        updatedAt: new Date()
+        updatedAt: firestore_1.FieldValue.serverTimestamp()
     });
     return { success: true };
 });

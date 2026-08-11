@@ -222,7 +222,7 @@ exports.createAdminReservation = (0, https_1.onCall)(async (request) => {
         specialInstructions: data.notes || "",
         preferences: data.preferences,
         classId: data.quote.classId,
-        className: ruleSet.classRates[data.quote.classId] ? data.quote.classId : "Unknown",
+        className: ruleSet.classRates[data.quote.classId]?.name || data.quote.classId,
         vehicleId: null,
         vehicleDescription: null,
         driverId: null,

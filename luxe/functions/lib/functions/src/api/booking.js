@@ -183,8 +183,8 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         status: "confirmed",
         pricingRuleSetId: activeRuleSetId,
         idempotencyKey: resInput.idempotencyKey,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: firestore_1.FieldValue.serverTimestamp(),
+        updatedAt: firestore_1.FieldValue.serverTimestamp(),
         // Pricing
         estimatedDistanceMeters: null,
         estimatedDurationSeconds: null,
@@ -210,7 +210,7 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         preferences: resInput.preferences,
         // Assignments (empty at start)
         classId: resInput.quote.classId,
-        className: ruleSet.classRates[resInput.quote.classId] ? resInput.quote.classId : "Unknown",
+        className: ruleSet.classRates[resInput.quote.classId]?.name || resInput.quote.classId,
         vehicleId: null,
         vehicleDescription: null,
         driverId: null,
@@ -236,11 +236,11 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
     };
     batch.set(reservationRef, reservationDoc);
     // Write initial StatusEvent
-    const eventRef = db.collection("statusEvents").doc();
+    const eventRef = reservationRef.collection("statusEvents").doc();
     const statusEvent = {
         from: null,
         to: "confirmed",
-        at: new Date(),
+        at: firestore_1.FieldValue.serverTimestamp(),
         actorId: request.auth.uid,
         actorRole: "rider",
         note: "Reservation created via app",
@@ -281,30 +281,8 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         throw new https_1.HttpsError("internal", "Pricing ruleset missing");
     }
     const ruleSet = ruleSetSnap.data();
-    // Calculate Hours Before Pickup
-    const pickupTimeMs = typeof reservation.pickupAt.toDate === 'function' ? reservation.pickupAt.toDate().getTime() : new Date(reservation.pickupAt).getTime();
-    const nowMs = Date.now();
-    const hoursBefore = (pickupTimeMs - nowMs) / (1000 * 60 * 60);
-    // Find applicable window
-    let feePercent = 0;
-    let feeFlatCents = 0;
-    // Sort windows by hoursBefore Pickup descending (e.g. 48, 24, 2)
-    const windows = [...ruleSet.cancellation].sort((a, b) => b.hoursBeforePickup - a.hoursBeforePickup);
-    for (const win of windows) {
-        if (hoursBefore <= win.hoursBeforePickup) {
-            if (win.appliesToClasses === "all" || win.appliesToClasses.includes(reservation.classId)) {
-                feePercent = win.feePercent;
-                feeFlatCents = win.feeFlatCents;
-            }
-        }
-    }
-    let cancellationFeeCents = 0;
-    if (feePercent > 0) {
-        cancellationFeeCents = Math.round((reservation.pricing.estimatedTotalCents || 0) * (feePercent / 100));
-    }
-    else if (feeFlatCents > 0) {
-        cancellationFeeCents = feeFlatCents;
-    }
+    const cancellationFeeCents = (0, pricing_1.calculateCancellationFee)(reservation.pickupAt, new Date(), // cancelAt = now
+    reservation.classId, ruleSet, reservation.pricing.estimatedTotalCents || 0);
     // Handle Stripe hold
     if (stripe && reservation.stripePaymentIntentId) {
         try {
@@ -333,18 +311,18 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
     const batch = db.batch();
     batch.update(resRef, {
         status: "cancelled",
-        cancelledAt: new Date(),
+        cancelledAt: firestore_1.FieldValue.serverTimestamp(),
         cancelledBy: request.auth.uid,
         cancellationFeeCents,
         paymentStatus: cancellationFeeCents > 0 ? "captured" : "refunded", // if we released the hold, effectively refunded/none
-        updatedAt: new Date(),
+        updatedAt: firestore_1.FieldValue.serverTimestamp(),
     });
-    const eventRef = db.collection("statusEvents").doc();
+    const eventRef = resRef.collection("statusEvents").doc();
     batch.set(eventRef, {
         reservationId,
         from: reservation.status,
         to: "cancelled",
-        at: new Date(),
+        at: firestore_1.FieldValue.serverTimestamp(),
         actorId: request.auth.uid,
         actorRole: request.auth.token.role === "admin" ? "admin" : "rider",
         note: cancellationFeeCents > 0 ? `Late cancellation fee: $${(cancellationFeeCents / 100).toFixed(2)}` : "Cancelled without fee",

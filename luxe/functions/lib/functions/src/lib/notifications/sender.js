@@ -67,7 +67,11 @@ async function dispatchNotification(params) {
         return;
     }
     // Idempotency Check: notification doc ID
-    const notificationId = `${reservationId}_${type}`;
+    // Types that should only fire once per reservation
+    const ONCE_PER_RESERVATION = ["rider_booking_confirmed", "admin_new_booking", "rider_trip_complete_sms", "rider_trip_complete_email"];
+    const notificationId = ONCE_PER_RESERVATION.includes(type)
+        ? `${reservationId}_${type}`
+        : `${reservationId}_${type}_${Date.now()}`;
     const notifRef = adminDb.collection("notifications").doc(notificationId);
     try {
         const sent = await adminDb.runTransaction(async (t) => {

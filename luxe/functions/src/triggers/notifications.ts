@@ -37,7 +37,7 @@ export const onReservationWritten = onDocumentWritten("reservations/{resId}", as
 
   const data = await getTemplateData(after);
   const tz = after.timezone;
-  const adminPhone = process.env.ADMIN_PHONE || "+1234567890"; // Adjust to real admin phone
+  const adminPhone = process.env.ADMIN_PHONE || ""; // Removed +1234567890 fallback // Adjust to real admin phone
 
   // 1a. New Booking
   if (!before) {
@@ -118,12 +118,13 @@ export const onReservationWritten = onDocumentWritten("reservations/{resId}", as
 // 2. Scheduled checks (run every 15 minutes)
 export const checkUpcomingReservations = onSchedule("every 15 minutes", async (event) => {
   const now = Date.now();
-  const adminPhone = process.env.ADMIN_PHONE || "+1234567890";
+  const adminPhone = process.env.ADMIN_PHONE || ""; // Removed +1234567890 fallback
 
   // Check Admin Unassigned Warning (<= 4 hours)
   const fourHoursFromNow = new Date(now + 4 * 60 * 60 * 1000);
   const unassignedSnap = await adminDb.collection("reservations")
-    .where("status", "in", ["unassigned", "quote_accepted"])
+    .where("status", "==", "confirmed")
+    .where("driverId", "==", null)
     .where("pickupAt", "<=", fourHoursFromNow)
     .get();
 

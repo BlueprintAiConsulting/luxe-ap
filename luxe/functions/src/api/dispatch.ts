@@ -278,7 +278,7 @@ export const createAdminReservation = onCall(async (request) => {
     preferences: data.preferences,
     
     classId: data.quote.classId,
-    className: ruleSet.classRates[data.quote.classId] ? data.quote.classId : "Unknown",
+    className: ruleSet.classRates[data.quote.classId]?.name || data.quote.classId,
     vehicleId: null,
     vehicleDescription: null,
     driverId: null,

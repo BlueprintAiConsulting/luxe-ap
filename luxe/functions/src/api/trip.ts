@@ -1,5 +1,5 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { calculatePrice } from "../pricing";
 import { Reservation, PricingRuleSet, Airport, ReservationStatusEvent, canTransition, ReservationStatus } from "../shared";
@@ -136,19 +136,19 @@ export const completeTrip = onCall({ minInstances: 1 }, async (request) => {
 
   batch.update(resRef, {
     status: "completed",
-    actualEndAt: new Date() as any,
+    actualEndAt: FieldValue.serverTimestamp() as any,
     pricing: finalBreakdown,
     waitMinutes,
     tollsCents,
     parkingCents,
-    updatedAt: new Date() as any,
+    updatedAt: FieldValue.serverTimestamp() as any,
   });
 
-  const eventRef = db.collection("statusEvents").doc();
+  const eventRef = resRef.collection("statusEvents").doc();
   const statusEvent: ReservationStatusEvent = {
     from: reservation.status,
     to: "completed",
-    at: new Date() as any,
+    at: FieldValue.serverTimestamp() as any,
     actorId: request.auth.uid,
     actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
     note: "Trip completed",
@@ -183,22 +183,22 @@ export const updateTripStatus = onCall({ minInstances: 1 }, async (request) => {
 
     const updates: any = {
       status,
-      updatedAt: new Date() as any
+      updatedAt: FieldValue.serverTimestamp() as any
     };
 
     if (status === "en_route" && !reservation.actualStartAt) {
-      updates.actualStartAt = new Date() as any;
+      updates.actualStartAt = FieldValue.serverTimestamp() as any;
     }
 
     t.update(resRef, updates);
 
-    const eventRef = db.collection("statusEvents").doc();
+    const eventRef = resRef.collection("statusEvents").doc();
     const event: ReservationStatusEvent = {
       from: reservation.status,
       to: status,
       actorId: request.auth!.uid,
       actorRole: request.auth!.token.role === "admin" ? "admin" : "driver",
-      at: new Date() as any,
+      at: FieldValue.serverTimestamp() as any,
       note: null,
       location: location || null
     };
@@ -227,7 +227,7 @@ export const updateTripChecklist = onCall({ minInstances: 1 }, async (request) =
 
   await resRef.update({
     [`prepChecklistState.${key}`]: checked,
-    updatedAt: new Date() as any
+    updatedAt: FieldValue.serverTimestamp() as any
   });
 
   return { success: true };

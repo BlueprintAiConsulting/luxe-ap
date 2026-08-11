@@ -26,6 +26,7 @@ exports.pricingRuleSetSchema = zod_1.z.object({
     effectiveFrom: timestamp_1.timestampSchema,
     timezone: zod_1.z.string(),
     classRates: zod_1.z.record(zod_1.z.string(), zod_1.z.object({
+        name: zod_1.z.string(),
         baseFareCents: zod_1.z.number().int(),
         perMileCents: zod_1.z.number().int(),
         perMinuteCents: zod_1.z.number().int(),

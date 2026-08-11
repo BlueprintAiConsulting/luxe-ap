@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
-import { calculatePrice } from "../pricing";
+import { calculatePrice, calculateCancellationFee } from "../pricing";
 import { 
   QuoteInput, 
   PricingRuleSet, 
@@ -217,8 +217,8 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
     status: "confirmed",
     pricingRuleSetId: activeRuleSetId,
     idempotencyKey: resInput.idempotencyKey,
-    createdAt: new Date() as any,
-    updatedAt: new Date() as any,
+    createdAt: FieldValue.serverTimestamp() as any,
+    updatedAt: FieldValue.serverTimestamp() as any,
 
     // Pricing
     estimatedDistanceMeters: null,
@@ -250,7 +250,7 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
     
     // Assignments (empty at start)
     classId: resInput.quote.classId,
-    className: ruleSet.classRates[resInput.quote.classId] ? resInput.quote.classId : "Unknown",
+    className: ruleSet.classRates[resInput.quote.classId]?.name || resInput.quote.classId,
     vehicleId: null,
     vehicleDescription: null,
     driverId: null,
@@ -281,11 +281,11 @@ export const createReservation = onCall({ minInstances: 1 }, async (request) => 
   batch.set(reservationRef, reservationDoc);
 
   // Write initial StatusEvent
-  const eventRef = db.collection("statusEvents").doc();
+  const eventRef = reservationRef.collection("statusEvents").doc();
   const statusEvent: ReservationStatusEvent = {
     from: null,
     to: "confirmed",
-    at: new Date() as any,
+    at: FieldValue.serverTimestamp() as any,
     actorId: request.auth.uid,
     actorRole: "rider",
     note: "Reservation created via app",
@@ -333,32 +333,13 @@ export const cancelReservation = onCall({ minInstances: 1 }, async (request) => 
   }
   const ruleSet = ruleSetSnap.data() as PricingRuleSet;
 
-  // Calculate Hours Before Pickup
-  const pickupTimeMs = typeof (reservation.pickupAt as any).toDate === 'function' ? (reservation.pickupAt as any).toDate().getTime() : new Date(reservation.pickupAt as any).getTime();
-  const nowMs = Date.now();
-  const hoursBefore = (pickupTimeMs - nowMs) / (1000 * 60 * 60);
-
-  // Find applicable window
-  let feePercent = 0;
-  let feeFlatCents = 0;
-  
-  // Sort windows by hoursBefore Pickup descending (e.g. 48, 24, 2)
-  const windows = [...ruleSet.cancellation].sort((a, b) => b.hoursBeforePickup - a.hoursBeforePickup);
-  for (const win of windows) {
-    if (hoursBefore <= win.hoursBeforePickup) {
-      if (win.appliesToClasses === "all" || win.appliesToClasses.includes(reservation.classId)) {
-        feePercent = win.feePercent;
-        feeFlatCents = win.feeFlatCents;
-      }
-    }
-  }
-
-  let cancellationFeeCents = 0;
-  if (feePercent > 0) {
-    cancellationFeeCents = Math.round((reservation.pricing.estimatedTotalCents || 0) * (feePercent / 100));
-  } else if (feeFlatCents > 0) {
-    cancellationFeeCents = feeFlatCents;
-  }
+  const cancellationFeeCents = calculateCancellationFee(
+    reservation.pickupAt,
+    new Date(),           // cancelAt = now
+    reservation.classId,
+    ruleSet,
+    reservation.pricing.estimatedTotalCents || 0
+  );
 
   // Handle Stripe hold
   if (stripe && reservation.stripePaymentIntentId) {
@@ -387,19 +368,19 @@ export const cancelReservation = onCall({ minInstances: 1 }, async (request) => 
   const batch = db.batch();
   batch.update(resRef, {
     status: "cancelled",
-    cancelledAt: new Date() as any,
+    cancelledAt: FieldValue.serverTimestamp() as any,
     cancelledBy: request.auth.uid,
     cancellationFeeCents,
     paymentStatus: cancellationFeeCents > 0 ? "captured" : "refunded", // if we released the hold, effectively refunded/none
-    updatedAt: new Date() as any,
+    updatedAt: FieldValue.serverTimestamp() as any,
   });
 
-  const eventRef = db.collection("statusEvents").doc();
+  const eventRef = resRef.collection("statusEvents").doc();
   batch.set(eventRef, {
     reservationId,
     from: reservation.status,
     to: "cancelled",
-    at: new Date() as any,
+    at: FieldValue.serverTimestamp() as any,
     actorId: request.auth.uid,
     actorRole: request.auth.token.role === "admin" ? "admin" : "rider",
     note: cancellationFeeCents > 0 ? `Late cancellation fee: $${(cancellationFeeCents/100).toFixed(2)}` : "Cancelled without fee",

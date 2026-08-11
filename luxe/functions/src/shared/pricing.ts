@@ -32,6 +32,7 @@ export const pricingRuleSetSchema = z.object({
   classRates: z.record(
     z.string(),
     z.object({
+      name: z.string(),
       baseFareCents: z.number().int(),
       perMileCents: z.number().int(),
       perMinuteCents: z.number().int(),

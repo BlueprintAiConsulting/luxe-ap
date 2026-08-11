@@ -2,6 +2,7 @@
   "auth": {
     "providers": {
       "emailPassword": true,
+      "phone": true,
       "anonymous": true
     }
   },

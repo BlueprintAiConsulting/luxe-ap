@@ -23,6 +23,7 @@ async function seed() {
     timezone: 'America/Los_Angeles',
     classRates: {
       sedan: {
+        name: 'Luxury Sedan',
         baseFareCents: 5000,
         perMileCents: 350,
         perMinuteCents: 100,
@@ -31,6 +32,7 @@ async function seed() {
         hourlyMinimumHours: 2,
       },
       suv: {
+        name: 'Luxury SUV',
         baseFareCents: 7500,
         perMileCents: 450,
         perMinuteCents: 125,
@@ -39,6 +41,7 @@ async function seed() {
         hourlyMinimumHours: 2,
       },
       sprinter: {
+        name: 'Executive Sprinter',
         baseFareCents: 15000,
         perMileCents: 650,
         perMinuteCents: 200,
