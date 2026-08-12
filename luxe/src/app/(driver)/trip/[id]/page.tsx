@@ -22,7 +22,7 @@ function generateChecklist(prefs: PreferenceProfile | null): ChecklistItem[] {
 
   // Beverage
   if (prefs.beverage?.preference && prefs.beverage.preference !== "no_preference" && prefs.beverage.preference !== "none") {
-    let label = prefs.beverage.preference.replace("_", " ");
+    let label = prefs.beverage.preference.replace(/_/g, " ");
     if (prefs.beverage.brand) label += ` (${prefs.beverage.brand})`;
     if (prefs.beverage.temperature) label += ` - ${prefs.beverage.temperature}`;
     list.push({ id: "beverage", label: `Beverage: ${label}` });
@@ -30,7 +30,7 @@ function generateChecklist(prefs: PreferenceProfile | null): ChecklistItem[] {
 
   // Conversation
   if (prefs.conversation && prefs.conversation !== "no_preference") {
-    list.push({ id: "conversation", label: `Conversation: ${prefs.conversation.replace("_", " ")}` });
+    list.push({ id: "conversation", label: `Conversation: ${prefs.conversation.replace(/_/g, " ")}` });
   }
 
   // Cabin Temp
@@ -182,7 +182,7 @@ export default function DriverTripDetailPage() {
           <ArrowLeft size={20} />
         </button>
         <div className="font-bold uppercase tracking-wider text-neutral-400 text-sm">
-          {trip.status.replace("_", " ")}
+          {trip.status.replace(/_/g, " ")}
         </div>
       </div>
 

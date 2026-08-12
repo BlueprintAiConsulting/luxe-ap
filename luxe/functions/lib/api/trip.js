@@ -12,6 +12,16 @@ const shared_1 = require("../shared");
 const db = (0, firestore_1.getFirestore)();
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 const stripe = stripeSecretKey ? new stripe_1.default(stripeSecretKey) : null;
+function haversineDistanceMiles(lat1, lon1, lat2, lon2) {
+    const R = 3958.8; // Radius of Earth in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "Must be logged in to complete a trip.");
@@ -48,6 +58,27 @@ exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) 
             airport = aptSnap.data();
     }
     // Re-run pricing with actuals
+    let outOfAreaMiles = 0;
+    try {
+        const globalSnap = await db.collection("settings").doc("global").get();
+        const serviceCenter = globalSnap.data()?.serviceCenter;
+        const radius = ruleSet.surcharges?.outOfAreaRadiusMiles || 0;
+        if (serviceCenter?.lat && serviceCenter?.lng && radius > 0) {
+            let maxDist = 0;
+            if (reservation.dropoff?.lat && reservation.dropoff?.lng) {
+                maxDist = Math.max(maxDist, haversineDistanceMiles(serviceCenter.lat, serviceCenter.lng, reservation.dropoff.lat, reservation.dropoff.lng));
+            }
+            if (reservation.pickup?.lat && reservation.pickup?.lng) {
+                maxDist = Math.max(maxDist, haversineDistanceMiles(serviceCenter.lat, serviceCenter.lng, reservation.pickup.lat, reservation.pickup.lng));
+            }
+            if (maxDist > radius) {
+                outOfAreaMiles = maxDist - radius;
+            }
+        }
+    }
+    catch (e) {
+        console.error("Failed to calculate out of area miles:", e);
+    }
     const actualQuoteInput = {
         tripType: reservation.tripType,
         pickupAt: reservation.pickupAt,
@@ -63,7 +94,7 @@ exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) 
         parkingCents,
         extraStopCount: reservation.stops?.length || 0,
         childSeatCount: reservation.preferences?.childSeats?.reduce((sum, item) => sum + item.count, 0) || 0,
-        outOfAreaMiles: 0, // In full implementation, calculate this actual
+        outOfAreaMiles,
     };
     const finalBreakdown = (0, pricing_1.calculatePrice)(
     // @ts-ignore mapping from db format back to quote input

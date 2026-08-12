@@ -100,6 +100,12 @@ export const reservationSchema = z.object({
   cancellationReason: z.string().nullable(),
   cancellationFeeCents: z.number().int(),
 
+  // --- Ratings ---
+  riderRating: z.number().int().min(1).max(5).nullable().optional(),
+  driverRating: z.number().int().min(1).max(5).nullable().optional(),
+  riderFeedback: z.string().nullable().optional(),
+  driverFeedback: z.string().nullable().optional(),
+
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
   idempotencyKey: z.string(),

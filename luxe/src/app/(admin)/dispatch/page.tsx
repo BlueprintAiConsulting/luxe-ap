@@ -146,12 +146,12 @@ export default function DispatchPage() {
         </div>
         
         <div className="flex items-center space-x-4 bg-neutral-50 p-2 rounded-xl">
-          <button onClick={handlePrevDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium">&larr;</button>
+          <button onClick={handlePrevDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">&larr;</button>
           <div className="flex items-center space-x-2 font-bold px-4">
             <Calendar size={18} className="text-neutral-500" />
             <span>{format(selectedDate, "EEE, MMM d, yyyy")}</span>
           </div>
-          <button onClick={handleNextDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium">&rarr;</button>
+          <button onClick={handleNextDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">&rarr;</button>
         </div>
       </div>
 
@@ -172,7 +172,7 @@ export default function DispatchPage() {
               </div>
             )}
 
-            {unassigned.map(trip => (
+            {unassigned.map((trip, idx) => (
               <div
                 key={trip.reservationId}
                 draggable
@@ -182,13 +182,21 @@ export default function DispatchPage() {
                   setPreSelectedDriverId(undefined);
                   setSelectedReservation(trip as Reservation);
                 }}
-                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md ${
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setPreSelectedDriverId(undefined);
+                    setSelectedReservation(trip as Reservation);
+                  }
+                }}
+                tabIndex={0}
+                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 ${
                   draggedResId === trip.reservationId ? "opacity-50 scale-95" : "opacity-100"
                 } ${
                   trip.isUrgent 
                     ? "bg-white border-brand hover:border-brand" 
                     : "bg-white border-neutral-200 hover:border-neutral-300"
                 }`}
+                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "both" }}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="font-bold text-lg">{formatDateTime(trip.dateObj, trip.timezone || "UTC")}</div>
@@ -281,7 +289,14 @@ export default function DispatchPage() {
                               setPreSelectedDriverId(undefined);
                               setSelectedReservation(trip as Reservation);
                             }}
-                            className={`absolute top-2 bottom-2 rounded-lg border p-2 text-xs font-semibold overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer z-10 ${statusColor}`}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                setPreSelectedDriverId(undefined);
+                                setSelectedReservation(trip as Reservation);
+                              }
+                            }}
+                            tabIndex={0}
+                            className={`absolute top-2 bottom-2 rounded-lg border p-2 text-xs font-semibold overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${statusColor}`}
                             style={{ 
                               left: `${startPercent}%`, 
                               width: `${widthPercent}%`,
@@ -292,7 +307,7 @@ export default function DispatchPage() {
                             <div className="truncate">{trip.riderName}</div>
                             <div className="truncate opacity-80 text-[10px] mt-0.5">{trip.pickup.line1}</div>
                             <div className="absolute bottom-1 right-2 text-[9px] font-bold uppercase opacity-60">
-                              {trip.status.replace("_", " ")}
+                              {trip.status.replace(/_/g, " ")}
                             </div>
                           </div>
                         );

@@ -7,8 +7,9 @@ import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 import Link from "next/link";
-import { MapPin, Navigation, History, DollarSign } from "lucide-react";
+import { MapPin, Navigation, History, DollarSign, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import TripRatingModal from "@/components/TripRatingModal";
 
 export default function DriverPastTripsPage() {
   const { user, role } = useAuth();
@@ -17,6 +18,7 @@ export default function DriverPastTripsPage() {
 
   const [trips, setTrips] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ratingTrip, setRatingTrip] = useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!targetDriverId) return;
@@ -46,7 +48,7 @@ export default function DriverPastTripsPage() {
   }
 
   return (
-    <div className="p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4">
+    <div className="p-4 space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4">
       <div className="mt-4 mb-8">
         <h1 className="text-3xl font-bold text-white">History</h1>
         <p className="text-neutral-400">Completed Trips & Payouts</p>
@@ -64,7 +66,7 @@ export default function DriverPastTripsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {trips.map((trip) => {
+          {trips.map((trip, idx) => {
             const pTime = trip.pickupAt as any;
             const dateObj = typeof pTime?.toDate === "function" ? pTime.toDate() : new Date(pTime);
             
@@ -78,7 +80,8 @@ export default function DriverPastTripsPage() {
             return (
               <div 
                 key={trip.reservationId}
-                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5"
+                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
+                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "both" }}
               >
                 <div className="flex justify-between items-start mb-4 border-b border-neutral-800 pb-4">
                   <div>
@@ -112,10 +115,38 @@ export default function DriverPastTripsPage() {
                     </div>
                   )}
                 </div>
+
+                <div className="pt-4 mt-4 border-t border-neutral-800 flex justify-end">
+                  {!(trip as any).riderRating ? (
+                    <button
+                      onClick={(e) => { e.preventDefault(); setRatingTrip(trip); }}
+                      className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-lg font-bold flex items-center transition-all active:scale-95 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                    >
+                      <Star size={13} className="fill-amber-400 text-amber-500 mr-1" />
+                      Rate Rider
+                    </button>
+                  ) : (
+                    <span className="flex items-center text-amber-500 font-bold text-sm">
+                      <Star size={13} className="fill-amber-500 mr-1" />
+                      {(trip as any).riderRating}.0 Rated
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {ratingTrip && (
+        <TripRatingModal
+          reservationId={ratingTrip.reservationId}
+          targetType="rider"
+          targetId={ratingTrip.riderId}
+          targetName={ratingTrip.riderName}
+          onClose={() => setRatingTrip(null)}
+          onSuccess={() => setRatingTrip(null)}
+        />
       )}
     </div>
   );

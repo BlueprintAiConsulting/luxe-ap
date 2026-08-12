@@ -86,7 +86,7 @@ export default function RiderPreferencesView({ preferences, className = "" }: Ri
             <div className="text-[10px] text-neutral-400 font-semibold uppercase">Beverage</div>
             <div className="font-bold text-neutral-900 dark:text-neutral-100 capitalize">
               {beverage?.preference && beverage.preference !== "no_preference"
-                ? `${beverage.brand || beverage.preference.replace("_", " ")} ${beverage.temperature ? `(${beverage.temperature})` : ""}`
+                ? `${beverage.brand || beverage.preference.replace(/_/g, " ")} ${beverage.temperature ? `(${beverage.temperature})` : ""}`
                 : "Standard Water"}
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function RiderPreferencesView({ preferences, className = "" }: Ri
           <div>
             <div className="text-[10px] text-neutral-400 font-semibold uppercase">Seating & Partition</div>
             <div className="font-bold text-neutral-900 dark:text-neutral-100 capitalize">
-              {seating?.preferredSeat ? seating.preferredSeat.replace("_", " ") : "Rear Right"}
+              {seating?.preferredSeat ? seating.preferredSeat.replace(/_/g, " ") : "Rear Right"}
               {seating?.shades === "down" ? " • Shades Down" : ""}
             </div>
           </div>

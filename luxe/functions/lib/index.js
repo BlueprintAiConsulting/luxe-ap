@@ -22,6 +22,7 @@ __exportStar(require("./api/booking"), exports);
 __exportStar(require("./api/trip"), exports);
 __exportStar(require("./api/dispatch"), exports);
 __exportStar(require("./api/webhook"), exports);
+__exportStar(require("./api/ratings"), exports);
 __exportStar(require("./crons/stripe"), exports);
 __exportStar(require("./triggers/notifications"), exports);
 //# sourceMappingURL=index.js.map

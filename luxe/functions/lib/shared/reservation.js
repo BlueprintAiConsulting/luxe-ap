@@ -88,6 +88,11 @@ exports.reservationSchema = zod_1.z.object({
     cancelledBy: zod_1.z.string().nullable(),
     cancellationReason: zod_1.z.string().nullable(),
     cancellationFeeCents: zod_1.z.number().int(),
+    // --- Ratings ---
+    riderRating: zod_1.z.number().int().min(1).max(5).nullable().optional(),
+    driverRating: zod_1.z.number().int().min(1).max(5).nullable().optional(),
+    riderFeedback: zod_1.z.string().nullable().optional(),
+    driverFeedback: zod_1.z.string().nullable().optional(),
     createdAt: timestamp_1.timestampSchema,
     updatedAt: timestamp_1.timestampSchema,
     idempotencyKey: zod_1.z.string(),

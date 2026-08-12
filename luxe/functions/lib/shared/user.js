@@ -20,6 +20,8 @@ exports.userSchema = zod_1.z.object({
     preferences: preferences_1.preferenceProfileSchema.nullable(),
     notes: zod_1.z.string(),
     totalRides: zod_1.z.number().int(),
+    averageRating: zod_1.z.number().nullable().optional(),
+    totalRatings: zod_1.z.number().int().optional(),
     createdAt: timestamp_1.timestampSchema,
     updatedAt: timestamp_1.timestampSchema,
     disabled: zod_1.z.boolean(),

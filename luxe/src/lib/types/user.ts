@@ -18,6 +18,8 @@ export const userSchema = z.object({
   preferences: preferenceProfileSchema.nullable(),
   notes: z.string(),
   totalRides: z.number().int(),
+  averageRating: z.number().nullable().optional(),
+  totalRatings: z.number().int().optional(),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
   disabled: z.boolean(),

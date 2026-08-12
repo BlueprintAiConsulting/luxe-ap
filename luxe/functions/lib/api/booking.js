@@ -7,13 +7,39 @@ exports.cancelReservation = exports.createReservation = exports.createQuote = vo
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-admin/firestore");
 const stripe_1 = __importDefault(require("stripe"));
+const google_maps_services_js_1 = require("@googlemaps/google-maps-services-js");
 const pricing_1 = require("../pricing");
 const shared_1 = require("../shared");
 const db = (0, firestore_1.getFirestore)();
 // Initialize external clients if keys are present
 const stripeKey = process.env.STRIPE_SECRET_KEY || "";
 const stripe = stripeKey ? new stripe_1.default(stripeKey) : null;
-// We skip full Google Maps validation here in dev, but can easily add it
+const mapsClient = new google_maps_services_js_1.Client({});
+const MAPS_KEY = process.env.GOOGLE_MAPS_SERVER_KEY || "";
+async function resolveDistance(pickup, dropoff) {
+    if (!MAPS_KEY)
+        return null; // fall back to client value if key missing
+    try {
+        const res = await mapsClient.distancematrix({
+            params: {
+                origins: [{ lat: pickup.lat, lng: pickup.lng }],
+                destinations: [{ lat: dropoff.lat, lng: dropoff.lng }],
+                key: MAPS_KEY,
+            },
+        });
+        const el = res.data.rows?.[0]?.elements?.[0];
+        if (el?.status === "OK") {
+            return {
+                miles: el.distance.value * 0.000621371,
+                minutes: Math.round(el.duration.value / 60),
+            };
+        }
+    }
+    catch (e) {
+        console.error("Distance Matrix failed, falling back to client value:", e);
+    }
+    return null;
+}
 /**
  * createQuote resolves distance/duration via Google Maps (or falls back),
  * loads active rules, and computes the price.
@@ -31,9 +57,14 @@ exports.createQuote = (0, https_1.onCall)({ minInstances: 1 }, async (request) =
     // Resolve distance and duration if it's a point-to-point or airport trip
     let finalDistanceMiles = input.estimatedDistanceMiles;
     let finalDurationMinutes = input.estimatedDurationMinutes;
-    // We skip doing a real Maps server-side fetch here for simplicity unless we had exact coordinates.
-    // The client will use the Directions API and pass estimatedDistanceMiles.
-    // If we wanted to re-verify, we would use mapsClient.distancematrix() here.
+    const rawData = request.data;
+    if (input.tripType !== "hourly" && rawData.pickup?.lat && rawData.dropoff?.lat) {
+        const resolved = await resolveDistance(rawData.pickup, rawData.dropoff);
+        if (resolved) {
+            finalDistanceMiles = resolved.miles;
+            finalDurationMinutes = resolved.minutes;
+        }
+    }
     // Fetch active PricingRuleSet
     const globalSnap = await db.collection("settings").doc("global").get();
     if (!globalSnap.exists) {
@@ -105,7 +136,16 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
             airport = aptSnap.data();
         }
     }
-    const priceBreakdown = (0, pricing_1.calculatePrice)(resInput.quote, ruleSet, new Date(), airport);
+    let finalDistanceMiles = resInput.quote.estimatedDistanceMiles;
+    let finalDurationMinutes = resInput.quote.estimatedDurationMinutes;
+    if (resInput.quote.tripType !== "hourly" && resInput.pickup?.lat && resInput.dropoff?.lat) {
+        const resolved = await resolveDistance(resInput.pickup, resInput.dropoff);
+        if (resolved) {
+            finalDistanceMiles = resolved.miles;
+            finalDurationMinutes = resolved.minutes;
+        }
+    }
+    const priceBreakdown = (0, pricing_1.calculatePrice)({ ...resInput.quote, estimatedDistanceMiles: finalDistanceMiles, estimatedDurationMinutes: finalDurationMinutes }, ruleSet, new Date(), airport);
     // Generate confirmation code (e.g. BCC-XXXXXX)
     const codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let confStr = "";
