@@ -127,12 +127,9 @@ export default function AffiliatesPage() {
   const totalFleet = affiliates.reduce((acc, a) => acc + (a.fleetSize || 0), 0);
 
   return (
-    <div className="flex min-h-screen bg-neutral-950 text-neutral-100">
-      <AdminNav />
-      <div className="flex-1 lg:pl-64 flex flex-col">
-        <main className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5 text-accent text-sm font-semibold uppercase tracking-wider mb-1">
                 <Network size={16} /> B2B Subcontracting & Fleet Network
@@ -302,8 +299,6 @@ export default function AffiliatesPage() {
               </div>
             )}
           </div>
-        </main>
-      </div>
 
       {/* Credential Vault Modal */}
       {isVaultOpen && selectedAffiliate && (

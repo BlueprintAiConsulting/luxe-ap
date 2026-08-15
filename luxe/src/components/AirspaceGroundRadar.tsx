@@ -576,32 +576,139 @@ export default function AirspaceGroundRadar({
     return () => clearInterval(driftInterval);
   }, []);
 
-  // Mouse Drag / Pan interactions
+  // Hit testing for clicks and hover
+  const getEntityAtPoint = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const width = rect.width;
+    const height = rect.height;
+
+    // Check Flights
+    if (showFlights && (activeSector === "all" || activeSector === "air" || activeSector === "vip")) {
+      for (const flight of flights) {
+        const planePos = latLngToCanvas(flight.latitude, flight.longitude, width, height);
+        // Distance to plane blip or within label rect
+        const dist = Math.hypot(planePos.x - x, planePos.y - y);
+        const labelX = planePos.x + 12;
+        const labelY = planePos.y - 22;
+        const insideLabel = x >= labelX && x <= labelX + 135 && y >= labelY && y <= labelY + 44;
+        if (dist <= 20 || insideLabel) {
+          return { type: "flight" as const, data: flight };
+        }
+      }
+    }
+
+    // Check Vehicles
+    if (showVehicles && (activeSector === "all" || activeSector === "ground" || activeSector === "vip")) {
+      for (const veh of vehicles) {
+        const vehPos = latLngToCanvas(veh.latitude, veh.longitude, width, height);
+        const dist = Math.hypot(vehPos.x - x, vehPos.y - y);
+        const vLabelX = vehPos.x + 12;
+        const vLabelY = vehPos.y - 20;
+        const insideLabel = x >= vLabelX && x <= vLabelX + 140 && y >= vLabelY && y <= vLabelY + 40;
+        if (dist <= 20 || insideLabel) {
+          return { type: "vehicle" as const, data: veh };
+        }
+      }
+    }
+
+    return null;
+  };
+
+  // Mouse Drag / Pan / Click interactions
+  const [hasMoved, setHasMoved] = useState(false);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
+    setHasMoved(false);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPan({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
+    if (isDragging) {
+      setHasMoved(true);
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    } else {
+      // Check hover for cursor
+      const entity = getEntityAtPoint(e.clientX, e.clientY);
+      if (containerRef.current) {
+        containerRef.current.style.cursor = entity ? "pointer" : "grab";
+      }
+    }
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = (e: React.MouseEvent) => {
+    setIsDragging(false);
+    if (!hasMoved) {
+      // It's a click!
+      const entity = getEntityAtPoint(e.clientX, e.clientY);
+      if (entity) {
+        setSelectedItem(entity);
+      }
+    }
+  };
+
+  // Mobile / Tablet Touch Handlers
+  const touchStartRef = useRef<{ x: number; y: number; dist?: number }>({ x: 0, y: 0 });
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setHasMoved(false);
+      touchStartRef.current = { x: e.touches[0].clientX - pan.x, y: e.touches[0].clientY - pan.y };
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartRef.current = { x: pan.x, y: pan.y, dist };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDragging) {
+      setHasMoved(true);
+      setPan({
+        x: e.touches[0].clientX - touchStartRef.current.x,
+        y: e.touches[0].clientY - touchStartRef.current.y,
+      });
+    } else if (e.touches.length === 2 && touchStartRef.current.dist) {
+      const newDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = newDist / touchStartRef.current.dist;
+      setZoom((prev) => Math.min(2.5, Math.max(0.6, prev * (factor > 1 ? 1.02 : 0.98))));
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsDragging(false);
+    if (!hasMoved && e.changedTouches.length === 1) {
+      const entity = getEntityAtPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      if (entity) setSelectedItem(entity);
+    }
+  };
 
   return (
     <div className="relative w-full h-[680px] lg:h-[760px] bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col font-sans select-none">
       {/* Futuristic Radar Canvas */}
       <div 
         ref={containerRef} 
-        className="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing"
+        className="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing touch-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={() => setIsDragging(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>

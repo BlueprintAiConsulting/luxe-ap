@@ -93,7 +93,7 @@ export default function DriverTodayPage() {
 
             return (
               <Link 
-                href={`/driver/trip/${trip.reservationId}`} 
+                href={`/trip/${trip.reservationId}`} 
                 key={trip.reservationId}
                 className={`block rounded-2xl p-6 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:focus-visible:ring-white motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 ${
                   isNext 

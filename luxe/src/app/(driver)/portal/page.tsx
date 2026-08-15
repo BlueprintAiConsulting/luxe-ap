@@ -127,14 +127,14 @@ export default function DriverPortalPage() {
       <div className="pt-6">
         <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-4">Quick Actions</h3>
         <div className="space-y-3">
-          <Link href={`/driver/today${targetDriverId !== user?.uid ? `?d=${targetDriverId}` : ''}`} className="flex items-center justify-between p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
+          <Link href={`/today${targetDriverId !== user?.uid ? `?d=${targetDriverId}` : ''}`} className="flex items-center justify-between p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
             <div className="flex items-center">
               <Clock className="text-neutral-400 mr-3" size={20} />
               <span className="font-bold text-white">Today's Schedule</span>
             </div>
             <div className="text-neutral-500">&rarr;</div>
           </Link>
-          <Link href={`/driver/past${targetDriverId !== user?.uid ? `?d=${targetDriverId}` : ''}`} className="flex items-center justify-between p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
+          <Link href={`/past${targetDriverId !== user?.uid ? `?d=${targetDriverId}` : ''}`} className="flex items-center justify-between p-4 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
             <div className="flex items-center">
               <DollarSign className="text-neutral-400 mr-3" size={20} />
               <span className="font-bold text-white">Trip History & Payouts</span>

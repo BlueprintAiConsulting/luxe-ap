@@ -217,17 +217,65 @@ function LoginContent() {
               </button>
 
               <button
-                onClick={() => setPortal("admin")}
+                onClick={() => {
+                  setPortal("admin");
+                  setEmail("admin@luxe.com");
+                  setPassword("LuxeAdmin2026!");
+                }}
                 className="w-full flex items-center p-4 border border-neutral-200 rounded-xl hover:border-brand hover:shadow-sm transition-all group text-left"
               >
                 <div className="w-12 h-12 rounded-full bg-neutral-50 group-hover:bg-brand/5 flex items-center justify-center text-neutral-600 group-hover:text-brand transition-colors">
                   <Shield size={24} />
                 </div>
                 <div className="ml-4">
-                  <div className="font-bold text-brand">Staff & Admin</div>
-                  <div className="text-sm text-neutral-500">Dispatch & operations</div>
+                  <div className="font-bold text-brand">Staff & Operations Admin</div>
+                  <div className="text-sm text-neutral-500">Live Radar, Dispatch, & Affiliates</div>
                 </div>
               </button>
+
+              <div className="pt-4 border-t border-neutral-100">
+                <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-center mb-3">
+                  Quick Demo Access (1-Tap Fill)
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPortal("rider");
+                      setEmail("rider@luxe.com");
+                      setPassword("LuxeRider2026!");
+                    }}
+                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                  >
+                    <div className="text-xs font-bold text-brand group-hover:text-accent">VIP Rider</div>
+                    <div className="text-[10px] text-neutral-400">rider@luxe.com</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPortal("driver");
+                      setEmail("driver@luxe.com");
+                      setPassword("LuxeDriver2026!");
+                    }}
+                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                  >
+                    <div className="text-xs font-bold text-brand group-hover:text-accent">Chauffeur</div>
+                    <div className="text-[10px] text-neutral-400">driver@luxe.com</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPortal("admin");
+                      setEmail("admin@luxe.com");
+                      setPassword("LuxeAdmin2026!");
+                    }}
+                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                  >
+                    <div className="text-xs font-bold text-brand group-hover:text-accent">Admin</div>
+                    <div className="text-[10px] text-neutral-400">admin@luxe.com</div>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

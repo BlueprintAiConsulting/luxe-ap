@@ -164,7 +164,7 @@ export default function DriverTripDetailPage() {
         tollsCents: tolls * 100, 
         parkingCents: parking * 100 
       });
-      router.push("/driver/today");
+      router.push("/today");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e.message || "Failed to complete trip");
@@ -181,11 +181,11 @@ export default function DriverTripDetailPage() {
   const mapLink = (addr: any) => `https://maps.apple.com/?daddr=${encodeURIComponent(addr.line1 + (addr.city ? ", " + addr.city : ""))}`;
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 space-y-6 pb-32 animate-in fade-in slide-in-from-right-4">
+    <div className="min-h-screen bg-black text-white p-4 space-y-6 pb-36 animate-in fade-in slide-in-from-right-4">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <button onClick={() => router.push("/driver/today")} className="p-3 bg-neutral-900 rounded-full">
+        <button onClick={() => router.push("/today")} className="p-3 bg-neutral-900 rounded-full hover:bg-neutral-800 transition-colors">
           <ArrowLeft size={20} />
         </button>
         <div className="font-bold uppercase tracking-wider text-neutral-400 text-sm">
