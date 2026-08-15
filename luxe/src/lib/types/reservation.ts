@@ -31,6 +31,25 @@ export const driverLocationStubSchema = z.object({
 
 export type DriverLocationStub = z.infer<typeof driverLocationStubSchema>;
 
+export const flightStatusSchema = z.object({
+  flightNumber: z.string(),
+  airline: z.string().nullable().optional(),
+  airlineCode: z.string().nullable().optional(),
+  origin: z.string().nullable().optional(),
+  originCity: z.string().nullable().optional(),
+  destination: z.string().nullable().optional(),
+  destinationCity: z.string().nullable().optional(),
+  scheduledArrival: z.any().nullable().optional(),
+  estimatedArrival: z.any().nullable().optional(),
+  delayMinutes: z.number().int().default(0),
+  status: z.enum(["scheduled", "active", "landed", "delayed", "cancelled", "diverted"]).default("scheduled"),
+  terminal: z.string().nullable().optional(),
+  gate: z.string().nullable().optional(),
+  lastCheckedAt: z.any().nullable().optional(),
+});
+
+export type FlightStatus = z.infer<typeof flightStatusSchema>;
+
 export const reservationSchema = z.object({
   reservationId: z.string(),
   confirmationCode: z.string(),
@@ -56,6 +75,7 @@ export const reservationSchema = z.object({
   luggage: z.number().int(),
   flightNumber: z.string().nullable(),
   airlineCode: z.string().nullable(),
+  flightStatus: flightStatusSchema.nullable().optional(),
 
   // --- Assignment (snapshotted) ---
   classId: z.string(),
@@ -82,7 +102,11 @@ export const reservationSchema = z.object({
   // --- Actuals, filled during trip ---
   actualStartAt: timestampSchema.nullable(),
   actualEndAt: timestampSchema.nullable(),
+  arrivedAtTimestamp: timestampSchema.nullable().optional(),
+  onboardAtTimestamp: timestampSchema.nullable().optional(),
   waitMinutes: z.number(),
+  freeWaitMinutesAllowed: z.number().optional(),
+  billableWaitMinutes: z.number().optional(),
   tollsCents: z.number().int(),
   parkingCents: z.number().int(),
   driverNotes: z.string(),

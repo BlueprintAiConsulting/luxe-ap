@@ -36,9 +36,28 @@ export default function ReservationDrawer({
   const [overrideStatus, setOverrideStatus] = useState(reservation.status);
   const [overrideReason, setOverrideReason] = useState("");
 
+  const [flightStatus, setFlightStatus] = useState<any>(reservation.flightStatus || null);
+  const [loadingFlight, setLoadingFlight] = useState(false);
+  const [loadingShift, setLoadingShift] = useState(false);
+  const [shiftSuccess, setShiftSuccess] = useState<string | null>(null);
+
   const functions = getFunctions(app);
   const assignDriverAndVehicle = httpsCallable(functions, "assignDriverAndVehicle");
   const adminOverrideStatus = httpsCallable(functions, "adminOverrideStatus");
+  const checkFlightStatus = httpsCallable(functions, "checkFlightStatus");
+  const autoShiftPickupForFlight = httpsCallable(functions, "autoShiftPickupForFlight");
+
+  useEffect(() => {
+    if (reservation.flightNumber && !flightStatus) {
+      setLoadingFlight(true);
+      checkFlightStatus({ flightNumber: reservation.flightNumber })
+        .then((res: any) => {
+          setFlightStatus(res.data);
+        })
+        .catch((err) => console.warn("Failed to fetch flight status:", err))
+        .finally(() => setLoadingFlight(false));
+    }
+  }, [reservation.flightNumber]);
 
   useEffect(() => {
     // Reset state on res change
@@ -156,40 +175,112 @@ export default function ReservationDrawer({
 
             {/* Flight Tracker (Airport Pickup) */}
             {reservation.flightNumber && (
-              <div className="mt-4 p-4 bg-slate-900 text-white rounded-2xl border border-slate-800 space-y-3">
+              <div className="mt-4 p-5 bg-slate-900 text-white rounded-3xl border border-slate-800 space-y-4 shadow-md">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-2">
-                    <Plane size={18} className="text-accent" />
-                    <span className="font-bold text-sm">Flight {reservation.flightNumber}</span>
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+                      <Plane size={16} className="text-accent" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-white">Flight {reservation.flightNumber}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">{flightStatus?.airline || "Commercial Airline"}</div>
+                    </div>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    DELAYED (+35m)
-                  </span>
+                  {flightStatus ? (
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+                      flightStatus.delayMinutes > 0
+                        ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                        : flightStatus.status === "landed"
+                        ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                        : flightStatus.status === "active"
+                        ? "bg-sky-500/20 text-sky-300 border-sky-500/30"
+                        : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                    }`}>
+                      {flightStatus.delayMinutes > 0 ? `DELAYED (+${flightStatus.delayMinutes}m)` : flightStatus.status}
+                    </span>
+                  ) : loadingFlight ? (
+                    <span className="text-xs text-slate-400 animate-pulse">Checking flight...</span>
+                  ) : null}
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
-                  <div><span className="text-slate-500">Route:</span> JFK &rarr; LAX</div>
-                  <div><span className="text-slate-500">Terminal/Gate:</span> T7 / Gate B14</div>
-                  <div><span className="text-slate-500">Scheduled:</span> 6:10 PM</div>
-                  <div><span className="text-slate-500">Est Arrival:</span> 6:45 PM</div>
+
+                {flightStatus && (
+                  <div className="grid grid-cols-2 gap-2.5 text-xs bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+                    <div>
+                      <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Route</span>
+                      <span className="font-semibold text-slate-200">{flightStatus.origin} ({flightStatus.originCity}) &rarr; {flightStatus.destination}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Terminal / Gate</span>
+                      <span className="font-semibold text-slate-200">{flightStatus.terminal || "TBD"} / {flightStatus.gate || "TBD"}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Scheduled Touchdown</span>
+                      <span className="font-semibold text-slate-200">
+                        {flightStatus.scheduledArrival ? new Date(flightStatus.scheduledArrival).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : "On schedule"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px] font-bold uppercase tracking-wider">Est Touchdown</span>
+                      <span className={`font-semibold ${flightStatus.delayMinutes > 0 ? "text-amber-400 font-bold" : "text-emerald-400"}`}>
+                        {flightStatus.estimatedArrival ? new Date(flightStatus.estimatedArrival).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : "On schedule"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {shiftSuccess && (
+                  <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 font-medium text-center">
+                    ✓ {shiftSuccess}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  {flightStatus && flightStatus.delayMinutes > 0 && (
+                    <button
+                      type="button"
+                      disabled={loadingShift}
+                      onClick={async () => {
+                        setLoadingShift(true);
+                        setShiftSuccess(null);
+                        try {
+                          await autoShiftPickupForFlight({
+                            reservationId: reservation.reservationId,
+                            shiftMinutes: flightStatus.delayMinutes,
+                            reason: `Flight delay auto-adjusted (+${flightStatus.delayMinutes}m shift)`
+                          });
+                          setShiftSuccess(`Pickup adjusted by +${flightStatus.delayMinutes} mins!`);
+                        } catch (e: any) {
+                          alert("Error shifting pickup time: " + e.message);
+                        } finally {
+                          setLoadingShift(false);
+                        }
+                      }}
+                      className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      <Zap size={14} /> {loadingShift ? "Shifting..." : `Auto-Shift Pickup (+${flightStatus.delayMinutes}m)`}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={loadingFlight}
+                    onClick={async () => {
+                      setLoadingFlight(true);
+                      setShiftSuccess(null);
+                      try {
+                        const res: any = await checkFlightStatus({ flightNumber: reservation.flightNumber! });
+                        setFlightStatus(res.data);
+                      } catch (e: any) {
+                        alert("Error refreshing flight: " + e.message);
+                      } finally {
+                        setLoadingFlight(false);
+                      }
+                    }}
+                    className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-all"
+                  >
+                    {loadingFlight ? "Syncing..." : "Refresh"}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      const newTime = new Date(pTime.getTime() + 35 * 60 * 1000);
-                      const { doc, updateDoc } = await import("firebase/firestore");
-                      await updateDoc(doc(db, "reservations", reservation.reservationId), {
-                        pickupAt: newTime,
-                      });
-                      alert("Pickup time auto-adjusted by +35 mins for flight delay!");
-                    } catch (e: any) {
-                      alert("Error updating pickup time: " + e.message);
-                    }
-                  }}
-                  className="w-full py-2.5 bg-accent/20 hover:bg-accent/30 text-accent border border-accent/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Zap size={14} /> Auto-Adjust Pickup Time (+35m Shift)
-                </button>
               </div>
             )}
 

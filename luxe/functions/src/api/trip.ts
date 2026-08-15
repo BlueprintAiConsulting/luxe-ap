@@ -208,33 +208,43 @@ export const completeTrip = onCall({ minInstances: 1 }, async (request) => {
     }
   }
 
-  const batch = db.batch();
+    const freeWaitMinutesAllowed =
+      reservation.tripType === "airport_arrival" || reservation.tripType === "airport_departure"
+        ? ruleSet.waitTime.freeMinutesAirport
+        : ruleSet.waitTime.freeMinutesStandard;
 
-  batch.update(resRef, {
-    status: "completed",
-    actualEndAt: FieldValue.serverTimestamp() as any,
-    pricing: finalBreakdown,
-    waitMinutes,
-    tollsCents,
-    parkingCents,
-    updatedAt: FieldValue.serverTimestamp() as any,
-  });
+    const billableWaitMinutes = Math.max(0, waitMinutes - freeWaitMinutesAllowed);
 
-  const eventRef = resRef.collection("statusEvents").doc();
-  const statusEvent: ReservationStatusEvent = {
-    from: reservation.status,
-    to: "completed",
-    at: FieldValue.serverTimestamp() as any,
-    actorId: request.auth.uid,
-    actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
-    note: "Trip completed",
-    location: null,
-  };
-  batch.set(eventRef, statusEvent);
+    const batch = db.batch();
 
-  await batch.commit();
-  return { success: true, finalAmountCents: finalAmount };
-});
+    batch.update(resRef, {
+      status: "completed",
+      actualEndAt: FieldValue.serverTimestamp() as any,
+      pricing: finalBreakdown,
+      waitMinutes,
+      freeWaitMinutesAllowed,
+      billableWaitMinutes,
+      tollsCents,
+      parkingCents,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    });
+
+    const eventRef = resRef.collection("statusEvents").doc();
+    const statusEvent: ReservationStatusEvent = {
+      from: reservation.status,
+      to: "completed",
+      at: FieldValue.serverTimestamp() as any,
+      actorId: request.auth.uid,
+      actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
+      note: `Trip completed. Wait: ${waitMinutes}m (${billableWaitMinutes}m billable).`,
+      location: null,
+    };
+    batch.set(eventRef, statusEvent);
+
+    await batch.commit();
+    return { success: true, finalAmountCents: finalAmount, billableWaitMinutes };
+  }
+);
 
 export const updateTripStatus = onCall({ minInstances: 1 }, async (request) => {
   if (!request.auth) throw new HttpsError("unauthenticated", "Must be logged in.");
@@ -264,6 +274,22 @@ export const updateTripStatus = onCall({ minInstances: 1 }, async (request) => {
 
     if (status === "en_route" && !reservation.actualStartAt) {
       updates.actualStartAt = FieldValue.serverTimestamp() as any;
+    }
+
+    if (status === "arrived" && !reservation.arrivedAtTimestamp) {
+      updates.arrivedAtTimestamp = FieldValue.serverTimestamp() as any;
+    }
+
+    if (status === "onboard" && !reservation.onboardAtTimestamp) {
+      updates.onboardAtTimestamp = FieldValue.serverTimestamp() as any;
+      // If arrivedAtTimestamp exists, auto-calculate elapsed wait minutes
+      if (reservation.arrivedAtTimestamp) {
+        const arrTime = typeof (reservation.arrivedAtTimestamp as any)?.toDate === "function"
+          ? (reservation.arrivedAtTimestamp as any).toDate()
+          : new Date(reservation.arrivedAtTimestamp as any);
+        const elapsedMinutes = Math.max(0, Math.floor((Date.now() - arrTime.getTime()) / 60000));
+        updates.waitMinutes = elapsedMinutes;
+      }
     }
 
     t.update(resRef, updates);

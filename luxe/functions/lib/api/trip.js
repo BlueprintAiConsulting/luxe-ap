@@ -196,12 +196,18 @@ exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) 
             console.error("Stripe corporate invoicing error:", e.message);
         }
     }
+    const freeWaitMinutesAllowed = reservation.tripType === "airport_arrival" || reservation.tripType === "airport_departure"
+        ? ruleSet.waitTime.freeMinutesAirport
+        : ruleSet.waitTime.freeMinutesStandard;
+    const billableWaitMinutes = Math.max(0, waitMinutes - freeWaitMinutesAllowed);
     const batch = db.batch();
     batch.update(resRef, {
         status: "completed",
         actualEndAt: firestore_1.FieldValue.serverTimestamp(),
         pricing: finalBreakdown,
         waitMinutes,
+        freeWaitMinutesAllowed,
+        billableWaitMinutes,
         tollsCents,
         parkingCents,
         updatedAt: firestore_1.FieldValue.serverTimestamp(),
@@ -213,12 +219,12 @@ exports.completeTrip = (0, https_1.onCall)({ minInstances: 1 }, async (request) 
         at: firestore_1.FieldValue.serverTimestamp(),
         actorId: request.auth.uid,
         actorRole: request.auth.token.role === "admin" ? "admin" : "driver",
-        note: "Trip completed",
+        note: `Trip completed. Wait: ${waitMinutes}m (${billableWaitMinutes}m billable).`,
         location: null,
     };
     batch.set(eventRef, statusEvent);
     await batch.commit();
-    return { success: true, finalAmountCents: finalAmount };
+    return { success: true, finalAmountCents: finalAmount, billableWaitMinutes };
 });
 exports.updateTripStatus = (0, https_1.onCall)({ minInstances: 1 }, async (request) => {
     if (!request.auth)
@@ -244,6 +250,20 @@ exports.updateTripStatus = (0, https_1.onCall)({ minInstances: 1 }, async (reque
         };
         if (status === "en_route" && !reservation.actualStartAt) {
             updates.actualStartAt = firestore_1.FieldValue.serverTimestamp();
+        }
+        if (status === "arrived" && !reservation.arrivedAtTimestamp) {
+            updates.arrivedAtTimestamp = firestore_1.FieldValue.serverTimestamp();
+        }
+        if (status === "onboard" && !reservation.onboardAtTimestamp) {
+            updates.onboardAtTimestamp = firestore_1.FieldValue.serverTimestamp();
+            // If arrivedAtTimestamp exists, auto-calculate elapsed wait minutes
+            if (reservation.arrivedAtTimestamp) {
+                const arrTime = typeof reservation.arrivedAtTimestamp?.toDate === "function"
+                    ? reservation.arrivedAtTimestamp.toDate()
+                    : new Date(reservation.arrivedAtTimestamp);
+                const elapsedMinutes = Math.max(0, Math.floor((Date.now() - arrTime.getTime()) / 60000));
+                updates.waitMinutes = elapsedMinutes;
+            }
         }
         t.update(resRef, updates);
         const eventRef = resRef.collection("statusEvents").doc();

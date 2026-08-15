@@ -23,7 +23,9 @@ __exportStar(require("./api/trip"), exports);
 __exportStar(require("./api/dispatch"), exports);
 __exportStar(require("./api/webhook"), exports);
 __exportStar(require("./api/ratings"), exports);
+__exportStar(require("./api/flight"), exports);
 __exportStar(require("./crons/stripe"), exports);
+__exportStar(require("./crons/flightSync"), exports);
 __exportStar(require("./triggers/notifications"), exports);
 __exportStar(require("./triggers/mail"), exports);
 //# sourceMappingURL=index.js.map

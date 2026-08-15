@@ -86,6 +86,10 @@ export default function DriverTripDetailPage() {
   const updateTripChecklist = httpsCallable(functions, "updateTripChecklist");
   const completeTrip = httpsCallable(functions, "completeTrip");
 
+  const isAirport = trip?.tripType === "airport_arrival" || trip?.tripType === "airport_departure";
+  const graceMinutes = isAirport ? 45 : 15;
+  const billableWaitMinutes = Math.max(0, waitMinutes - graceMinutes);
+
   useEffect(() => {
     if (!user || !tripId) return;
 
@@ -95,12 +99,15 @@ export default function DriverTripDetailPage() {
         setTrip(data);
         
         // Initialize timer if arrived
-        if (data.status === "arrived" && data.updatedAt) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const updatedAt = data.updatedAt as any;
-          const arrivedTime = typeof updatedAt?.toDate === "function" ? updatedAt.toDate() : new Date(updatedAt);
-          const diffMs = Date.now() - arrivedTime.getTime();
-          setWaitMinutes(Math.max(0, Math.floor(diffMs / 60000)));
+        if (data.status === "arrived") {
+          const arrTimestamp = data.arrivedAtTimestamp || data.updatedAt;
+          if (arrTimestamp) {
+            const arrTime = typeof (arrTimestamp as any)?.toDate === "function" 
+              ? (arrTimestamp as any).toDate() 
+              : new Date(arrTimestamp as any);
+            const diffMs = Date.now() - arrTime.getTime();
+            setWaitMinutes(Math.max(0, Math.floor(diffMs / 60000)));
+          }
         }
       } else {
         setTrip(null);
@@ -247,6 +254,55 @@ export default function DriverTripDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Live Wait-Time Grace HUD */}
+      {trip.status === "arrived" && (
+        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 space-y-4 shadow-lg animate-in fade-in">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-neutral-800 border border-neutral-700 flex items-center justify-center">
+                <Clock className="text-accent" size={20} />
+              </div>
+              <div>
+                <div className="text-xs text-neutral-400 font-bold uppercase tracking-wider">Arrival & Wait Timer</div>
+                <div className="text-xl font-bold text-white">{waitMinutes} min elapsed</div>
+              </div>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+              waitMinutes > graceMinutes 
+                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" 
+                : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+            }`}>
+              {waitMinutes > graceMinutes ? "BILLABLE WAIT TIME" : "COMPLIMENTARY GRACE"}
+            </span>
+          </div>
+
+          <div className="bg-neutral-950 p-4 rounded-2xl border border-neutral-800 space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-neutral-400">Policy Allowance ({isAirport ? "Airport Arrival" : "Standard"})</span>
+              <span className="text-white">{graceMinutes} min free</span>
+            </div>
+            <div className="w-full bg-neutral-800 h-2.5 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${waitMinutes > graceMinutes ? "bg-amber-500" : "bg-emerald-500"}`}
+                style={{ width: `${Math.min(100, (waitMinutes / graceMinutes) * 100)}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs pt-1">
+              <span className="text-neutral-500">
+                {waitMinutes < graceMinutes 
+                  ? `${graceMinutes - waitMinutes} min grace remaining` 
+                  : `${billableWaitMinutes} min billable past grace`}
+              </span>
+              {waitMinutes > graceMinutes && (
+                <span className="text-amber-400 font-bold">
+                  +${((billableWaitMinutes * 175) / 100).toFixed(2)} auto-capturing
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Prep Checklist */}
       {checklistItems.length > 0 && trip.status !== "completed" && (

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reservationStatusEventSchema = exports.createReservationInputSchema = exports.reservationSchema = exports.driverLocationStubSchema = exports.reservationStatusSchema = void 0;
+exports.reservationStatusEventSchema = exports.createReservationInputSchema = exports.reservationSchema = exports.flightStatusSchema = exports.driverLocationStubSchema = exports.reservationStatusSchema = void 0;
 exports.canTransition = canTransition;
 const zod_1 = require("zod");
 const timestamp_1 = require("./timestamp");
@@ -28,6 +28,22 @@ exports.driverLocationStubSchema = zod_1.z.object({
     recordedAt: timestamp_1.timestampSchema,
     expiresAt: timestamp_1.timestampSchema,
 });
+exports.flightStatusSchema = zod_1.z.object({
+    flightNumber: zod_1.z.string(),
+    airline: zod_1.z.string().nullable().optional(),
+    airlineCode: zod_1.z.string().nullable().optional(),
+    origin: zod_1.z.string().nullable().optional(),
+    originCity: zod_1.z.string().nullable().optional(),
+    destination: zod_1.z.string().nullable().optional(),
+    destinationCity: zod_1.z.string().nullable().optional(),
+    scheduledArrival: zod_1.z.any().nullable().optional(),
+    estimatedArrival: zod_1.z.any().nullable().optional(),
+    delayMinutes: zod_1.z.number().int().default(0),
+    status: zod_1.z.enum(["scheduled", "active", "landed", "delayed", "cancelled", "diverted"]).default("scheduled"),
+    terminal: zod_1.z.string().nullable().optional(),
+    gate: zod_1.z.string().nullable().optional(),
+    lastCheckedAt: zod_1.z.any().nullable().optional(),
+});
 exports.reservationSchema = zod_1.z.object({
     reservationId: zod_1.z.string(),
     confirmationCode: zod_1.z.string(),
@@ -51,6 +67,7 @@ exports.reservationSchema = zod_1.z.object({
     luggage: zod_1.z.number().int(),
     flightNumber: zod_1.z.string().nullable(),
     airlineCode: zod_1.z.string().nullable(),
+    flightStatus: exports.flightStatusSchema.nullable().optional(),
     // --- Assignment (snapshotted) ---
     classId: zod_1.z.string(),
     className: zod_1.z.string(),
@@ -73,7 +90,11 @@ exports.reservationSchema = zod_1.z.object({
     // --- Actuals, filled during trip ---
     actualStartAt: timestamp_1.timestampSchema.nullable(),
     actualEndAt: timestamp_1.timestampSchema.nullable(),
+    arrivedAtTimestamp: timestamp_1.timestampSchema.nullable().optional(),
+    onboardAtTimestamp: timestamp_1.timestampSchema.nullable().optional(),
     waitMinutes: zod_1.z.number(),
+    freeWaitMinutesAllowed: zod_1.z.number().optional(),
+    billableWaitMinutes: zod_1.z.number().optional(),
     tollsCents: zod_1.z.number().int(),
     parkingCents: zod_1.z.number().int(),
     driverNotes: zod_1.z.string(),
