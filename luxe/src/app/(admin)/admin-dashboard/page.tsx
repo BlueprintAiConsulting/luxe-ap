@@ -7,6 +7,7 @@ import { format, startOfToday, endOfToday } from "date-fns";
 import { Calendar, UserCheck, Car, Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Reservation, Driver } from "@/lib/types";
+import AirspaceGroundRadar from "@/components/AirspaceGroundRadar";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -118,6 +119,20 @@ export default function AdminDashboardPage() {
           </div>
           <Activity size={48} strokeWidth={1} className="text-neutral-200 group-hover:text-brand/20 transition-colors" />
         </div>
+      </div>
+
+      {/* Futuristic Live Airspace & Ground Radar */}
+      <div className="mb-12 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-brand tracking-tight">Live Airspace & Ground Fleet Radar</h2>
+            <p className="text-sm text-neutral-500">Real-time commercial/private jet inbounds and synchronized chauffeur curbside tracking.</p>
+          </div>
+          <Link href="/radar" className="text-sm font-semibold text-accent hover:underline flex items-center gap-1">
+            Full Screen Radar &rarr;
+          </Link>
+        </div>
+        <AirspaceGroundRadar />
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm ring-1 ring-neutral-900/5 overflow-hidden">
