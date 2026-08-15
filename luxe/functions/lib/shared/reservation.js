@@ -37,6 +37,7 @@ exports.reservationSchema = zod_1.z.object({
     riderName: zod_1.z.string(),
     riderPhone: zod_1.z.string(),
     riderEmail: zod_1.z.string().nullable(),
+    riderPhotoUrl: zod_1.z.string().nullable().optional(),
     bookedByAdmin: zod_1.z.boolean(),
     // --- Trip ---
     pickupAt: timestamp_1.timestampSchema,

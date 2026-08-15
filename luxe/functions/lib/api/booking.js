@@ -206,6 +206,7 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
                     customer: customerId,
                     capture_method: "manual",
                     setup_future_usage: "off_session",
+                    receipt_email: riderData?.email || undefined,
                     metadata: {
                         riderId: request.auth.uid,
                         idempotencyKey: resInput.idempotencyKey,
@@ -233,6 +234,7 @@ exports.createReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         riderName: `${riderData?.firstName} ${riderData?.lastName}`,
         riderPhone: riderData?.phone || "",
         riderEmail: riderData?.email || null,
+        riderPhotoUrl: riderData?.photoUrl || null,
         bookedByAdmin: false,
         status: "confirmed",
         pricingRuleSetId: activeRuleSetId,

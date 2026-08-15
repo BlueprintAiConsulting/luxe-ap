@@ -247,6 +247,7 @@ export const createAdminReservation = onCall(async (request) => {
     riderName: `${riderData?.firstName} ${riderData?.lastName}`,
     riderPhone: riderData?.phone || "",
     riderEmail: riderData?.email || null,
+    riderPhotoUrl: riderData?.photoUrl || null,
     bookedByAdmin: true,
     status: "confirmed",
     pricingRuleSetId: activeRuleSetId,

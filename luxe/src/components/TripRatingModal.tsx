@@ -97,7 +97,7 @@ export default function TripRatingModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95">
+      <div className="relative w-full max-w-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 ease-out">
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-900 dark:hover:text-white rounded-full">
           <X size={20} />
         </button>

@@ -150,6 +150,7 @@ export const completeTrip = onCall({ minInstances: 1 }, async (request) => {
               payment_method: intent.payment_method as string,
               off_session: true,
               confirm: true,
+              receipt_email: intent.receipt_email || undefined,
               metadata: {
                 reservationCode: reservation.confirmationCode,
                 note: "Secondary capture for trip actuals (tolls/wait/tip)"
@@ -163,6 +164,47 @@ export const completeTrip = onCall({ minInstances: 1 }, async (request) => {
     } catch (e: any) {
       console.error("Stripe capture error:", e.message);
       // We log but still try to update the reservation in DB to reflect completion.
+    }
+  } else if (stripe && reservation.billedToCorporate && reservation.corporateAccountId) {
+    try {
+      const corpSnap = await db.collection("corporate_accounts").doc(reservation.corporateAccountId).get();
+      if (corpSnap.exists) {
+        const corpData = corpSnap.data();
+        let customerId = corpData?.stripeCustomerId;
+        if (!customerId) {
+          const customer = await stripe.customers.create({
+            email: corpData?.email || undefined,
+            name: corpData?.companyName || "Corporate Account",
+            metadata: { corporateAccountId: reservation.corporateAccountId }
+          });
+          customerId = customer.id;
+          await corpSnap.ref.update({ stripeCustomerId: customerId });
+        }
+        
+        // Create an Invoice Item
+        await stripe.invoiceItems.create({
+          customer: customerId,
+          amount: finalAmount,
+          currency: "usd",
+          description: `Trip ${reservation.confirmationCode} (${reservation.pickup.line1} to ${reservation.dropoff?.line1 || 'Directed'})`,
+        });
+
+        // Create the Invoice
+        const invoice = await stripe.invoices.create({
+          customer: customerId,
+          auto_advance: true,
+          metadata: {
+            reservationCode: reservation.confirmationCode,
+          }
+        });
+
+        // Finalize the Invoice
+        if (invoice.id) {
+          await stripe.invoices.finalizeInvoice(invoice.id);
+        }
+      }
+    } catch (e: any) {
+      console.error("Stripe corporate invoicing error:", e.message);
     }
   }
 

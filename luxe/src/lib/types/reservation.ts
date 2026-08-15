@@ -41,6 +41,7 @@ export const reservationSchema = z.object({
   riderName: z.string(),
   riderPhone: z.string(),
   riderEmail: z.string().nullable(),
+  riderPhotoUrl: z.string().nullable().optional(),
   bookedByAdmin: z.boolean(),
 
   // --- Trip ---

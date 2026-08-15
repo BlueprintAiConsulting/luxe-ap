@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { app, db, auth } from "@/lib/firebase/client";
 import { doc, getDoc, getDocs, collection, query, where, Timestamp } from "firebase/firestore";
-import { Loader2, ArrowLeft, ArrowRight, User, MapPin, LogOut } from "lucide-react";
+import { Loader2, ArrowLeft, ArrowRight, User, MapPin, LogOut, Car, Bus, Shield, Star, Zap } from "lucide-react";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { QuoteInput, PriceBreakdown, CreateReservationInput, Address, defaultPreferences } from "@/lib/types";
@@ -97,7 +97,7 @@ export default function BookPage() {
   const [flightNumber, setFlightNumber] = useState("");
 
   // Vehicle
-  const [availableClasses, setAvailableClasses] = useState<{id: string, name: string, capacity: number, image: string}[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<{id: string, name: string, capacity: number}[]>([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [quote, setQuote] = useState<PriceBreakdown | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -167,10 +167,9 @@ export default function BookPage() {
             if (data.classRates) {
               const classes = Object.entries(data.classRates).map(([id, rate]: [string, any]) => {
                 let capacity = 3;
-                let image = "🚗";
-                if (id === "suv") { capacity = 6; image = "🚙"; }
-                if (id === "sprinter") { capacity = 12; image = "🚐"; }
-                return { id, name: rate.name || id, capacity, image };
+                if (id === "suv") { capacity = 6; }
+                if (id === "sprinter") { capacity = 12; }
+                return { id, name: rate.name || id, capacity };
               });
               setAvailableClasses(classes);
               setSelectedClassId(classes[0]?.id || "");
@@ -442,11 +441,19 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
       <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-neutral-200 flex flex-col min-h-[700px]">
         {/* Header */}
         <div className="px-8 py-6 border-b flex items-center justify-between bg-white z-10">
-          <button onClick={handleBack} disabled={currentStep === 0} className="p-2 -ml-2 disabled:opacity-30 rounded-full hover:bg-neutral-100 transition-colors">
+          <button 
+            type="button"
+            aria-label="Go to previous step"
+            onClick={handleBack} 
+            disabled={currentStep === 0} 
+            className="p-2 -ml-2 disabled:opacity-30 rounded-full hover:bg-neutral-100 transition-colors"
+          >
             <ArrowLeft size={24} />
           </button>
           <span className="font-bold text-neutral-800 uppercase tracking-widest text-sm">Step {currentStep + 1} of {steps.length}</span>
           <button 
+            type="button"
+            aria-label="Sign out"
             onClick={() => {
               import("firebase/auth").then(({ signOut }) => signOut(auth));
             }} 
@@ -568,18 +575,46 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
                 <div className="flex justify-between items-center p-6 border-2 border-neutral-200 rounded-2xl shadow-sm bg-white">
                   <span className="font-bold text-xl text-neutral-800">Passengers</span>
                   <div className="flex items-center space-x-6 bg-neutral-50 rounded-full p-2 border border-neutral-200">
-                    <button onClick={() => setPassengers(Math.max(1, passengers - 1))} className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors">-</button>
+                    <button 
+                      type="button"
+                      aria-label="Decrease passenger count"
+                      onClick={() => setPassengers(Math.max(1, passengers - 1))} 
+                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
+                    >
+                      -
+                    </button>
                     <span className="w-8 text-center font-bold text-2xl text-brand">{passengers}</span>
-                    <button onClick={() => setPassengers(passengers + 1)} className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors">+</button>
+                    <button 
+                      type="button"
+                      aria-label="Increase passenger count"
+                      onClick={() => setPassengers(passengers + 1)} 
+                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center p-6 border-2 border-neutral-200 rounded-2xl shadow-sm bg-white">
                   <span className="font-bold text-xl text-neutral-800">Luggage</span>
                   <div className="flex items-center space-x-6 bg-neutral-50 rounded-full p-2 border border-neutral-200">
-                    <button onClick={() => setLuggage(Math.max(0, luggage - 1))} className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors">-</button>
+                    <button 
+                      type="button"
+                      aria-label="Decrease luggage count"
+                      onClick={() => setLuggage(Math.max(0, luggage - 1))} 
+                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
+                    >
+                      -
+                    </button>
                     <span className="w-8 text-center font-bold text-2xl text-brand">{luggage}</span>
-                    <button onClick={() => setLuggage(luggage + 1)} className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors">+</button>
+                    <button 
+                      type="button"
+                      aria-label="Increase luggage count"
+                      onClick={() => setLuggage(luggage + 1)} 
+                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
@@ -607,8 +642,16 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
                       onClick={() => handleClassSelect(cls.id)}
                       className={`w-full text-left p-6 border-2 rounded-2xl flex items-center justify-between transition-all duration-200 ${selectedClassId === cls.id ? 'border-brand ring-4 ring-brand/10 bg-neutral-50 shadow-md transform scale-[1.02]' : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 shadow-sm bg-white'}`}
                     >
-                      <div className="flex items-center space-x-6">
-                        <div className="text-6xl drop-shadow-md">{cls.image}</div>
+                      <div className="flex items-center space-x-5">
+                        <div className="w-16 h-16 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center flex-shrink-0 shadow-inner">
+                          {cls.id === "sprinter" ? (
+                            <Bus size={32} className="text-brand" />
+                          ) : cls.id === "suv" ? (
+                            <Shield size={32} className="text-brand" />
+                          ) : (
+                            <Car size={32} className="text-brand" />
+                          )}
+                        </div>
                         <div>
                           <div className="font-bold text-2xl text-neutral-900">{cls.name}</div>
                           <div className="text-sm font-semibold text-neutral-500 flex items-center mt-2 uppercase tracking-wider">
@@ -659,7 +702,9 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
                       <div className="flex-1">
                         <div className="font-bold text-xl text-neutral-900 flex items-center flex-wrap gap-2">
                           {drv.name} 
-                          <span className="text-xs bg-brand text-white px-2 py-0.5 rounded-md font-bold flex items-center">★ {drv.rating}</span>
+                          <span className="text-xs bg-brand text-white px-2 py-0.5 rounded-md font-bold flex items-center">
+                            <Star size={12} className="fill-white mr-1" /> {drv.rating}
+                          </span>
                         </div>
                         {drv.yearsExperience && (
                           <div className="text-xs font-semibold text-neutral-400 mt-0.5">

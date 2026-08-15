@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 import Link from "next/link";
-import { MapPin, Navigation, History, DollarSign, Star } from "lucide-react";
+import { MapPin, Navigation, History, DollarSign, Star, User } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import TripRatingModal from "@/components/TripRatingModal";
 
@@ -55,14 +55,20 @@ export default function DriverPastTripsPage() {
       </div>
 
       {trips.length === 0 ? (
-        <div className="text-center bg-neutral-900 border border-neutral-800 rounded-2xl py-16 px-6 mt-12">
-          <div className="w-16 h-16 bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <History className="w-8 h-8 text-neutral-500" />
+        <div className="text-center bg-neutral-900/80 border border-neutral-800 rounded-3xl py-20 px-8 mt-6">
+          <div className="w-20 h-20 bg-neutral-800/60 border border-neutral-700/40 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+            <History className="w-10 h-10 text-neutral-400" />
           </div>
-          <h2 className="text-xl font-bold mb-2 text-white">No history yet</h2>
-          <p className="text-neutral-500 max-w-xs mx-auto">
-            Your completed trips and earnings will appear here.
+          <h2 className="text-2xl font-bold mb-3 text-white tracking-tight">No Past Trips Recorded</h2>
+          <p className="text-neutral-400 max-w-sm mx-auto text-sm leading-relaxed mb-6">
+            When you complete client reservations, detailed trip logs, gratuity, and payout statements will populate here.
           </p>
+          <Link
+            href="/today"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-neutral-800 hover:bg-neutral-700 px-5 py-2.5 rounded-full border border-neutral-700 transition-colors"
+          >
+            View Active Jobs
+          </Link>
         </div>
       ) : (
         <div className="space-y-4">
@@ -86,7 +92,16 @@ export default function DriverPastTripsPage() {
                 <div className="flex justify-between items-start mb-4 border-b border-neutral-800 pb-4">
                   <div>
                     <div className="text-lg font-bold text-white">{formatDateTime(dateObj, trip.timezone || "UTC")}</div>
-                    <div className="text-sm text-neutral-400">Rider: {trip.riderName}</div>
+                    <div className="text-sm text-neutral-400 flex items-center mt-1">
+                      <div className="w-5 h-5 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center mr-2 overflow-hidden text-[10px]">
+                        {(trip as any).riderPhotoUrl ? (
+                          <img src={(trip as any).riderPhotoUrl} alt="Rider" className="w-full h-full object-cover" />
+                        ) : (
+                          <User size={12} className="text-neutral-400" />
+                        )}
+                      </div>
+                      Rider: {trip.riderName}
+                    </div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-emerald-400 flex items-center justify-end">

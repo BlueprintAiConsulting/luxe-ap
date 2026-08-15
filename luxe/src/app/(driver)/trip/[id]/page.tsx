@@ -7,7 +7,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Reservation, ReservationStatus, PreferenceProfile } from "@/lib/types";
 import { format } from "date-fns";
-import { ArrowLeft, Phone, MessageSquare, MapPin, Navigation, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, Phone, MessageSquare, MapPin, Navigation, CheckCircle, Clock, User } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { getFunctions as getFunctionsApp, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/client";
@@ -187,6 +187,23 @@ export default function DriverTripDetailPage() {
       </div>
 
       <div className="text-3xl font-bold">{formatDateTime(dateObj, trip.timezone || "UTC")}</div>
+
+      {/* Rider Info */}
+      <div className="flex justify-between items-center bg-neutral-900 p-4 rounded-2xl border border-neutral-800">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
+            {(trip as any).riderPhotoUrl ? (
+              <img src={(trip as any).riderPhotoUrl} alt="Rider" className="w-full h-full object-cover" />
+            ) : (
+              <User size={22} className="text-neutral-400" />
+            )}
+          </div>
+          <div>
+            <div className="text-xs text-neutral-500 font-bold uppercase tracking-wider mb-1">Rider</div>
+            <div className="text-lg font-black text-white">{trip.riderName}</div>
+          </div>
+        </div>
+      </div>
 
       {/* Quick Actions */}
       <div className="flex space-x-4">

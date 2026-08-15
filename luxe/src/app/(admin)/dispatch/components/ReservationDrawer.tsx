@@ -3,7 +3,7 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 
 import { useState, useEffect } from "react";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
-import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane } from "lucide-react";
+import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap } from "lucide-react";
 import { format } from "date-fns";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -107,14 +107,19 @@ export default function ReservationDrawer({
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
       
       {/* Drawer */}
-      <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right">
+      <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in fade-in slide-in-from-right duration-200 ease-out">
         
         <div className="flex justify-between items-center p-6 border-b border-neutral-100">
           <div>
             <h2 className="text-xl font-bold">{reservation.confirmationCode}</h2>
             <div className="text-sm text-neutral-500">Booked by {reservation.bookedByAdmin ? "Admin" : "Rider"}</div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-neutral-100 rounded-full">
+          <button 
+            type="button"
+            aria-label="Close reservation details drawer"
+            onClick={onClose} 
+            className="p-2 hover:bg-neutral-100 rounded-full"
+          >
             <X size={20} />
           </button>
         </div>
@@ -181,9 +186,9 @@ export default function ReservationDrawer({
                       alert("Error updating pickup time: " + e.message);
                     }
                   }}
-                  className="w-full py-2 bg-accent/20 hover:bg-accent/30 text-accent border border-accent/30 rounded-xl text-xs font-bold transition-all"
+                  className="w-full py-2.5 bg-accent/20 hover:bg-accent/30 text-accent border border-accent/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
-                  ⚡ Auto-Adjust Pickup Time (+35m Shift)
+                  <Zap size={14} /> Auto-Adjust Pickup Time (+35m Shift)
                 </button>
               </div>
             )}
@@ -222,8 +227,9 @@ export default function ReservationDrawer({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-1">Driver</label>
+                <label htmlFor="dispatch-select-driver" className="block text-xs font-bold text-neutral-700 mb-1">Driver</label>
                 <select 
+                  id="dispatch-select-driver"
                   className="w-full border border-neutral-300 rounded-lg p-2 text-sm"
                   value={selectedDriver}
                   onChange={e => setSelectedDriver(e.target.value)}
@@ -235,8 +241,9 @@ export default function ReservationDrawer({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-1">Vehicle</label>
+                <label htmlFor="dispatch-select-vehicle" className="block text-xs font-bold text-neutral-700 mb-1">Vehicle</label>
                 <select 
+                  id="dispatch-select-vehicle"
                   className="w-full border border-neutral-300 rounded-lg p-2 text-sm"
                   value={selectedVehicle}
                   onChange={e => setSelectedVehicle(e.target.value)}
@@ -319,7 +326,9 @@ export default function ReservationDrawer({
               <ShieldAlert size={16} className="mr-1" /> Admin Status Override
             </h3>
             <div className="space-y-3">
+              <label htmlFor="dispatch-override-status" className="sr-only">Override Status</label>
               <select 
+                id="dispatch-override-status"
                 className="w-full border border-red-200 rounded-lg p-2 text-sm bg-white"
                 value={overrideStatus}
                 onChange={e => setOverrideStatus(e.target.value as any)}
@@ -328,7 +337,9 @@ export default function ReservationDrawer({
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
+              <label htmlFor="dispatch-override-reason" className="sr-only">Override Reason</label>
               <input 
+                id="dispatch-override-reason"
                 type="text" 
                 placeholder="Reason (Required)" 
                 className="w-full border border-red-200 rounded-lg p-2 text-sm bg-white"
@@ -336,6 +347,7 @@ export default function ReservationDrawer({
                 onChange={e => setOverrideReason(e.target.value)}
               />
               <button 
+                type="button"
                 disabled={loadingOverride || !overrideReason}
                 onClick={handleOverride}
                 className="w-full bg-red-600 text-white rounded-lg py-2 text-sm font-bold disabled:opacity-50"

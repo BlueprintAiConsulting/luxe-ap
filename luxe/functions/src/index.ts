@@ -12,3 +12,4 @@ export * from "./api/ratings";
 export * from "./crons/stripe";
 
 export * from "./triggers/notifications";
+export * from "./triggers/mail";

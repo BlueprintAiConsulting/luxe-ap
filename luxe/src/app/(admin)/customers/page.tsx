@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { User } from "@/lib/types";
-import { Search, User as UserIcon, Phone, Mail, Award, Clock, X, FileText, ChevronRight } from "lucide-react";
+import { Search, User as UserIcon, Phone, Mail, Award, Clock, X, FileText, ChevronRight, Star } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 import RiderPreferencesView from "@/app/(admin)/components/RiderPreferencesView";
@@ -138,8 +138,8 @@ export default function CustomersPage() {
                         <div>
                           <div className="font-bold text-brand text-sm group-hover:text-accent transition-colors flex items-center gap-2">
                             {c.firstName} {c.lastName}
-                            <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.2 rounded font-bold flex items-center">
-                              ★ {(c as any).rating || 5.0}
+                            <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-bold flex items-center">
+                              <Star size={11} className="fill-amber-600 text-amber-600 mr-1 inline" /> {((c as any).rating || 5.0).toFixed(1)}
                             </span>
                           </div>
                           <div className="text-xs text-neutral-500 flex items-center mt-1">
