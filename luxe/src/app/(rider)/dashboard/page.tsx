@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/firebase/auth";
 import Link from "next/link";
-import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight } from "lucide-react";
+import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight, ShieldCheck, MapPin, Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/client";
@@ -39,65 +39,73 @@ export default function RiderDashboardPage() {
   }, [user, limitCount]);
 
   if (loading) {
-    return <div className="p-8 text-center text-neutral-500">Loading trips...</div>;
+    return (
+      <div className="p-8 text-center text-neutral-500 min-h-[50vh] flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-medium tracking-wider uppercase text-neutral-400">Loading your reservations...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto w-full pt-8 pb-28 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4">
-      {/* Header with Preferences Link */}
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 max-w-lg mx-auto w-full pt-6 pb-28 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4">
+      
+      {/* Header with Luxury Brand & Quick Actions */}
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">My Trips</h1>
-          <p className="text-xs text-neutral-400 font-medium">Executive Chauffeured Concierge</p>
+          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-1 font-mono">
+            <Sparkles size={11} /> Concierge Active
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight">My Reservations</h1>
         </div>
+
         <div className="flex items-center space-x-2">
           <a
             href="tel:+18005550199"
             aria-label="Contact Concierge"
-            className="flex items-center space-x-1.5 px-3 py-2 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white rounded-xl text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white"
+            className="flex items-center space-x-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md"
             title="Contact Concierge"
           >
-            <PhoneCall size={14} className="text-neutral-500 dark:text-neutral-400" />
+            <PhoneCall size={13} className="text-accent" />
             <span className="hidden sm:inline">Concierge</span>
           </a>
-          <Link
-            href="/preferences"
-            aria-label="Concierge Preferences Settings"
-            className="flex items-center space-x-1.5 px-3 py-2 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white rounded-xl text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white"
-            title="Concierge Preferences Settings"
-          >
-            <Sparkles size={14} className="text-accent" />
-            <span className="hidden sm:inline">Preferences</span>
-          </Link>
           <button 
             onClick={() => signOut(auth)} 
             aria-label="Sign Out"
-            className="p-2 text-neutral-500 hover:text-red-500 transition-colors rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="p-2 text-neutral-400 hover:text-red-400 transition-colors rounded-xl bg-neutral-900 border border-neutral-800 active:scale-95"
             title="Sign Out"
           >
-            <LogOut size={20} />
+            <LogOut size={16} />
           </button>
         </div>
       </div>
       
+      {/* Trips list */}
       {trips.length === 0 ? (
-        <div className="text-center bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl py-16 px-6">
-          <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Car className="w-8 h-8 text-neutral-400" />
+        <div className="text-center bg-neutral-900/80 backdrop-blur-xl border border-neutral-800 rounded-3xl py-14 px-6 shadow-xl space-y-4">
+          <div className="w-16 h-16 bg-neutral-800/80 border border-neutral-700 rounded-2xl flex items-center justify-center mx-auto text-accent">
+            <Car size={30} />
           </div>
-          <h2 className="text-xl font-bold mb-2">No trips today</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 mb-6">
-            You don't have any past or upcoming trips yet.
-          </p>
-          <Link 
-            href="/book"
-            className="bg-black hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black px-6 py-3 rounded-xl font-medium inline-block transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900"
-          >
-            Book your first ride
-          </Link>
+          <div>
+            <h2 className="text-lg font-bold text-white font-serif">No Upcoming Trips</h2>
+            <p className="text-xs text-neutral-400 mt-1 max-w-xs mx-auto">
+              Your next executive charter will appear here with live flight & chauffeur telemetry.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link 
+              href="/book"
+              className="bg-accent hover:bg-accent/90 text-neutral-950 px-6 py-3.5 rounded-2xl font-bold text-xs inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-amber-500/10"
+            >
+              <span>Book An Executive Ride</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {trips.map((trip, index) => {
             const isActive = ["assigned", "en_route", "arrived", "onboard"].includes(trip.status);
             const isCompleted = trip.status === "completed";
@@ -106,35 +114,56 @@ export default function RiderDashboardPage() {
             return (
               <div 
                 key={trip.reservationId} 
-                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm space-y-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
+                className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 p-5 rounded-3xl shadow-xl space-y-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
                 style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
               >
-                <div className="flex justify-between items-start">
+                {/* Status & Date */}
+                <div className="flex justify-between items-start gap-2">
                   <div>
-                    <div className="font-bold text-lg">{formatDateTime(trip.pickupAt as any, trip.timezone || "UTC")}</div>
-                    <div className="text-sm text-neutral-500 mt-1">{trip.pickup.line1} &rarr; {trip.dropoff?.line1 || "As directed"}</div>
+                    <div className="font-bold text-base text-white">
+                      {formatDateTime(trip.pickupAt as any, trip.timezone || "UTC")}
+                    </div>
+                    <div className="text-xs text-neutral-400 mt-1 flex items-center gap-1.5">
+                      <MapPin size={13} className="text-accent shrink-0" />
+                      <span className="line-clamp-1">{trip.pickup.line1}</span>
+                    </div>
+                    {trip.dropoff && (
+                      <div className="text-xs text-neutral-400 mt-0.5 flex items-center gap-1.5">
+                        <Navigation size={13} className="text-neutral-500 shrink-0" />
+                        <span className="line-clamp-1">{trip.dropoff.line1}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs font-bold px-3 py-1 bg-black text-white dark:bg-white dark:text-black rounded-full capitalize">
+                  
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border shrink-0 ${
+                    isActive 
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse" 
+                      : isCompleted 
+                        ? "bg-neutral-800 border-neutral-700 text-neutral-300"
+                        : "bg-amber-400/10 border-amber-400/30 text-amber-400"
+                  }`}>
                     {trip.status.replace(/_/g, " ")}
-                  </div>
+                  </span>
                 </div>
 
                 {/* Driver Info */}
                 {trip.driverName && (
-                  <div className="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs">
-                    <span className="text-neutral-500 font-medium">Chauffeur: <span className="font-bold text-neutral-900 dark:text-white">{trip.driverName}</span></span>
+                  <div className="flex items-center justify-between pt-3 border-t border-neutral-800 text-xs">
+                    <span className="text-neutral-400">
+                      Chauffeur: <span className="font-bold text-white ml-1">{trip.driverName}</span>
+                    </span>
                     {driverRated ? (
-                      <span className="flex items-center text-amber-500 font-bold">
-                        <Star size={13} className="fill-amber-500 mr-1" />
+                      <span className="flex items-center text-accent font-bold text-[11px]">
+                        <Star size={12} className="fill-accent text-accent mr-1" />
                         {(trip as any).driverRating}.0 Rated
                       </span>
                     ) : isCompleted ? (
                       <button
                         onClick={() => setRatingTrip(trip)}
-                        className="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg font-bold flex items-center transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                        className="px-2.5 py-1 bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 rounded-xl font-bold text-[11px] flex items-center transition-all active:scale-95"
                       >
-                        <Star size={13} className="fill-amber-400 text-amber-500 mr-1" />
-                        Rate Driver
+                        <Star size={11} className="fill-accent text-accent mr-1" />
+                        Rate Chauffeur
                       </button>
                     ) : null}
                   </div>
@@ -143,7 +172,10 @@ export default function RiderDashboardPage() {
                 {/* Embedded Live GPS Tracking Map for Active Trips */}
                 {isActive && (
                   <div className="pt-2">
-                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Live Chauffeur Location</div>
+                    <div className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2 flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      Live Chauffeur GPS Telemetry
+                    </div>
                     <LiveTripMap
                       pickup={trip.pickup}
                       dropoff={trip.dropoff}
@@ -158,43 +190,25 @@ export default function RiderDashboardPage() {
             );
           })}
           
-          <div className="pt-6 space-y-3">
+          <div className="pt-4 space-y-2.5">
             {trips.length >= limitCount && (
               <button 
                 onClick={() => setLimitCount(c => c + 10)}
-                className="block w-full text-center bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white px-6 py-4 rounded-xl font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white"
+                className="block w-full text-center bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 px-4 py-3 rounded-2xl text-xs font-semibold transition-all active:scale-95"
               >
-                Load older trips
+                Load Older Reservations
               </button>
             )}
             <Link 
               href="/book"
-              className="group flex items-center justify-center w-full bg-black hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black px-6 py-4 rounded-xl font-medium transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900"
+              className="flex items-center justify-center w-full bg-accent hover:bg-accent/90 text-neutral-950 px-5 py-3.5 rounded-2xl font-bold text-xs transition-all active:scale-95 shadow-lg"
             >
-              <span>Book another ride</span>
-              <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
+              <span>Book Another Executive Ride</span>
+              <ArrowRight size={14} className="ml-2" />
             </Link>
           </div>
         </div>
       )}
-
-      {/* Rider Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 py-3 px-6 z-40">
-        <div className="max-w-md mx-auto flex justify-around items-center">
-          <Link href="/dashboard" className="flex flex-col items-center text-brand dark:text-white font-bold text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white rounded-lg p-1">
-            <Calendar size={20} className="mb-0.5" />
-            <span>My Trips</span>
-          </Link>
-          <Link href="/book" className="flex flex-col items-center text-neutral-400 hover:text-brand dark:hover:text-white text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white rounded-lg p-1">
-            <PlusCircle size={20} className="mb-0.5 text-accent" />
-            <span>Book Ride</span>
-          </Link>
-          <Link href="/preferences" className="flex flex-col items-center text-neutral-400 hover:text-brand dark:hover:text-white text-[11px] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white rounded-lg p-1">
-            <Sparkles size={20} className="mb-0.5 text-accent" />
-            <span>Preferences</span>
-          </Link>
-        </div>
-      </div>
 
       {/* Trip Rating Modal */}
       {ratingTrip && (

@@ -3,13 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
-import { LayoutDashboard, Radio, Users, Car, DollarSign, UserCircle, LogOut, Menu, X, ArrowUpRight, Building2, Network, Globe } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Radio, 
+  Users, 
+  Car, 
+  DollarSign, 
+  UserCircle, 
+  LogOut, 
+  Menu, 
+  X, 
+  ArrowUpRight, 
+  Building2, 
+  Network, 
+  Globe,
+  Sparkles,
+  ShieldAlert
+} from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
-  { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
-  { name: "Live Radar", href: "/radar", icon: Globe },
+  { name: "Live Radar", href: "/radar", icon: Globe, highlight: true },
   { name: "Dispatch", href: "/dispatch", icon: Radio },
+  { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
   { name: "Affiliates", href: "/affiliates", icon: Network },
   { name: "Drivers", href: "/drivers", icon: Users },
   { name: "Vehicles", href: "/vehicles", icon: Car },
@@ -27,8 +43,8 @@ export function AdminNav() {
   };
 
   const NavLinks = () => (
-    <>
-      <div className="space-y-1">
+    <div className="flex flex-col h-full">
+      <div className="space-y-1 flex-1">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -37,18 +53,25 @@ export function AdminNav() {
               key={item.name}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group active:scale-[0.98] ${
                 isActive
-                  ? "bg-white/10 text-white font-semibold shadow-inner"
-                  : "text-neutral-400 hover:bg-white/5 hover:text-white font-medium"
+                  ? "bg-neutral-800 text-white font-bold border border-white/10 shadow-lg"
+                  : "text-neutral-400 hover:bg-neutral-900 hover:text-white font-medium"
               }`}
             >
-              <Icon size={20} className={isActive ? "text-accent" : "opacity-60 group-hover:opacity-100 transition-opacity"} />
-              <span className="flex-1">{item.name}</span>
+              <Icon 
+                size={20} 
+                className={
+                  isActive 
+                    ? item.highlight ? "text-cyan-400" : "text-accent" 
+                    : "opacity-60 group-hover:opacity-100 group-hover:text-neutral-200 transition-all"
+                } 
+              />
+              <span className="flex-1 text-sm">{item.name}</span>
               {item.name === "Live Radar" && (
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
                 </span>
               )}
             </Link>
@@ -56,63 +79,79 @@ export function AdminNav() {
         })}
       </div>
       
-      <div className="mt-auto pt-6 border-t border-white/10 flex flex-col gap-1">
-        <div className="px-4 py-2 text-xs font-semibold text-neutral-500">
-          Views
+      <div className="pt-6 mt-4 border-t border-neutral-800 flex flex-col gap-1 pb-safe">
+        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+          Client & Cockpit Switcher
         </div>
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-neutral-400 hover:bg-white/5 hover:text-white font-medium group"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-neutral-400 hover:bg-neutral-900 hover:text-white text-xs font-semibold group"
         >
-          <UserCircle size={20} className="opacity-60 group-hover:text-accent transition-colors" />
+          <UserCircle size={18} className="opacity-60 group-hover:text-accent transition-colors" />
           Rider View
-          <ArrowUpRight size={14} className="ml-auto opacity-50" />
+          <ArrowUpRight size={13} className="ml-auto opacity-50" />
         </Link>
         <Link
           href="/today"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-neutral-400 hover:bg-white/5 hover:text-white font-medium group"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-neutral-400 hover:bg-neutral-900 hover:text-white text-xs font-semibold group"
         >
-          <Car size={20} className="opacity-60 group-hover:text-accent transition-colors" />
-          Driver View
-          <ArrowUpRight size={14} className="ml-auto opacity-50" />
+          <Car size={18} className="opacity-60 group-hover:text-amber-400 transition-colors" />
+          Driver Cockpit
+          <ArrowUpRight size={13} className="ml-auto opacity-50" />
         </Link>
         
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl transition-all text-neutral-400 hover:bg-white/5 hover:text-white font-medium"
+          className="w-full flex items-center gap-3 px-4 py-2.5 mt-2 rounded-xl transition-all text-red-400 hover:bg-red-950/40 hover:text-red-300 text-xs font-semibold"
         >
-          <LogOut size={20} className="opacity-60" />
+          <LogOut size={18} className="opacity-70" />
           Sign Out
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
     <>
       {/* Mobile Top Bar */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-brand fixed top-0 w-full z-40">
-        <div className="font-bold text-xl text-white">Luxe</div>
-        <button aria-label="Toggle mobile menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -mr-2 text-white min-h-[44px] min-w-[44px] flex items-center justify-center">
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      <div className="lg:hidden flex items-center justify-between px-5 py-3.5 bg-neutral-900/95 backdrop-blur-xl border-b border-neutral-800 fixed top-0 left-0 right-0 z-40">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+            <Globe size={16} />
+          </div>
+          <div>
+            <div className="font-bold text-sm text-white tracking-wider uppercase font-serif">LUXE</div>
+            <div className="text-[10px] text-cyan-400 font-mono leading-none">OPERATIONS</div>
+          </div>
+        </div>
+
+        <button 
+          aria-label="Toggle navigation menu" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+          className="p-2.5 -mr-2 text-neutral-300 hover:text-white rounded-xl bg-neutral-800 border border-neutral-700/80 min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-all"
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 pt-16 bg-brand flex flex-col p-4 h-full overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 z-30 pt-20 bg-neutral-950/98 backdrop-blur-2xl flex flex-col p-6 h-full overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
           <NavLinks />
         </div>
       )}
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex flex-col w-64 bg-brand h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto">
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 bg-neutral-900 border-r border-neutral-800 h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto">
         <div className="px-4 mb-8">
-          <h1 className="font-bold text-2xl text-white tracking-tight">Luxe</h1>
-          <div className="text-xs font-medium text-accent mt-0.5 tracking-wider uppercase">Executive Console</div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-2">
+            <Sparkles size={11} /> Operations
+          </div>
+          <h1 className="font-bold text-2xl text-white tracking-tight font-serif uppercase">LUXE</h1>
+          <div className="text-[11px] font-medium text-neutral-400 mt-0.5 tracking-wider uppercase">Airspace & Dispatch</div>
         </div>
         <NavLinks />
-      </div>
+      </aside>
     </>
   );
 }

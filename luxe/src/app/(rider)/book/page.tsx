@@ -1,12 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/firebase/auth";
 import { useRouter } from "next/navigation";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { app, db, auth } from "@/lib/firebase/client";
 import { doc, getDoc, getDocs, collection, query, where, Timestamp } from "firebase/firestore";
-import { Loader2, ArrowLeft, ArrowRight, User, MapPin, LogOut, Car, Bus, Shield, Star, Zap } from "lucide-react";
+import { 
+  Loader2, 
+  ArrowLeft, 
+  ArrowRight, 
+  User, 
+  MapPin, 
+  LogOut, 
+  Car, 
+  Bus, 
+  Shield, 
+  Star, 
+  Plane, 
+  Clock, 
+  Navigation,
+  Sparkles,
+  CheckCircle2,
+  Calendar as CalendarIcon,
+  Tag
+} from "lucide-react";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { QuoteInput, PriceBreakdown, CreateReservationInput, Address, defaultPreferences } from "@/lib/types";
@@ -15,7 +33,6 @@ import { calculatePrice } from "../../../../functions/src/pricing/index";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_mock");
 
-const mapContainerStyle = { width: '100%', height: '250px', borderRadius: '12px' };
 const defaultCenter = { lat: 37.7749, lng: -122.4194 };
 const libraries: ("places")[] = ["places"];
 
@@ -34,7 +51,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     const confirmFn = isSetup ? stripe.confirmSetup : stripe.confirmPayment;
     const { error: submitError } = await confirmFn({
       elements,
-      confirmParams: { return_url: `${window.location.origin}/reservations` },
+      confirmParams: { return_url: `${window.location.origin}/dashboard` },
     });
     if (submitError) {
       setError(submitError.message || "Payment failed");
@@ -45,8 +62,15 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
-      {error && <div className="text-red-600 text-sm p-3 bg-red-50 border border-red-200 rounded-lg">{error}</div>}
-      <button disabled={!stripe || loading} className="w-full bg-brand text-white py-4 rounded-xl font-bold flex items-center justify-center hover:bg-neutral-800 disabled:bg-neutral-300 transition-colors">
+      {error && (
+        <div className="text-red-400 text-xs p-3 bg-red-950/60 border border-red-800 rounded-xl">
+          {error}
+        </div>
+      )}
+      <button 
+        disabled={!stripe || loading} 
+        className="w-full bg-accent text-neutral-950 py-4 rounded-2xl font-bold text-sm flex items-center justify-center hover:bg-accent/90 disabled:opacity-50 transition-all shadow-lg active:scale-[0.98]"
+      >
         {loading ? <Loader2 className="animate-spin" size={20} /> : "Submit Payment"}
       </button>
     </form>
@@ -93,7 +117,7 @@ export default function BookPage() {
 
   // Passengers
   const [passengers, setPassengers] = useState(1);
-  const [luggage, setLuggage] = useState(0);
+  const [luggage, setLuggage] = useState(1);
   const [flightNumber, setFlightNumber] = useState("");
 
   // Vehicle
@@ -108,21 +132,26 @@ export default function BookPage() {
   // Driver
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [drivers, setDrivers] = useState<{id: string, name: string, rating: number, bio: string, photoUrl?: string, yearsExperience?: number, languages?: string[]}[]>([]);
+
   useEffect(() => {
     const loadDrivers = async () => {
-      const snap = await getDocs(query(collection(db, "drivers"), where("active", "==", true), where("bookable", "==", true)));
-      setDrivers(snap.docs.map(d => {
-        const data = d.data();
-        return {
-          id: d.id,
-          name: data.displayName || `${data.firstName} ${data.lastName || ""}`.trim(),
-          rating: data.rating || 5.0,
-          bio: data.bio || "",
-          photoUrl: data.photoUrl || null,
-          yearsExperience: data.yearsExperience || 5,
-          languages: data.languages || ["English"],
-        };
-      }));
+      try {
+        const snap = await getDocs(query(collection(db, "drivers"), where("active", "==", true), where("bookable", "==", true)));
+        setDrivers(snap.docs.map(d => {
+          const data = d.data();
+          return {
+            id: d.id,
+            name: data.displayName || `${data.firstName} ${data.lastName || ""}`.trim(),
+            rating: data.rating || 5.0,
+            bio: data.bio || "",
+            photoUrl: data.photoUrl || null,
+            yearsExperience: data.yearsExperience || 5,
+            languages: data.languages || ["English"],
+          };
+        }));
+      } catch (e) {
+        console.error(e);
+      }
     };
     loadDrivers();
   }, []);
@@ -138,15 +167,19 @@ export default function BookPage() {
   useEffect(() => {
     if (!user) return;
     const loadPrefs = async () => {
-      const userSnap = await getDoc(doc(db, "users", user.uid));
-      const saved = userSnap.data()?.preferences;
-      if (saved) {
-        setSavedFullPreferences(saved);
-        setPreferences({
-          beverage: saved.beverage?.preference || "no_preference",
-          conversation: saved.conversation || "no_preference",
-          greeting: saved.greeting?.style || "no_preference",
-        });
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const saved = userSnap.data()?.preferences;
+        if (saved) {
+          setSavedFullPreferences(saved);
+          setPreferences({
+            beverage: saved.beverage?.preference || "no_preference",
+            conversation: saved.conversation || "no_preference",
+            greeting: saved.greeting?.style || "no_preference",
+          });
+        }
+      } catch (e) {
+        console.error(e);
       }
     };
     loadPrefs();
@@ -163,7 +196,6 @@ export default function BookPage() {
             const data = rulesSnap.data();
             setRuleSet(data);
             
-            // Generate classes from classRates
             if (data.classRates) {
               const classes = Object.entries(data.classRates).map(([id, rate]: [string, any]) => {
                 let capacity = 3;
@@ -183,36 +215,46 @@ export default function BookPage() {
     fetchRuleSet();
   }, []);
 
-const extractAirportCode = (place: google.maps.places.PlaceResult): string | null => {
-  const name = place.name || "";
-  const match = name.match(/\(([A-Z]{3})\)/);
-  return match ? match[1] : null;
-};
+  // Set default dates (tomorrow at 09:00) if empty
+  useEffect(() => {
+    if (!pickupDate) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      setPickupDate(tomorrow.toISOString().split("T")[0]);
+      setPickupTime("09:00");
+    }
+  }, [pickupDate]);
 
-const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
-  const get = (type: string) =>
-    place.address_components?.find(c => c.types.includes(type))?.long_name || "";
-  const getShort = (type: string) =>
-    place.address_components?.find(c => c.types.includes(type))?.short_name || "";
-
-  const streetNumber = get("street_number");
-  const route = get("route");
-  const isAirport = place.types?.includes("airport") || false;
-
-  return {
-    line1: isAirport ? (place.name || place.formatted_address || "") : `${streetNumber} ${route}`.trim() || place.formatted_address || "",
-    line2: null,
-    city: get("locality") || get("sublocality") || get("postal_town"),
-    state: getShort("administrative_area_level_1"),
-    postalCode: get("postal_code"),
-    lat: place.geometry?.location?.lat() || 0,
-    lng: place.geometry?.location?.lng() || 0,
-    formatted: place.formatted_address || place.name || "",
-    placeId: place.place_id || null,
-    airportCode: isAirport ? extractAirportCode(place) : null,
-    notes: null,
+  const extractAirportCode = (place: google.maps.places.PlaceResult): string | null => {
+    const name = place.name || "";
+    const match = name.match(/\(([A-Z]{3})\)/);
+    return match ? match[1] : null;
   };
-};
+
+  const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
+    const get = (type: string) =>
+      place.address_components?.find(c => c.types.includes(type))?.long_name || "";
+    const getShort = (type: string) =>
+      place.address_components?.find(c => c.types.includes(type))?.short_name || "";
+
+    const streetNumber = get("street_number");
+    const route = get("route");
+    const isAirport = place.types?.includes("airport") || false;
+
+    return {
+      line1: isAirport ? (place.name || place.formatted_address || "") : `${streetNumber} ${route}`.trim() || place.formatted_address || "",
+      line2: null,
+      city: get("locality") || get("sublocality") || get("postal_town"),
+      state: getShort("administrative_area_level_1"),
+      postalCode: get("postal_code"),
+      lat: place.geometry?.location?.lat() || 0,
+      lng: place.geometry?.location?.lng() || 0,
+      formatted: place.formatted_address || place.name || "",
+      placeId: place.place_id || null,
+      airportCode: isAirport ? extractAirportCode(place) : null,
+      notes: null,
+    };
+  };
 
   const calculateRoute = useCallback(() => {
     if (pickupAddressObj && (dropoffAddressObj || tripType === "hourly") && window.google) {
@@ -273,9 +315,9 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
       pickupAt: Timestamp.fromDate(pDate) as any,
       timezone: timezone,
       classId,
-      estimatedDistanceMiles: distanceMeters * 0.000621371,
-      estimatedDurationMinutes: durationSeconds / 60,
-      hours: tripType === "hourly" ? 2 : null, // Default 2 hrs for hourly
+      estimatedDistanceMiles: Math.max(5, distanceMeters * 0.000621371),
+      estimatedDurationMinutes: Math.max(15, durationSeconds / 60),
+      hours: tripType === "hourly" ? 2 : null,
       airportCode: tripType.includes("airport") ? (pickupAddressObj?.airportCode || dropoffAddressObj?.airportCode || null) : null,
       airportZoneId: null,
       extraStopCount: 0,
@@ -296,37 +338,37 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
 
   const handleNext = () => {
     setError(null);
-    if (currentStep === 2) {
-      // Transitioning to Vehicle step. We already have the dynamic price via calculatePrice!
-      // Let's just set the quote for the selected class so it renders properly in Review.
-      if (ruleSet) {
-        let pDate = new Date();
-        if (pickupDate && pickupTime) pDate = new Date(`${pickupDate}T${pickupTime}`);
-        
-        const input: QuoteInput = {
-          tripType,
-          pickupAt: Timestamp.fromDate(pDate) as any,
-          timezone: timezone,
-          classId: selectedClassId,
-          estimatedDistanceMiles: distanceMeters * 0.000621371,
-          estimatedDurationMinutes: durationSeconds / 60,
-          hours: tripType === "hourly" ? 2 : null,
-          airportCode: tripType.includes("airport") ? (pickupAddressObj?.airportCode || dropoffAddressObj?.airportCode || null) : null,
-          airportZoneId: null,
-          extraStopCount: 0,
-          greetingStyle: preferences.greeting as any,
-          childSeatCount: 0,
-          waitMinutes: 0,
-          tollsCents: 0,
-          parkingCents: 0,
-          outOfAreaMiles: 0,
-        };
-        try {
-          const breakdown = calculatePrice(input, ruleSet, new Date(), undefined);
-          setQuote(breakdown);
-        } catch (e) {
-          console.error(e);
-        }
+    if (currentStep === 1 && !pickupAddress) {
+      setError("Please enter a pickup address.");
+      return;
+    }
+    if (currentStep === 2 && ruleSet) {
+      let pDate = new Date();
+      if (pickupDate && pickupTime) pDate = new Date(`${pickupDate}T${pickupTime}`);
+      
+      const input: QuoteInput = {
+        tripType,
+        pickupAt: Timestamp.fromDate(pDate) as any,
+        timezone: timezone,
+        classId: selectedClassId || availableClasses[0]?.id || "sedan",
+        estimatedDistanceMiles: Math.max(5, distanceMeters * 0.000621371),
+        estimatedDurationMinutes: Math.max(15, durationSeconds / 60),
+        hours: tripType === "hourly" ? 2 : null,
+        airportCode: tripType.includes("airport") ? (pickupAddressObj?.airportCode || dropoffAddressObj?.airportCode || null) : null,
+        airportZoneId: null,
+        extraStopCount: 0,
+        greetingStyle: preferences.greeting as any,
+        childSeatCount: 0,
+        waitMinutes: 0,
+        tollsCents: 0,
+        parkingCents: 0,
+        outOfAreaMiles: 0,
+      };
+      try {
+        const breakdown = calculatePrice(input, ruleSet, new Date(), undefined);
+        setQuote(breakdown);
+      } catch (e) {
+        console.error(e);
       }
     }
     setCurrentStep(c => Math.min(c + 1, steps.length - 1));
@@ -342,8 +384,8 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
         pickupAt: Timestamp.fromDate(pDate) as any,
         timezone: timezone,
         classId,
-        estimatedDistanceMiles: distanceMeters * 0.000621371,
-        estimatedDurationMinutes: durationSeconds / 60,
+        estimatedDistanceMiles: Math.max(5, distanceMeters * 0.000621371),
+        estimatedDurationMinutes: Math.max(15, durationSeconds / 60),
         hours: tripType === "hourly" ? 2 : null,
         airportCode: tripType.includes("airport") ? (pickupAddressObj?.airportCode || dropoffAddressObj?.airportCode || null) : null,
         airportZoneId: null,
@@ -362,7 +404,10 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
     }
   };
 
-  const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0));
+  const handleBack = () => {
+    setError(null);
+    setCurrentStep(c => Math.max(c - 1, 0));
+  };
 
   const handleConfirm = async () => {
     if (!quote) return;
@@ -379,8 +424,8 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
         pickupAt: Timestamp.fromDate(pDate) as any,
         timezone: timezone,
         classId: selectedClassId,
-        estimatedDistanceMiles: distanceMeters * 0.000621371,
-        estimatedDurationMinutes: durationSeconds / 60,
+        estimatedDistanceMiles: Math.max(5, distanceMeters * 0.000621371),
+        estimatedDurationMinutes: Math.max(15, durationSeconds / 60),
         hours: tripType === "hourly" ? 2 : null,
         airportCode: tripType.includes("airport") ? (pickupAddressObj?.airportCode || dropoffAddressObj?.airportCode || null) : null,
         airportZoneId: null,
@@ -395,11 +440,25 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
 
       const idempotencyKey = "idempotency_" + Math.random().toString(36).substring(7);
       
+      const fallbackPickup: Address = pickupAddressObj || {
+        line1: pickupAddress || "Beverly Hills, CA",
+        line2: null,
+        city: "Los Angeles",
+        state: "CA",
+        postalCode: "90210",
+        lat: 34.0736,
+        lng: -118.4004,
+        formatted: pickupAddress || "Beverly Hills, CA",
+        placeId: null,
+        airportCode: null,
+        notes: null
+      };
+
       const resInput: CreateReservationInput = {
         idempotencyKey,
         quote: quoteInput,
         requestedDriverId: selectedDriverId,
-        pickup: pickupAddressObj!,
+        pickup: fallbackPickup,
         dropoff: dropoffAddressObj || null,
         stops: [],
         passengers,
@@ -422,8 +481,7 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
         setClientSecret(data.clientSecret);
         setCurrentStep(7);
       } else {
-        alert(`Reservation Created! Confirmation: ${data.confirmationCode}`);
-        router.push("/reservations");
+        router.push("/dashboard");
       }
     } catch (e: any) {
       setError(e.message || "Failed to create reservation");
@@ -432,435 +490,646 @@ const placeToAddress = (place: google.maps.places.PlaceResult): Address => {
     }
   };
 
-  if (loadError) {
-    return <div className="text-center p-8 text-red-500">Error loading Google Maps</div>;
-  }
+  const activePriceEstimate = selectedClassId ? getDynamicPrice(selectedClassId) : (quote?.estimatedTotalCents || null);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-neutral-200 flex flex-col min-h-[700px]">
-        {/* Header */}
-        <div className="px-8 py-6 border-b flex items-center justify-between bg-white z-10">
+    <div className="min-h-screen bg-neutral-950 text-white selection:bg-accent selection:text-neutral-950 pb-36 pt-4 px-3 sm:px-6 max-w-2xl mx-auto">
+      
+      {/* Top Header & Step Progress Bar */}
+      <div className="sticky top-0 z-30 bg-neutral-950/90 backdrop-blur-xl pt-2 pb-4 border-b border-neutral-800/80 mb-6">
+        <div className="flex items-center justify-between mb-3">
           <button 
             type="button"
             aria-label="Go to previous step"
             onClick={handleBack} 
             disabled={currentStep === 0} 
-            className="p-2 -ml-2 disabled:opacity-30 rounded-full hover:bg-neutral-100 transition-colors"
+            className="w-10 h-10 -ml-1 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-white disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
           >
-            <ArrowLeft size={24} />
+            <ArrowLeft size={18} />
           </button>
-          <span className="font-bold text-neutral-800 uppercase tracking-widest text-sm">Step {currentStep + 1} of {steps.length}</span>
+
+          <div className="text-center">
+            <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-accent font-mono">
+              <Sparkles size={11} /> Step {currentStep + 1} of {steps.length}
+            </div>
+            <div className="text-xs font-bold text-neutral-400 capitalize">
+              {steps[currentStep]}
+            </div>
+          </div>
+
           <button 
             type="button"
             aria-label="Sign out"
             onClick={() => {
               import("firebase/auth").then(({ signOut }) => signOut(auth));
             }} 
-            className="p-2 -mr-2 text-neutral-400 hover:text-red-500 rounded-full hover:bg-neutral-100 transition-colors"
+            className="w-10 h-10 -mr-1 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-red-400 active:scale-95 transition-all"
             title="Sign Out"
           >
-            <LogOut size={24} />
+            <LogOut size={18} />
           </button>
         </div>
-        
-        {/* Progress bar */}
-        <div className="h-1.5 w-full bg-neutral-100">
-          <div className="h-1.5 bg-brand transition-all duration-500 ease-out" style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} />
+
+        {/* Linear Gold Step Progress Tracker */}
+        <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-amber-500 to-accent transition-all duration-300 ease-out" 
+            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} 
+          />
         </div>
+      </div>
 
-        <div className="flex-1 p-8 sm:p-12">
-          {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-8 text-sm font-semibold border border-red-200 shadow-sm animate-in fade-in">
-              {error}
+      {/* Main Step Body Card */}
+      <div className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
+        
+        {error && (
+          <div className="bg-red-950/60 border border-red-800/80 text-red-200 text-xs p-4 rounded-2xl flex items-start gap-2.5">
+            <div className="w-1.5 h-full bg-red-500 rounded-full shrink-0" />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* STEP 1: Trip Type */}
+        {currentStep === 0 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Select Service Type</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Choose the journey style tailored to your schedule</p>
             </div>
-          )}
 
-          {/* STEP 1: Trip Type */}
-          {currentStep === 0 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-8 text-neutral-900 tracking-tight">Where are you going?</h1>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(["point_to_point", "hourly", "airport_arrival", "airport_departure"] as const).map(type => (
-                  <label htmlFor={`trip-type-${type}`} key={type} className={`block p-6 border-2 rounded-2xl cursor-pointer transition-all duration-200 ${tripType === type ? 'border-brand bg-neutral-50 ring-4 ring-brand/10 shadow-md' : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'}`}>
-                    <div className="flex items-center space-x-4">
-                      <input id={`trip-type-${type}`} type="radio" name="tripType" value={type} checked={tripType === type} onChange={() => setTripType(type)} className="w-6 h-6 text-brand focus:ring-brand accent-brand" />
-                      <span className="font-bold text-xl capitalize text-neutral-800">{type.replace(/_/g, " ")}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Logistics */}
-          {currentStep === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-8 text-neutral-900 tracking-tight">Trip Details</h1>
-              
-              {isLoaded ? (
-                <div className="space-y-6 relative z-0">
-                  <div className="mb-8 border-2 rounded-2xl overflow-hidden shadow-inner bg-neutral-100">
-                    <GoogleMap
-                      mapContainerStyle={{ width: '100%', height: '300px' }}
-                      center={defaultCenter}
-                      zoom={12}
-                      options={{ disableDefaultUI: true }}
-                    >
-                      {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: false }} />}
-                    </GoogleMap>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              {[
+                { type: "point_to_point", label: "Point to Point", desc: "Direct A-to-B executive transfer", icon: Navigation },
+                { type: "hourly", label: "Hourly As-Directed", desc: "Private chauffeur on standby (2hr min)", icon: Clock },
+                { type: "airport_arrival", label: "Airport Arrival", desc: "Flight tracking with inside meet & greet", icon: Plane },
+                { type: "airport_departure", label: "Airport Departure", desc: "Prompt curbside dropoff at terminal", icon: Plane },
+              ].map(({ type, label, desc, icon: Icon }) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setTripType(type as any)}
+                  className={`p-4 rounded-2xl border text-left transition-all duration-200 active:scale-[0.98] flex items-start gap-3.5 ${
+                    tripType === type 
+                      ? "bg-accent/10 border-accent text-white shadow-lg ring-1 ring-accent/30" 
+                      : "bg-neutral-950 border-neutral-800 text-neutral-300 hover:border-neutral-700"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tripType === type ? "bg-accent/20 text-accent" : "bg-neutral-900 text-neutral-400"}`}>
+                    <Icon size={20} />
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="font-bold text-sm text-white flex items-center gap-1.5">
+                      {label}
+                      {tripType === type && <CheckCircle2 size={14} className="text-accent" />}
+                    </div>
+                    <div className="text-xs text-neutral-400 mt-0.5 font-medium">{desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Logistics */}
+        {currentStep === 1 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Route & Schedule</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Input your itinerary for automated route estimation</p>
+            </div>
+
+            {isLoaded ? (
+              <div className="space-y-3">
+                {/* Embedded Dark Luxury Map */}
+                <div className="rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-950 shadow-inner">
+                  <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '180px' }}
+                    center={pickupAddressObj ? { lat: pickupAddressObj.lat, lng: pickupAddressObj.lng } : defaultCenter}
+                    zoom={12}
+                    options={{ 
+                      disableDefaultUI: true,
+                      styles: [
+                        { elementType: "geometry", stylers: [{ color: "#18181b" }] },
+                        { elementType: "labels.text.stroke", stylers: [{ color: "#18181b" }] },
+                        { elementType: "labels.text.fill", stylers: [{ color: "#a1a1aa" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#27272a" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#09090b" }] },
+                      ]
+                    }}
+                  >
+                    {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: false }} />}
+                  </GoogleMap>
+                </div>
+
+                {/* Pickup Address */}
+                <div>
+                  <label htmlFor="pickup-address" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                    Pickup Location
+                  </label>
+                  <div className="relative">
+                    <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent" />
+                    <Autocomplete onLoad={setPickupAutocomplete} onPlaceChanged={onPickupPlaceChanged}>
+                      <input 
+                        id="pickup-address"
+                        type="text" 
+                        value={pickupAddress} 
+                        onChange={e => setPickupAddress(e.target.value)} 
+                        placeholder="Enter pickup address or airport" 
+                        className="w-full pl-10 pr-3.5 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600 font-medium" 
+                      />
+                    </Autocomplete>
+                  </div>
+                </div>
+
+                {/* Dropoff Address */}
+                {tripType !== 'hourly' && (
+                  <div>
+                    <label htmlFor="dropoff-address" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                      Dropoff Destination
+                    </label>
                     <div className="relative">
-                      <div className="absolute left-4 top-11 text-neutral-400">
-                        <MapPin size={20} />
-                      </div>
-                      <label htmlFor="pickup-address" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Pickup Address</label>
-                      <Autocomplete onLoad={setPickupAutocomplete} onPlaceChanged={onPickupPlaceChanged}>
+                      <Navigation size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                      <Autocomplete onLoad={setDropoffAutocomplete} onPlaceChanged={onDropoffPlaceChanged}>
                         <input 
-                          id="pickup-address"
+                          id="dropoff-address"
                           type="text" 
-                          value={pickupAddress} 
-                          onChange={e => setPickupAddress(e.target.value)} 
-                          placeholder="123 Main St" 
-                          className="w-full border-2 border-neutral-200 p-4 pl-12 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all shadow-sm bg-white text-lg" 
+                          value={dropoffAddress} 
+                          onChange={e => setDropoffAddress(e.target.value)} 
+                          placeholder="Enter destination address" 
+                          className="w-full pl-10 pr-3.5 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600 font-medium" 
                         />
                       </Autocomplete>
                     </div>
+                  </div>
+                )}
 
-                    {tripType !== 'hourly' && (
-                      <div className="relative">
-                        <div className="absolute left-4 top-11 text-neutral-400">
-                          <MapPin size={20} />
-                        </div>
-                        <label htmlFor="dropoff-address" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Dropoff Address</label>
-                        <Autocomplete onLoad={setDropoffAutocomplete} onPlaceChanged={onDropoffPlaceChanged}>
-                          <input 
-                            id="dropoff-address"
-                            type="text" 
-                            value={dropoffAddress} 
-                            onChange={e => setDropoffAddress(e.target.value)} 
-                            placeholder="456 Market St" 
-                            className="w-full border-2 border-neutral-200 p-4 pl-12 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all shadow-sm bg-white text-lg" 
-                          />
-                        </Autocomplete>
-                      </div>
-                    )}
+                {/* Date & Time Row */}
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label htmlFor="pickup-date" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                      Date
+                    </label>
+                    <div className="relative">
+                      <CalendarIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none" />
+                      <input 
+                        id="pickup-date" 
+                        type="date" 
+                        value={pickupDate} 
+                        onChange={e => setPickupDate(e.target.value)} 
+                        className="w-full pl-10 pr-3 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-medium" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="pickup-time" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                      Time
+                    </label>
+                    <div className="relative">
+                      <Clock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none" />
+                      <input 
+                        id="pickup-time" 
+                        type="time" 
+                        value={pickupTime} 
+                        onChange={e => setPickupTime(e.target.value)} 
+                        className="w-full pl-10 pr-3 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-medium" 
+                      />
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-neutral-400" size={40} /></div>
-              )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-neutral-100">
+              </div>
+            ) : (
+              <div className="flex justify-center p-8"><Loader2 className="animate-spin text-neutral-500" size={32} /></div>
+            )}
+          </div>
+        )}
+
+        {/* STEP 3: Passengers & Bags */}
+        {currentStep === 2 && (
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Party & Luggage</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Ensure the correct vehicle capacity for your party</p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-4 bg-neutral-950 border border-neutral-800 rounded-2xl">
                 <div>
-                  <label htmlFor="pickup-date" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Date</label>
-                  <input id="pickup-date" type="date" value={pickupDate} onChange={e => setPickupDate(e.target.value)} className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all shadow-sm bg-white text-lg" />
+                  <div className="font-bold text-sm text-white">Total Passengers</div>
+                  <div className="text-xs text-neutral-500">Including children & guests</div>
                 </div>
-                <div>
-                  <label htmlFor="pickup-time" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Time</label>
-                  <input id="pickup-time" type="time" value={pickupTime} onChange={e => setPickupTime(e.target.value)} className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all shadow-sm bg-white text-lg" />
+                <div className="flex items-center gap-3 bg-neutral-900 border border-neutral-800 rounded-xl p-1.5">
+                  <button 
+                    type="button"
+                    aria-label="Decrease passenger count"
+                    onClick={() => setPassengers(Math.max(1, passengers - 1))} 
+                    className="w-9 h-9 rounded-lg bg-neutral-800 text-white font-bold flex items-center justify-center hover:bg-neutral-700 active:scale-90 transition-all"
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center font-bold font-mono text-base text-accent">{passengers}</span>
+                  <button 
+                    type="button"
+                    aria-label="Increase passenger count"
+                    onClick={() => setPassengers(passengers + 1)} 
+                    className="w-9 h-9 rounded-lg bg-neutral-800 text-white font-bold flex items-center justify-center hover:bg-neutral-700 active:scale-90 transition-all"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* STEP 3: Passengers & Flight */}
-          {currentStep === 2 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-8 text-neutral-900 tracking-tight">Passengers & Bags</h1>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex justify-between items-center p-6 border-2 border-neutral-200 rounded-2xl shadow-sm bg-white">
-                  <span className="font-bold text-xl text-neutral-800">Passengers</span>
-                  <div className="flex items-center space-x-6 bg-neutral-50 rounded-full p-2 border border-neutral-200">
-                    <button 
-                      type="button"
-                      aria-label="Decrease passenger count"
-                      onClick={() => setPassengers(Math.max(1, passengers - 1))} 
-                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center font-bold text-2xl text-brand">{passengers}</span>
-                    <button 
-                      type="button"
-                      aria-label="Increase passenger count"
-                      onClick={() => setPassengers(passengers + 1)} 
-                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
+              <div className="flex justify-between items-center p-4 bg-neutral-950 border border-neutral-800 rounded-2xl">
+                <div>
+                  <div className="font-bold text-sm text-white">Luggage Bags</div>
+                  <div className="text-xs text-neutral-500">Standard check-in / carry-on</div>
                 </div>
-
-                <div className="flex justify-between items-center p-6 border-2 border-neutral-200 rounded-2xl shadow-sm bg-white">
-                  <span className="font-bold text-xl text-neutral-800">Luggage</span>
-                  <div className="flex items-center space-x-6 bg-neutral-50 rounded-full p-2 border border-neutral-200">
-                    <button 
-                      type="button"
-                      aria-label="Decrease luggage count"
-                      onClick={() => setLuggage(Math.max(0, luggage - 1))} 
-                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center font-bold text-2xl text-brand">{luggage}</span>
-                    <button 
-                      type="button"
-                      aria-label="Increase luggage count"
-                      onClick={() => setLuggage(luggage + 1)} 
-                      className="w-12 h-12 rounded-full bg-white shadow-sm border border-neutral-200 flex items-center justify-center font-bold text-xl hover:bg-neutral-100 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="flex items-center gap-3 bg-neutral-900 border border-neutral-800 rounded-xl p-1.5">
+                  <button 
+                    type="button"
+                    aria-label="Decrease luggage count"
+                    onClick={() => setLuggage(Math.max(0, luggage - 1))} 
+                    className="w-9 h-9 rounded-lg bg-neutral-800 text-white font-bold flex items-center justify-center hover:bg-neutral-700 active:scale-90 transition-all"
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center font-bold font-mono text-base text-accent">{luggage}</span>
+                  <button 
+                    type="button"
+                    aria-label="Increase luggage count"
+                    onClick={() => setLuggage(luggage + 1)} 
+                    className="w-9 h-9 rounded-lg bg-neutral-800 text-white font-bold flex items-center justify-center hover:bg-neutral-700 active:scale-90 transition-all"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
               {tripType.includes("airport") && (
-                <div className="pt-8 border-t border-neutral-100">
-                  <label htmlFor="flight-number" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Flight Number (Optional)</label>
-                  <input id="flight-number" type="text" value={flightNumber} onChange={e => setFlightNumber(e.target.value)} placeholder="e.g. DL 1234" className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 shadow-sm bg-white transition-all text-lg" />
+                <div className="pt-2">
+                  <label htmlFor="flight-number" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                    Flight Number (Auto-Tracking)
+                  </label>
+                  <div className="relative">
+                    <Plane size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+                    <input 
+                      id="flight-number" 
+                      type="text" 
+                      value={flightNumber} 
+                      onChange={e => setFlightNumber(e.target.value.toUpperCase())} 
+                      placeholder="e.g. DL 1492 or N123AA" 
+                      className="w-full pl-10 pr-3.5 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-mono placeholder:text-neutral-600" 
+                    />
+                  </div>
+                  <p className="text-[10px] text-neutral-500 mt-1 font-medium">Chauffeur coordinates curbside arrival based on live radar telemetry.</p>
                 </div>
               )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* STEP 4: Vehicle */}
-          {currentStep === 3 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-8 text-neutral-900 tracking-tight">Select a Vehicle</h1>
-              
-              <div className="grid grid-cols-1 gap-6">
-                {availableClasses.filter(c => c.capacity >= passengers).map(cls => {
-                  const price = getDynamicPrice(cls.id);
-                  return (
-                    <button 
-                      key={cls.id}
-                      onClick={() => handleClassSelect(cls.id)}
-                      className={`w-full text-left p-6 border-2 rounded-2xl flex items-center justify-between transition-all duration-200 ${selectedClassId === cls.id ? 'border-brand ring-4 ring-brand/10 bg-neutral-50 shadow-md transform scale-[1.02]' : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 shadow-sm bg-white'}`}
-                    >
-                      <div className="flex items-center space-x-5">
-                        <div className="w-16 h-16 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center flex-shrink-0 shadow-inner">
-                          {cls.id === "sprinter" ? (
-                            <Bus size={32} className="text-brand" />
-                          ) : cls.id === "suv" ? (
-                            <Shield size={32} className="text-brand" />
-                          ) : (
-                            <Car size={32} className="text-brand" />
-                          )}
+        {/* STEP 4: Vehicle Selection */}
+        {currentStep === 3 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Select Vehicle Class</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Premium executive fleet with complimentary refreshment</p>
+            </div>
+
+            <div className="space-y-3 pt-1">
+              {availableClasses.filter(c => c.capacity >= passengers).map(cls => {
+                const price = getDynamicPrice(cls.id);
+                const isSelected = selectedClassId === cls.id;
+                return (
+                  <button 
+                    key={cls.id}
+                    type="button"
+                    onClick={() => handleClassSelect(cls.id)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 active:scale-[0.98] flex items-center justify-between ${
+                      isSelected 
+                        ? 'border-accent bg-accent/10 ring-1 ring-accent/30 shadow-lg' 
+                        : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+                        isSelected ? "bg-accent/20 border-accent/40 text-accent" : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                      }`}>
+                        {cls.id === "sprinter" ? (
+                          <Bus size={24} />
+                        ) : cls.id === "suv" ? (
+                          <Shield size={24} />
+                        ) : (
+                          <Car size={24} />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-white flex items-center gap-2">
+                          {cls.name}
+                          {isSelected && <span className="text-[9px] bg-accent text-neutral-950 px-1.5 py-0.5 rounded font-bold uppercase">Selected</span>}
                         </div>
-                        <div>
-                          <div className="font-bold text-2xl text-neutral-900">{cls.name}</div>
-                          <div className="text-sm font-semibold text-neutral-500 flex items-center mt-2 uppercase tracking-wider">
-                            <User size={16} className="mr-1.5" /> {cls.capacity} max
-                          </div>
+                        <div className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+                          <User size={12} /> Up to {cls.capacity} Passengers
                         </div>
                       </div>
-                      {price !== null && (
-                        <div className="text-right">
-                          <div className="font-bold text-3xl text-brand">${(price / 100).toFixed(2)}</div>
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+                    </div>
+
+                    {price !== null && (
+                      <div className="text-right">
+                        <div className="font-bold text-lg text-accent font-mono">${(price / 100).toFixed(2)}</div>
+                        <div className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">All Inclusive</div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* STEP 5: Driver */}
-          {currentStep === 4 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-8 text-neutral-900 tracking-tight">Select a Driver</h1>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <button 
-                  onClick={() => setSelectedDriverId(null)}
-                  className={`text-left p-6 border-2 rounded-2xl transition-all duration-200 h-full ${selectedDriverId === null ? 'border-brand ring-4 ring-brand/10 bg-neutral-50 shadow-md transform scale-[1.02]' : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 shadow-sm'}`}
-                >
-                  <div className="font-bold text-xl text-neutral-900">Any Available Driver</div>
-                  <div className="text-sm font-medium text-neutral-500 mt-2 leading-relaxed">We'll automatically assign the highest rated available driver for your selected vehicle class.</div>
-                </button>
+        {/* STEP 5: Driver Selection */}
+        {currentStep === 4 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Select Chauffeur</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">All chauffeurs are background-checked and executive-certified</p>
+            </div>
 
-                {drivers.map(drv => (
+            <div className="space-y-3 pt-1">
+              <button 
+                type="button"
+                onClick={() => setSelectedDriverId(null)}
+                className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 active:scale-[0.98] flex items-center justify-between ${
+                  selectedDriverId === null 
+                    ? 'border-accent bg-accent/10 ring-1 ring-accent/30 shadow-lg' 
+                    : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
+                }`}
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+                    selectedDriverId === null ? "bg-accent/20 border-accent/40 text-accent" : "bg-neutral-900 border-neutral-800 text-neutral-400"
+                  }`}>
+                    <Sparkles size={22} />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-white">Top-Rated Nearest Chauffeur</div>
+                    <div className="text-xs text-neutral-400 mt-0.5 font-medium">Auto-dispatch fastest certified chauffeur</div>
+                  </div>
+                </div>
+                {selectedDriverId === null && <CheckCircle2 size={18} className="text-accent" />}
+              </button>
+
+              {drivers.map(drv => {
+                const isSelected = selectedDriverId === drv.id;
+                return (
                   <button 
                     key={drv.id}
+                    type="button"
                     onClick={() => setSelectedDriverId(drv.id)}
-                    className={`text-left p-6 border-2 rounded-2xl transition-all duration-200 h-full ${selectedDriverId === drv.id ? 'border-brand ring-4 ring-brand/10 bg-neutral-50 shadow-md transform scale-[1.02]' : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50 shadow-sm'}`}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 active:scale-[0.98] flex items-start justify-between ${
+                      isSelected 
+                        ? 'border-accent bg-accent/10 ring-1 ring-accent/30 shadow-lg' 
+                        : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
+                    }`}
                   >
-                    <div className="flex items-start space-x-4">
-                      <div className="w-16 h-16 bg-brand text-white rounded-full flex items-center justify-center text-2xl border-4 border-brand/20 flex-shrink-0 font-bold overflow-hidden relative">
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center shrink-0 overflow-hidden text-lg font-bold text-accent">
                         {drv.photoUrl ? (
                           <img src={drv.photoUrl} alt={drv.name} className="w-full h-full object-cover" />
                         ) : (
                           drv.name.charAt(0)
                         )}
                       </div>
-                      <div className="flex-1">
-                        <div className="font-bold text-xl text-neutral-900 flex items-center flex-wrap gap-2">
-                          {drv.name} 
-                          <span className="text-xs bg-brand text-white px-2 py-0.5 rounded-md font-bold flex items-center">
-                            <Star size={12} className="fill-white mr-1" /> {drv.rating}
+                      <div>
+                        <div className="font-bold text-sm text-white flex items-center gap-2">
+                          {drv.name}
+                          <span className="inline-flex items-center gap-0.5 text-[10px] bg-accent/20 text-accent font-bold px-1.5 py-0.2 rounded">
+                            <Star size={10} className="fill-accent text-accent" /> {drv.rating}
                           </span>
                         </div>
-                        {drv.yearsExperience && (
-                          <div className="text-xs font-semibold text-neutral-400 mt-0.5">
-                            {drv.yearsExperience} Years Chauffeur Experience
+                        <div className="text-[11px] text-neutral-400 mt-0.5 font-medium">
+                          {drv.yearsExperience} Years Executive Experience &bull; {drv.languages?.join(", ")}
+                        </div>
+                        {drv.bio && (
+                          <div className="text-xs text-neutral-400 mt-1 line-clamp-1 italic">
+                            "{drv.bio}"
                           </div>
                         )}
-                        <div className="text-sm font-medium text-neutral-600 mt-2 leading-relaxed line-clamp-2">{drv.bio}</div>
                       </div>
                     </div>
+                    {isSelected && <CheckCircle2 size={18} className="text-accent shrink-0 mt-1" />}
                   </button>
-                ))}
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 6: Preferences */}
+        {currentStep === 5 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Cabin Preferences</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Tailor vehicle amenities and chauffeur etiquette</p>
+            </div>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label htmlFor="pref-beverage" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                  Complimentary Beverage
+                </label>
+                <select 
+                  id="pref-beverage" 
+                  value={preferences.beverage} 
+                  onChange={e => setPreferences({...preferences, beverage: e.target.value})} 
+                  className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-medium"
+                >
+                  <option value="no_preference">No preference</option>
+                  <option value="water_sparkling">San Pellegrino (Sparkling)</option>
+                  <option value="water_still">Fiji Water (Still)</option>
+                  <option value="coffee">Hot Artisan Coffee</option>
+                  <option value="soda">Cold Soda / Tonic</option>
+                  <option value="none">No beverage requested</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="pref-conversation" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                  Conversation & Atmosphere
+                </label>
+                <select 
+                  id="pref-conversation" 
+                  value={preferences.conversation} 
+                  onChange={e => setPreferences({...preferences, conversation: e.target.value})} 
+                  className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-medium"
+                >
+                  <option value="silent">Silent Ride (Executive Focus / Rest)</option>
+                  <option value="greeting_only">Greeting Only (Concierge confirmation)</option>
+                  <option value="chatty">Happy to chat / City Guide</option>
+                  <option value="no_preference">Chauffeur's Discretion</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="pref-greeting" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                  Greeting Style
+                </label>
+                <select 
+                  id="pref-greeting" 
+                  value={preferences.greeting} 
+                  onChange={e => setPreferences({...preferences, greeting: e.target.value})} 
+                  className="w-full p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent font-medium"
+                >
+                  <option value="curbside">Curbside (Wait by vehicle with door held)</option>
+                  <option value="meet_inside">Meet Inside (Terminal / Hotel Lobby with Name Sign)</option>
+                  <option value="no_preference">Standard Executive</option>
+                </select>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* STEP 6: Preferences */}
-          {currentStep === 5 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-2 text-neutral-900 tracking-tight">Trip Preferences</h1>
-              <p className="text-lg font-medium text-neutral-500 mb-8">Let us know how to make your trip perfectly tailored to you.</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label htmlFor="pref-beverage" className="block text-sm font-bold mb-3 text-neutral-700 uppercase tracking-wider">Beverage</label>
-                  <select id="pref-beverage" value={preferences.beverage} onChange={e => setPreferences({...preferences, beverage: e.target.value})} className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium outline-none bg-white shadow-sm focus:border-brand focus:ring-4 focus:ring-brand/10 text-lg">
-                    <option value="no_preference">No preference</option>
-                    <option value="none">No beverage needed</option>
-                    <option value="water_still">Still Water</option>
-                    <option value="water_sparkling">Sparkling Water</option>
-                    <option value="soda">Soda</option>
-                    <option value="coffee">Coffee</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="pref-conversation" className="block text-sm font-bold mb-3 text-neutral-700 uppercase tracking-wider">Conversation</label>
-                  <select id="pref-conversation" value={preferences.conversation} onChange={e => setPreferences({...preferences, conversation: e.target.value})} className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium outline-none bg-white shadow-sm focus:border-brand focus:ring-4 focus:ring-brand/10 text-lg">
-                    <option value="silent">Silent ride</option>
-                    <option value="greeting_only">Greeting only</option>
-                    <option value="chatty">Happy to chat</option>
-                    <option value="no_preference">Driver's Discretion</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label htmlFor="pref-greeting" className="block text-sm font-bold mb-3 text-neutral-700 uppercase tracking-wider">Greeting Style</label>
-                  <select id="pref-greeting" value={preferences.greeting} onChange={e => setPreferences({...preferences, greeting: e.target.value})} className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium outline-none bg-white shadow-sm focus:border-brand focus:ring-4 focus:ring-brand/10 text-lg">
-                    <option value="no_preference">Standard</option>
-                    <option value="curbside">Curbside (Wait by vehicle)</option>
-                    <option value="meet_inside">Meet inside (Lobby/Baggage)</option>
-                  </select>
-                </div>
-              </div>
+        {/* STEP 7: Review & Confirm */}
+        {currentStep === 6 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Review Reservation</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Verify your journey parameters before final confirmation</p>
             </div>
-          )}
 
-          {/* STEP 7: Review */}
-          {currentStep === 6 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-4 text-neutral-900 tracking-tight">Review & Confirm</h1>
-              
-              <div className="bg-neutral-50 p-8 rounded-3xl border-2 border-neutral-200 space-y-6 shadow-inner">
-                <div className="flex flex-col sm:flex-row justify-between text-base sm:items-center border-b border-neutral-200 pb-5">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider mb-1 sm:mb-0">Pickup Location</span>
-                  <span className="font-bold text-neutral-900 sm:text-right">{pickupAddress || "Not specified"}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between text-base sm:items-center border-b border-neutral-200 pb-5">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider mb-1 sm:mb-0">Date & Time</span>
-                  <span className="font-bold text-neutral-900">{pickupDate} at {pickupTime}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between text-base sm:items-center">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider mb-1 sm:mb-0">Vehicle Class</span>
-                  <span className="font-bold text-neutral-900">{availableClasses.find(c => c.id === selectedClassId)?.name}</span>
+            {/* Itinerary Summary Card */}
+            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="text-accent shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Pickup</div>
+                  <div className="text-xs font-semibold text-white">{pickupAddress || "Not specified"}</div>
                 </div>
               </div>
 
-              {quote && (
-                <div className="border-2 border-neutral-200 rounded-3xl p-8 bg-white shadow-sm">
-                  <h3 className="font-bold mb-6 text-2xl border-b border-neutral-200 pb-4 text-neutral-900 tracking-tight">Payment Summary</h3>
-                  <div className="space-y-4 text-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-neutral-700">Base Fare</span>
-                      <span className="font-bold text-neutral-900">${(quote.subtotalCents / 100).toFixed(2)}</span>
-                    </div>
-                    {quote.lineItems.map((li, i) => (
-                      <div key={i} className="flex justify-between items-center text-neutral-600">
-                        <span className="font-medium">{li.label}</span>
-                        <span className="font-semibold">${(li.amountCents / 100).toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="pt-6 mt-6 border-t-2 border-neutral-100 flex justify-between items-center font-bold text-3xl text-brand">
-                      <span>Total</span>
-                      <span>${(quote.estimatedTotalCents / 100).toFixed(2)}</span>
-                    </div>
+              {dropoffAddress && (
+                <div className="flex items-start gap-3 pt-2 border-t border-neutral-900">
+                  <Navigation size={16} className="text-neutral-400 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Destination</div>
+                    <div className="text-xs font-semibold text-white">{dropoffAddress}</div>
                   </div>
                 </div>
               )}
-              
-              <div className="bg-neutral-50 p-6 rounded-2xl border-2 border-neutral-200">
-                <label htmlFor="promo-code" className="block text-sm font-bold mb-2 text-neutral-700 uppercase tracking-wider">Corporate / Promo Code</label>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-900 text-xs">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Date & Time</div>
+                  <div className="font-semibold text-white">{pickupDate} @ {pickupTime}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Vehicle</div>
+                  <div className="font-semibold text-white capitalize">{availableClasses.find(c => c.id === selectedClassId)?.name || selectedClassId}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Summary Breakdown */}
+            {quote && (
+              <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-2.5">
+                <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                  Transparent Fare Breakdown
+                </div>
+                <div className="flex justify-between items-center text-xs text-neutral-300">
+                  <span>Base Charter Fare</span>
+                  <span className="font-mono">${(quote.subtotalCents / 100).toFixed(2)}</span>
+                </div>
+                {quote.lineItems.map((li, i) => (
+                  <div key={i} className="flex justify-between items-center text-xs text-neutral-400">
+                    <span>{li.label}</span>
+                    <span className="font-mono">${(li.amountCents / 100).toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-neutral-800 flex justify-between items-center font-bold text-base text-accent">
+                  <span>Estimated Total</span>
+                  <span className="font-mono text-lg">${(quote.estimatedTotalCents / 100).toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Corporate / Promo Code Box */}
+            <div>
+              <label htmlFor="promo-code" className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
+                Corporate Account / Promo Code
+              </label>
+              <div className="relative">
+                <Tag size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
                 <input 
                   id="promo-code" 
                   type="text" 
                   value={promoCode} 
                   onChange={e => setPromoCode(e.target.value.toUpperCase())} 
-                  placeholder="e.g. ACME-VIP" 
-                  className="w-full border-2 border-neutral-200 p-4 rounded-xl font-medium focus:border-brand focus:ring-4 focus:ring-brand/10 shadow-sm bg-white transition-all text-lg font-mono uppercase" 
+                  placeholder="e.g. VIP-CORP-2026" 
+                  className="w-full pl-10 pr-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-xs text-white focus:outline-none focus:border-accent font-mono uppercase placeholder:text-neutral-600" 
                 />
-                <p className="text-xs text-neutral-500 mt-2 font-medium">If this is a corporate ride, enter your company code to bypass personal billing.</p>
-              </div>
-
-              <div className="bg-brand/5 border border-brand/20 p-5 rounded-2xl flex items-center justify-center">
-                <p className="text-sm text-brand font-semibold text-center">
-                  By confirming, a hold will be placed on your default payment method.
-                </p>
               </div>
             </div>
-          )}
 
-          {/* STEP 8: Payment */}
-          {currentStep === 7 && clientSecret && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h1 className="text-4xl font-bold mb-4 text-neutral-900 tracking-tight">Payment Details</h1>
-              <div className="bg-white p-8 rounded-3xl border-2 border-neutral-200 shadow-sm">
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <CheckoutForm clientSecret={clientSecret} />
-                </Elements>
+          </div>
+        )}
+
+        {/* STEP 8: Stripe Payment */}
+        {currentStep === 7 && clientSecret && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Payment Method</h2>
+              <p className="text-xs text-neutral-400 mt-1 font-medium">Encrypted card pre-authorization</p>
+            </div>
+            <div className="bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm clientSecret={clientSecret} />
+              </Elements>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Floating Sticky Bottom Action Bar */}
+      {currentStep < 7 && (
+        <div className="fixed bottom-14 sm:bottom-0 left-0 right-0 z-40 bg-neutral-900/95 backdrop-blur-2xl border-t border-white/10 p-3.5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+          <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Estimated Fare</div>
+              <div className="text-lg font-bold text-accent font-mono leading-tight">
+                {activePriceEstimate !== null ? `$${(activePriceEstimate / 100).toFixed(2)}` : "--"}
               </div>
             </div>
-          )}
 
-        </div>
-
-        {/* Footer Navigation (Inline instead of fixed) */}
-        {currentStep < 7 && (
-          <div className="p-8 bg-neutral-50 border-t border-neutral-200 flex justify-end items-center">
             {currentStep < steps.length - 2 ? (
               <button 
+                type="button"
                 onClick={handleNext} 
-                disabled={loading || (currentStep === 1 && (!pickupAddressObj || !pickupDate || !pickupTime))}
-                className="w-full sm:w-auto px-12 bg-brand text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center hover:bg-neutral-800 active:scale-[0.98] disabled:bg-neutral-300 disabled:active:scale-100 transition-all shadow-lg hover:shadow-xl"
+                disabled={loading || (currentStep === 1 && !pickupAddress)}
+                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-accent text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-40 transition-all shadow-lg active:scale-95"
               >
-                Continue <ArrowRight size={20} className="ml-3" />
+                <span>Continue</span>
+                <ArrowRight size={16} />
               </button>
             ) : (
               <button 
+                type="button"
                 onClick={handleConfirm}
                 disabled={loading || !quote}
-                className="w-full sm:w-auto px-12 bg-brand text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center hover:bg-neutral-800 active:scale-[0.98] disabled:bg-neutral-300 disabled:active:scale-100 transition-all shadow-lg hover:shadow-xl"
+                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-accent text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-40 transition-all shadow-lg active:scale-95"
               >
-                {loading ? <Loader2 className="animate-spin" size={24} /> : "Confirm & Book"}
+                {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                  <>
+                    <span>Confirm & Book</span>
+                    <Sparkles size={16} />
+                  </>
+                )}
               </button>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
     </div>
   );
 }

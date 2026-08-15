@@ -1,54 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: var(--color-neutral-50); 
-  --foreground: var(--color-neutral-900);
+  --background: #09090b; 
+  --foreground: #f4f4f5;
 
-  /* Deep Charcoal brand color */
-  --color-brand: oklch(20% 0.01 260);
+  /* Deep Charcoal & Obsidian brand color */
+  --color-brand: #18181b;
   
   --color-white: #ffffff;
   --color-black: #000000;
 
-  /* Warm Champagne accent */
-  --color-accent: oklch(85% 0.04 80);
-  --color-accent-hover: oklch(80% 0.05 80);
+  /* Warm Champagne Gold accent */
+  --color-accent: #e5c378;
+  --color-accent-hover: #d4af37;
 
-  /* Neutrals tinted toward 260 (deep blue/charcoal) */
-  --color-neutral-50:  oklch(98% 0.005 260);
-  --color-neutral-100: oklch(95% 0.005 260);
-  --color-neutral-200: oklch(90% 0.005 260);
-  --color-neutral-300: oklch(80% 0.005 260);
-  --color-neutral-400: oklch(70% 0.005 260);
-  --color-neutral-500: oklch(60% 0.005 260);
-  --color-neutral-600: oklch(50% 0.005 260);
-  --color-neutral-700: oklch(40% 0.005 260);
-  --color-neutral-800: oklch(30% 0.005 260);
-  --color-neutral-900: oklch(20% 0.01 260);
-  --color-neutral-950: oklch(15% 0.01 260);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(12% 0.01 260); /* darkest possible background */
-    --foreground: oklch(98% 0.005 260);
-    
-    --color-white: oklch(15% 0.01 260); /* Standard white surfaces become standard dark surfaces */
-    
-    --color-brand: oklch(98% 0.005 260);
-    
-    --color-neutral-50:  oklch(18% 0.01 260); /* Elevated surface (was bg-neutral-50) */
-    --color-neutral-100: oklch(22% 0.01 260); /* Borders / hover states */
-    --color-neutral-200: oklch(28% 0.01 260);
-    --color-neutral-300: oklch(40% 0.005 260);
-    --color-neutral-400: oklch(55% 0.005 260);
-    --color-neutral-500: oklch(70% 0.005 260);
-    --color-neutral-600: oklch(80% 0.005 260);
-    --color-neutral-700: oklch(90% 0.005 260);
-    --color-neutral-800: oklch(95% 0.005 260);
-    --color-neutral-900: oklch(98% 0.005 260);
-    --color-neutral-950: oklch(99% 0.005 260);
-  }
+  /* Consistent Obsidian Neutrals */
+  --color-neutral-50:  #141418;
+  --color-neutral-100: #1c1c22;
+  --color-neutral-200: #272730;
+  --color-neutral-300: #3f3f46;
+  --color-neutral-400: #71717a;
+  --color-neutral-500: #a1a1aa;
+  --color-neutral-600: #d4d4d8;
+  --color-neutral-700: #e4e4e7;
+  --color-neutral-800: #f4f4f5;
+  --color-neutral-900: #fafafa;
+  --color-neutral-950: #ffffff;
 }
 
 @theme inline {
@@ -77,8 +54,40 @@
   --font-mono: var(--font-geist-mono);
 }
 
-body {
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html, body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* iOS Safe Area Padding Helpers */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.mb-safe {
+  margin-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
