@@ -24,5 +24,6 @@ __exportStar(require("./driver"), exports);
 __exportStar(require("./vehicle"), exports);
 __exportStar(require("./airport"), exports);
 __exportStar(require("./reservation"), exports);
+__exportStar(require("./affiliate"), exports);
 __exportStar(require("./webhook"), exports);
 //# sourceMappingURL=index.js.map

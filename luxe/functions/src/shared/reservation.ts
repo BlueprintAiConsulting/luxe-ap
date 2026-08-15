@@ -119,6 +119,17 @@ export const reservationSchema = z.object({
   authorizedAmountCents: z.number().int(),
   capturedAmountCents: z.number().int(),
 
+  // --- Affiliate & Subcontracting ---
+  subcontractType: z.enum(["in_house", "farm_out", "farm_in"]).default("in_house").optional(),
+  affiliateId: z.string().nullable().optional(),
+  affiliateName: z.string().nullable().optional(),
+  affiliatePayoutCents: z.number().int().nullable().optional(),
+  affiliateStatus: z.enum(["pending", "accepted", "declined", "completed"]).nullable().optional(),
+  affiliateDriverName: z.string().nullable().optional(),
+  affiliateDriverPhone: z.string().nullable().optional(),
+  affiliateVehicleDescription: z.string().nullable().optional(),
+  affiliateNotes: z.string().nullable().optional(),
+
   // --- Cancellation ---
   cancelledAt: timestampSchema.nullable(),
   cancelledBy: z.string().nullable(),

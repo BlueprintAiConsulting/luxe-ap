@@ -41,11 +41,31 @@ export default function ReservationDrawer({
   const [loadingShift, setLoadingShift] = useState(false);
   const [shiftSuccess, setShiftSuccess] = useState<string | null>(null);
 
+  // Affiliate Farm-Out State
+  const [dispatchMode, setDispatchMode] = useState<"in_house" | "farm_out">(
+    reservation.subcontractType === "farm_out" ? "farm_out" : "in_house"
+  );
+  const [affiliates, setAffiliates] = useState<any[]>([]);
+  const [selectedAffiliateId, setSelectedAffiliateId] = useState(reservation.affiliateId || "");
+  const [farmOutPayoutOverride, setFarmOutPayoutOverride] = useState("");
+  const [farmOutNotes, setFarmOutNotes] = useState(reservation.affiliateNotes || "");
+  const [loadingFarmOut, setLoadingFarmOut] = useState(false);
+  const [farmOutSuccess, setFarmOutSuccess] = useState<string | null>(null);
+
   const functions = getFunctions(app);
   const assignDriverAndVehicle = httpsCallable(functions, "assignDriverAndVehicle");
   const adminOverrideStatus = httpsCallable(functions, "adminOverrideStatus");
   const checkFlightStatus = httpsCallable(functions, "checkFlightStatus");
   const autoShiftPickupForFlight = httpsCallable(functions, "autoShiftPickupForFlight");
+  const farmOutReservation = httpsCallable(functions, "farmOutReservation");
+
+  useEffect(() => {
+    const q = query(collection(db, "affiliates"));
+    const unsub = onSnapshot(q, snap => {
+      setAffiliates(snap.docs.map(d => ({ ...d.data(), affiliateId: d.id })));
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     if (reservation.flightNumber && !flightStatus) {
@@ -306,61 +326,204 @@ export default function ReservationDrawer({
           </section>
 
           {/* Assignment UI */}
-          <section className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-500 mb-4">Assignment</h3>
-            
-            {reservation.requestedDriverId && (
-              <div className="mb-4 text-xs font-bold text-amber-600 bg-amber-50 p-2 rounded border border-amber-200 flex items-center">
-                <ShieldAlert size={14} className="mr-2" /> 
-                Rider requested driver ID: {reservation.requestedDriverId}
+          <section className="bg-neutral-50 p-5 rounded-3xl border border-neutral-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-500">Dispatch & Assignment</h3>
+              <div className="flex bg-neutral-200/70 p-0.5 rounded-xl text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setDispatchMode("in_house")}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    dispatchMode === "in_house" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+                  }`}
+                >
+                  In-House Fleet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDispatchMode("farm_out")}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    dispatchMode === "farm_out" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+                  }`}
+                >
+                  Farm-Out Partner
+                </button>
+              </div>
+            </div>
+
+            {reservation.subcontractType === "farm_out" && (
+              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-1">
+                <div className="font-bold flex items-center justify-between">
+                  <span>Farmed Out to: {reservation.affiliateName}</span>
+                  <span className="uppercase font-bold text-[10px] px-2 py-0.5 bg-blue-200/60 rounded-full">
+                    {reservation.affiliateStatus || "pending"}
+                  </span>
+                </div>
+                <div>Agreed Partner Payout: ${((reservation.affiliatePayoutCents || 0) / 100).toFixed(2)}</div>
+                {reservation.affiliateDriverName && (
+                  <div className="pt-1 text-neutral-600">
+                    Partner Driver: <span className="font-bold">{reservation.affiliateDriverName}</span> ({reservation.affiliateDriverPhone}) - {reservation.affiliateVehicleDescription}
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="dispatch-select-driver" className="block text-xs font-bold text-neutral-700 mb-1">Driver</label>
-                <select 
-                  id="dispatch-select-driver"
-                  className="w-full border border-neutral-300 rounded-lg p-2 text-sm"
-                  value={selectedDriver}
-                  onChange={e => setSelectedDriver(e.target.value)}
-                >
-                  <option value="">-- Select Driver --</option>
-                  {drivers.map(d => (
-                    <option key={d.driverId} value={d.driverId}>{d.displayName}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="dispatch-select-vehicle" className="block text-xs font-bold text-neutral-700 mb-1">Vehicle</label>
-                <select 
-                  id="dispatch-select-vehicle"
-                  className="w-full border border-neutral-300 rounded-lg p-2 text-sm"
-                  value={selectedVehicle}
-                  onChange={e => setSelectedVehicle(e.target.value)}
-                >
-                  <option value="">-- Select Vehicle --</option>
-                  {vehicles.filter(v => v.classId === reservation.classId || !reservation.classId).map(v => (
-                    <option key={v.vehicleId} value={v.vehicleId}>{v.make} {v.model} ({v.licensePlate})</option>
-                  ))}
-                </select>
-                <div className="text-xs text-neutral-500 mt-1">Requested Class: {reservation.className}</div>
-              </div>
-              
-              {assignError && (
-                <div className="text-xs text-red-600 font-semibold p-2 bg-red-50 rounded">
-                  {assignError}
-                </div>
-              )}
+            {dispatchMode === "in_house" ? (
+              <div className="space-y-4">
+                {reservation.requestedDriverId && (
+                  <div className="text-xs font-bold text-amber-600 bg-amber-50 p-2 rounded border border-amber-200 flex items-center">
+                    <ShieldAlert size={14} className="mr-2" /> 
+                    Rider requested driver ID: {reservation.requestedDriverId}
+                  </div>
+                )}
 
-              <button 
-                disabled={loadingAssign || !selectedDriver || !selectedVehicle}
-                onClick={handleAssign}
-                className="w-full bg-black text-white rounded-lg py-2 text-sm font-bold disabled:opacity-50"
-              >
-                {loadingAssign ? "Assigning..." : "Assign & Notify"}
-              </button>
-            </div>
+                <div>
+                  <label htmlFor="dispatch-select-driver" className="block text-xs font-bold text-neutral-700 mb-1">In-House Driver</label>
+                  <select 
+                    id="dispatch-select-driver"
+                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    value={selectedDriver}
+                    onChange={e => setSelectedDriver(e.target.value)}
+                  >
+                    <option value="">-- Select Driver --</option>
+                    {drivers.map(d => (
+                      <option key={d.driverId} value={d.driverId}>{d.displayName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="dispatch-select-vehicle" className="block text-xs font-bold text-neutral-700 mb-1">Vehicle</label>
+                  <select 
+                    id="dispatch-select-vehicle"
+                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    value={selectedVehicle}
+                    onChange={e => setSelectedVehicle(e.target.value)}
+                  >
+                    <option value="">-- Select Vehicle --</option>
+                    {vehicles.map(v => (
+                      <option key={v.vehicleId} value={v.vehicleId}>{v.make} {v.model} ({v.licensePlate})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {assignError && (
+                  <div className="text-xs font-bold text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                    {assignError}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleAssign}
+                  disabled={loadingAssign || !selectedDriver || !selectedVehicle}
+                  className="w-full py-3 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-neutral-900 disabled:opacity-50 transition-all shadow-sm"
+                >
+                  {loadingAssign ? "Assigning..." : "Assign In-House Driver"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Affiliate Partner</label>
+                  <select
+                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    value={selectedAffiliateId}
+                    onChange={e => setSelectedAffiliateId(e.target.value)}
+                  >
+                    <option value="">-- Select Partner Carrier --</option>
+                    {affiliates.map(a => (
+                      <option key={a.affiliateId} value={a.affiliateId}>
+                        {a.companyName} ({Math.round(a.defaultCommissionRate * 100)}% Payout) - {a.complianceStatus === "active_compliant" ? "✓ Insured" : "⚠ Non-Compliant"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedAffiliateId && (
+                  <div className="p-3 bg-neutral-100 rounded-xl text-xs space-y-1">
+                    {(() => {
+                      const selectedAff = affiliates.find(a => a.affiliateId === selectedAffiliateId);
+                      if (!selectedAff) return null;
+                      const subtotal = reservation.pricing.subtotalCents / 100;
+                      const payout = (subtotal * (selectedAff.defaultCommissionRate || 0.85)).toFixed(2);
+                      const margin = (subtotal - Number(payout)).toFixed(2);
+                      return (
+                        <>
+                          <div className="flex justify-between font-semibold">
+                            <span>Client Subtotal:</span>
+                            <span>${subtotal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-blue-700">
+                            <span>Affiliate Payout ({Math.round(selectedAff.defaultCommissionRate * 100)}%):</span>
+                            <span>${payout}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-emerald-700">
+                            <span>Luxe Platform Margin:</span>
+                            <span>${margin}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Custom Payout Override ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Optional (defaults to partner commission %)"
+                    value={farmOutPayoutOverride}
+                    onChange={e => setFarmOutPayoutOverride(e.target.value)}
+                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-xs bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Special Partner Instructions</label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. VIP client, please send black executive SUV"
+                    value={farmOutNotes}
+                    onChange={e => setFarmOutNotes(e.target.value)}
+                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-xs bg-white resize-none"
+                  />
+                </div>
+
+                {farmOutSuccess && (
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 font-medium">
+                    ✓ {farmOutSuccess}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  disabled={loadingFarmOut || !selectedAffiliateId}
+                  onClick={async () => {
+                    setLoadingFarmOut(true);
+                    setFarmOutSuccess(null);
+                    try {
+                      const payoutCents = farmOutPayoutOverride ? Math.round(Number(farmOutPayoutOverride) * 100) : undefined;
+                      await farmOutReservation({
+                        reservationId: reservation.reservationId,
+                        affiliateId: selectedAffiliateId,
+                        payoutCentsOverride: payoutCents,
+                        notes: farmOutNotes || null,
+                      });
+                      setFarmOutSuccess("Trip successfully farmed out to affiliate partner!");
+                    } catch (e: any) {
+                      alert("Error farming out reservation: " + e.message);
+                    } finally {
+                      setLoadingFarmOut(false);
+                    }
+                  }}
+                  className="w-full py-3 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-black disabled:opacity-50 transition-all shadow-sm"
+                >
+                  {loadingFarmOut ? "Dispatching..." : "Dispatch to Affiliate Partner"}
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Pricing */}

@@ -8,4 +8,5 @@ export * from "./driver";
 export * from "./vehicle";
 export * from "./airport";
 export * from "./reservation";
+export * from "./affiliate";
 export * from "./webhook";

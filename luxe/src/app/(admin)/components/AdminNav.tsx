@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
-import { LayoutDashboard, Radio, Users, Car, DollarSign, UserCircle, LogOut, Menu, X, ArrowUpRight, Building2 } from "lucide-react";
+import { LayoutDashboard, Radio, Users, Car, DollarSign, UserCircle, LogOut, Menu, X, ArrowUpRight, Building2, Network } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
   { name: "Dispatch", href: "/dispatch", icon: Radio },
+  { name: "Affiliates", href: "/affiliates", icon: Network },
   { name: "Drivers", href: "/drivers", icon: Users },
   { name: "Vehicles", href: "/vehicles", icon: Car },
   { name: "Pricing", href: "/pricing", icon: DollarSign },

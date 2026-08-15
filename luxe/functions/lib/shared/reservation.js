@@ -105,6 +105,16 @@ exports.reservationSchema = zod_1.z.object({
     paymentStatus: zod_1.z.enum(["none", "authorized", "captured", "failed", "refunded"]),
     authorizedAmountCents: zod_1.z.number().int(),
     capturedAmountCents: zod_1.z.number().int(),
+    // --- Affiliate & Subcontracting ---
+    subcontractType: zod_1.z.enum(["in_house", "farm_out", "farm_in"]).default("in_house").optional(),
+    affiliateId: zod_1.z.string().nullable().optional(),
+    affiliateName: zod_1.z.string().nullable().optional(),
+    affiliatePayoutCents: zod_1.z.number().int().nullable().optional(),
+    affiliateStatus: zod_1.z.enum(["pending", "accepted", "declined", "completed"]).nullable().optional(),
+    affiliateDriverName: zod_1.z.string().nullable().optional(),
+    affiliateDriverPhone: zod_1.z.string().nullable().optional(),
+    affiliateVehicleDescription: zod_1.z.string().nullable().optional(),
+    affiliateNotes: zod_1.z.string().nullable().optional(),
     // --- Cancellation ---
     cancelledAt: timestamp_1.timestampSchema.nullable(),
     cancelledBy: zod_1.z.string().nullable(),
