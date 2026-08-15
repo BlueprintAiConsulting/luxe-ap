@@ -4,22 +4,18 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithGoogleEnsureProfile } from "@/lib/firebase/googleAuth";
 import { signInWithAppleEnsureProfile } from "@/lib/firebase/appleAuth";
-import { signInWithEmailAndPassword, signInWithCustomToken } from "firebase/auth";
+import { signInWithCustomToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Role } from "@/lib/firebase/auth";
 import { homeForRole } from "@/lib/auth/roleHome";
 import { 
   Shield, 
-  Mail, 
-  KeyRound, 
   User, 
   Car, 
   ArrowLeft, 
   Sparkles, 
   Radio, 
-  Copy, 
   Check, 
-  ExternalLink,
   Loader2,
   ChevronRight,
   Send
@@ -47,11 +43,7 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [loadingRole, setLoadingRole] = useState<string | null>(null);
   const [portal, setPortal] = useState<"select" | "rider" | "driver" | "admin">("select");
-  const [copiedLink, setCopiedLink] = useState(false);
   const [copiedSms, setCopiedSms] = useState(false);
-  
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   // Handle URL parameter auto-login: /login?demo=rider | driver | admin
   useEffect(() => {
@@ -82,7 +74,7 @@ function LoginContent() {
     }
   }
 
-  // 1-Click Instant Demo Login via Custom Token Callable
+  // 1-Click Instant Demo Login via Custom Token
   async function handleDemoLogin(targetRole: "rider" | "driver" | "admin") {
     setError("");
     setLoading(true);
@@ -164,33 +156,6 @@ function LoginContent() {
     }
   }
 
-  async function handleEmailSignIn(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPassword = password.trim();
-
-    if (!cleanEmail || !cleanPassword) {
-      setError("Please enter your email and password.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
-      const token = await userCredential.user.getIdTokenResult(true);
-      const role = (token.claims.role as Role) || "rider";
-      router.replace(searchParams.get("redirect") || homeForRole(role));
-    } catch (err: any) {
-      console.error("Sign in failed:", err);
-      setError(err?.message || "Login failed. Check email & password.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   function handleCopyClientMessage() {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://luxe-app-1786335311.web.app";
     const text = `Here is the interactive demo for the LUXE Chauffeured Platform:
@@ -212,12 +177,12 @@ ${origin}/login?demo=admin
   }
 
   const renderSocialButtons = () => (
-    <div className="space-y-3">
+    <div className="space-y-3 pt-2">
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-white border border-neutral-300 text-brand font-semibold text-sm transition-all hover:bg-neutral-50 active:scale-[0.99] disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-white border border-neutral-300 text-neutral-900 font-bold text-sm transition-all hover:bg-neutral-100 active:scale-[0.98] disabled:opacity-50 shadow-md"
       >
         <GoogleIcon />
         <span>{loading ? "Authenticating..." : "Continue with Google"}</span>
@@ -227,7 +192,7 @@ ${origin}/login?demo=admin
         type="button"
         onClick={handleAppleSignIn}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-neutral-900 text-white font-semibold text-sm transition-all hover:bg-black active:scale-[0.99] disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-neutral-900 hover:bg-black border border-neutral-800 text-white font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 shadow-md"
       >
         <AppleIcon />
         <span>{loading ? "Authenticating..." : "Continue with Apple"}</span>
@@ -237,12 +202,12 @@ ${origin}/login?demo=admin
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-neutral-950 py-10 px-4 sm:px-6 lg:px-8 relative selection:bg-accent selection:text-neutral-950">
-      {/* Background ambient lighting */}
+      {/* Ambient background lighting */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-neutral-950/80 to-neutral-950 pointer-events-none" />
 
       <div className="max-w-md w-full relative z-10 space-y-6">
         
-        {/* Luxury Card Container */}
+        {/* Luxury Glass Card */}
         <div className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           
           {/* Header */}
@@ -250,8 +215,8 @@ ${origin}/login?demo=admin
             {portal !== "select" && (
               <button 
                 onClick={() => setPortal("select")} 
-                className="absolute left-0 top-1 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-neutral-800"
-                title="Back to roles"
+                className="absolute left-0 top-1 text-neutral-400 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-neutral-800"
+                title="Back to portal selection"
               >
                 <ArrowLeft size={20} />
               </button>
@@ -264,9 +229,9 @@ ${origin}/login?demo=admin
             </h1>
             <p className="text-xs text-neutral-400 mt-2 font-medium">
               {portal === "select" && "Select a portal or tap a 1-click demo to begin"}
-              {portal === "rider" && "Sign in with your VIP Client credentials"}
-              {portal === "driver" && "Sign in to your Chauffeur cockpit"}
-              {portal === "admin" && "Sign in to Flight Dispatch & Radar"}
+              {portal === "rider" && "Sign in as a VIP Client with Google or Apple"}
+              {portal === "driver" && "Sign in to Chauffeur Cockpit with Google or Apple"}
+              {portal === "admin" && "Sign in to Dispatch & Radar with Google or Apple"}
             </p>
           </div>
 
@@ -284,9 +249,9 @@ ${origin}/login?demo=admin
               {/* 1-Click Instant Demo Launchers */}
               <div className="space-y-2.5">
                 <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>1-Click Instant Client Demo</span>
+                  <span>1-Click Client Demo Access</span>
                   <span className="text-accent font-semibold flex items-center gap-1 text-[10px]">
-                    <Sparkles size={11} /> Zero Passwords
+                    <Sparkles size={11} /> Instant Launch
                   </span>
                 </div>
 
@@ -374,7 +339,7 @@ ${origin}/login?demo=admin
                 <button
                   type="button"
                   onClick={handleCopyClientMessage}
-                  className="w-full py-3 px-4 bg-accent hover:bg-accent/90 text-neutral-950 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
+                  className="w-full py-3.5 px-4 bg-accent hover:bg-accent/90 text-neutral-950 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
                 >
                   {copiedSms ? (
                     <>
@@ -391,89 +356,24 @@ ${origin}/login?demo=admin
                 </p>
               </div>
 
-              {/* Standard Account Sign In Toggle */}
-              <div className="pt-2 border-t border-neutral-800 text-center">
-                <div className="text-xs text-neutral-400 mb-3">Or sign in with existing credentials:</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPortal("rider")}
-                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
-                  >
-                    Rider Sign-In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPortal("driver")}
-                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
-                  >
-                    Driver Sign-In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPortal("admin")}
-                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
-                  >
-                    Admin Sign-In
-                  </button>
-                </div>
+              {/* Social Login Direct Launchers */}
+              <div className="pt-3 border-t border-neutral-800">
+                <div className="text-xs text-neutral-400 text-center mb-3">Or sign in with your verified account:</div>
+                {renderSocialButtons()}
               </div>
 
             </div>
           )}
 
-          {/* STANDARD ROLE EMAIL / SOCIAL SIGN IN */}
+          {/* DEDICATED ROLE SELECTION GOOGLE/APPLE SIGN IN */}
           {(portal === "rider" || portal === "driver" || portal === "admin") && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <form onSubmit={handleEmailSignIn} className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Email Address</label>
-                  <div className="relative">
-                    <Mail size={16} aria-hidden="true" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={portal === "admin" ? "admin@luxe.app" : portal === "driver" ? "driver@luxe.app" : "client@domain.com"}
-                      className="w-full pl-10 pr-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Password</label>
-                  <div className="relative">
-                    <KeyRound size={16} aria-hidden="true" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
-                    <input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full pl-10 pr-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 px-4 rounded-xl bg-accent text-neutral-950 font-bold text-sm hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] shadow-md"
-                >
-                  {portal === "admin" && <Shield size={16} aria-hidden="true" />}
-                  {portal === "driver" && <Car size={16} aria-hidden="true" />}
-                  {portal === "rider" && <User size={16} aria-hidden="true" />}
-                  {loading ? "Authenticating..." : "Sign In"}
-                </button>
-              </form>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-neutral-800"></div>
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-neutral-900 text-neutral-500 font-medium uppercase tracking-wider">Or continue with</span>
+              <div className="text-center p-4 bg-neutral-950/70 border border-neutral-800/80 rounded-2xl">
+                <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">Authenticating For</div>
+                <div className="text-base font-bold text-white flex items-center justify-center gap-2">
+                  {portal === "rider" && <><User size={16} className="text-accent" /> VIP Rider / Client Portal</>}
+                  {portal === "driver" && <><Car size={16} className="text-amber-400" /> Executive Chauffeur Cockpit</>}
+                  {portal === "admin" && <><Shield size={16} className="text-cyan-400" /> Operations & Radar Admin</>}
                 </div>
               </div>
               
