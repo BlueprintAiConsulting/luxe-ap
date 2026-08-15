@@ -1,14 +1,29 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithGoogleEnsureProfile } from "@/lib/firebase/googleAuth";
 import { signInWithAppleEnsureProfile } from "@/lib/firebase/appleAuth";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithCustomToken } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Role } from "@/lib/firebase/auth";
 import { homeForRole } from "@/lib/auth/roleHome";
-import { Shield, Mail, KeyRound, User, Car, ArrowLeft } from "lucide-react";
+import { 
+  Shield, 
+  Mail, 
+  KeyRound, 
+  User, 
+  Car, 
+  ArrowLeft, 
+  Sparkles, 
+  Radio, 
+  Copy, 
+  Check, 
+  ExternalLink,
+  Loader2,
+  ChevronRight,
+  Send
+} from "lucide-react";
 
 const GoogleIcon = () => (
   <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -30,10 +45,21 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingRole, setLoadingRole] = useState<string | null>(null);
   const [portal, setPortal] = useState<"select" | "rider" | "driver" | "admin">("select");
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedSms, setCopiedSms] = useState(false);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Handle URL parameter auto-login: /login?demo=rider | driver | admin
+  useEffect(() => {
+    const demoParam = searchParams.get("demo");
+    if (demoParam === "rider" || demoParam === "driver" || demoParam === "admin") {
+      handleDemoLogin(demoParam);
+    }
+  }, [searchParams]);
 
   async function resolveRoleAndNavigate() {
     if (!auth.currentUser) return;
@@ -42,17 +68,53 @@ function LoginContent() {
     const redirectUrl = searchParams.get("redirect");
     
     if (redirectUrl) {
-      if (role === "admin" && !redirectUrl.startsWith("/admin") && !redirectUrl.startsWith("/dispatch")) {
+      if (role === "admin" && !redirectUrl.startsWith("/admin") && !redirectUrl.startsWith("/dispatch") && !redirectUrl.startsWith("/radar")) {
         router.replace(homeForRole(role));
         return;
       }
-      if (role === "driver" && !redirectUrl.startsWith("/today") && !redirectUrl.startsWith("/driver")) {
+      if (role === "driver" && !redirectUrl.startsWith("/today") && !redirectUrl.startsWith("/portal") && !redirectUrl.startsWith("/trip")) {
         router.replace(homeForRole(role));
         return;
       }
       router.replace(redirectUrl);
     } else {
       router.replace(homeForRole(role));
+    }
+  }
+
+  // 1-Click Instant Demo Login via Custom Token Callable
+  async function handleDemoLogin(targetRole: "rider" | "driver" | "admin") {
+    setError("");
+    setLoading(true);
+    setLoadingRole(targetRole);
+    try {
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const { app } = await import("@/lib/firebase/client");
+      
+      const loginFn = httpsCallable<{ role: string }, { customToken: string; role: Role; displayName: string }>(
+        getFunctions(app),
+        "loginAsDemoUser"
+      );
+      
+      const res = await loginFn({ role: targetRole });
+      if (res.data?.customToken) {
+        await signInWithCustomToken(auth, res.data.customToken);
+        const redirectUrl = searchParams.get("redirect");
+        if (redirectUrl) {
+          router.replace(redirectUrl);
+        } else if (targetRole === "admin") {
+          router.replace("/radar");
+        } else if (targetRole === "driver") {
+          router.replace("/today");
+        } else {
+          router.replace("/book");
+        }
+      }
+    } catch (err: any) {
+      console.error("Demo login error:", err);
+      setError(`Instant demo login error: ${err.message || String(err)}`);
+      setLoading(false);
+      setLoadingRole(null);
     }
   }
 
@@ -66,7 +128,7 @@ function LoginContent() {
         const { app } = await import("@/lib/firebase/client");
         const promoteFn = httpsCallable(getFunctions(app), "demoPromoteToAdmin");
         await promoteFn();
-        await auth.currentUser?.getIdToken(true); // Force refresh token for claims
+        await auth.currentUser?.getIdToken(true);
       }
       await resolveRoleAndNavigate();
     } catch (err: any) {
@@ -89,7 +151,7 @@ function LoginContent() {
         const { app } = await import("@/lib/firebase/client");
         const promoteFn = httpsCallable(getFunctions(app), "demoPromoteToAdmin");
         await promoteFn();
-        await auth.currentUser?.getIdToken(true); // Force refresh token for claims
+        await auth.currentUser?.getIdToken(true);
       }
       await resolveRoleAndNavigate();
     } catch (err: any) {
@@ -129,13 +191,33 @@ function LoginContent() {
     }
   }
 
+  function handleCopyClientMessage() {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://luxe-app-1786335311.web.app";
+    const text = `Here is the interactive demo for the LUXE Chauffeured Platform:
+
+👑 VIP Rider Experience:
+${origin}/login?demo=rider
+
+🚘 Executive Chauffeur HUD:
+${origin}/login?demo=driver
+
+📡 Live Airspace & Ground Radar (Admin):
+${origin}/login?demo=admin
+
+(Each link logs you in instantly with zero passwords required)`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedSms(true);
+    setTimeout(() => setCopiedSms(false), 3000);
+  }
+
   const renderSocialButtons = () => (
     <div className="space-y-3">
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-white border border-neutral-300 text-brand font-semibold text-base transition-all hover:bg-neutral-50 disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-white border border-neutral-300 text-brand font-semibold text-sm transition-all hover:bg-neutral-50 active:scale-[0.99] disabled:opacity-50"
       >
         <GoogleIcon />
         <span>{loading ? "Authenticating..." : "Continue with Google"}</span>
@@ -145,7 +227,7 @@ function LoginContent() {
         type="button"
         onClick={handleAppleSignIn}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-brand text-white font-semibold text-base transition-all hover:bg-neutral-900 disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-neutral-900 text-white font-semibold text-sm transition-all hover:bg-black active:scale-[0.99] disabled:opacity-50"
       >
         <AppleIcon />
         <span>{loading ? "Authenticating..." : "Continue with Apple"}</span>
@@ -154,168 +236,230 @@ function LoginContent() {
   );
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="max-w-md w-full relative z-10 transition-all duration-500">
-        <div className="space-y-8 bg-white p-8 sm:p-10 rounded-2xl border border-neutral-200 shadow-xl relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-neutral-950 py-10 px-4 sm:px-6 lg:px-8 relative selection:bg-accent selection:text-neutral-950">
+      {/* Background ambient lighting */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-neutral-950/80 to-neutral-950 pointer-events-none" />
+
+      <div className="max-w-md w-full relative z-10 space-y-6">
+        
+        {/* Luxury Card Container */}
+        <div className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           
-          <div className="relative flex flex-col items-center">
+          {/* Header */}
+          <div className="relative flex flex-col items-center text-center">
             {portal !== "select" && (
               <button 
                 onClick={() => setPortal("select")} 
-                className="absolute left-0 top-1 text-neutral-400 hover:text-brand transition-colors"
+                className="absolute left-0 top-1 text-neutral-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-neutral-800"
                 title="Back to roles"
               >
-                <ArrowLeft size={24} />
+                <ArrowLeft size={20} />
               </button>
             )}
-            <div className="space-y-2 text-center mb-2">
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-brand uppercase leading-none">
-                LUXE
-              </h1>
-              <p className="text-sm text-neutral-500 font-medium">
-                {portal === "select" && "Select your portal to continue"}
-                {portal === "rider" && "Sign in to book or manage rides."}
-                {portal === "driver" && "Sign in to view your assigned trips."}
-                {portal === "admin" && "Sign in to dispatch and operations."}
-              </p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[11px] font-bold uppercase tracking-widest mb-3">
+              <Sparkles size={12} /> Executive Mobility System
             </div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase leading-none font-serif">
+              LUXE
+            </h1>
+            <p className="text-xs text-neutral-400 mt-2 font-medium">
+              {portal === "select" && "Select a portal or tap a 1-click demo to begin"}
+              {portal === "rider" && "Sign in with your VIP Client credentials"}
+              {portal === "driver" && "Sign in to your Chauffeur cockpit"}
+              {portal === "admin" && "Sign in to Flight Dispatch & Radar"}
+            </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-xl flex items-start gap-3">
-              <div className="w-1 h-full bg-red-500 rounded-full mt-0.5 shrink-0" />
+            <div className="bg-red-950/50 border border-red-800/80 text-red-200 text-xs p-4 rounded-2xl flex items-start gap-3">
+              <div className="w-1.5 h-full bg-red-500 rounded-full shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
+          {/* MAIN PORTAL SELECTOR & 1-CLICK DEMO LAUNCHER */}
           {portal === "select" && (
-            <div className="space-y-3 mt-8">
-              <button
-                onClick={() => setPortal("rider")}
-                className="w-full flex items-center p-4 border border-neutral-200 rounded-xl hover:border-brand hover:shadow-sm transition-all group text-left"
-              >
-                <div className="w-12 h-12 rounded-full bg-neutral-50 group-hover:bg-brand/5 flex items-center justify-center text-neutral-600 group-hover:text-brand transition-colors">
-                  <User size={24} />
+            <div className="space-y-4">
+              
+              {/* 1-Click Instant Demo Launchers */}
+              <div className="space-y-2.5">
+                <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>1-Click Instant Client Demo</span>
+                  <span className="text-accent font-semibold flex items-center gap-1 text-[10px]">
+                    <Sparkles size={11} /> Zero Passwords
+                  </span>
                 </div>
-                <div className="ml-4">
-                  <div className="font-bold text-brand">Rider / Client</div>
-                  <div className="text-sm text-neutral-500">Book & manage your rides</div>
-                </div>
-              </button>
 
-              <button
-                onClick={() => setPortal("driver")}
-                className="w-full flex items-center p-4 border border-neutral-200 rounded-xl hover:border-brand hover:shadow-sm transition-all group text-left"
-              >
-                <div className="w-12 h-12 rounded-full bg-neutral-50 group-hover:bg-brand/5 flex items-center justify-center text-neutral-600 group-hover:text-brand transition-colors">
-                  <Car size={24} />
-                </div>
-                <div className="ml-4">
-                  <div className="font-bold text-brand">Driver</div>
-                  <div className="text-sm text-neutral-500">View your assigned trips</div>
-                </div>
-              </button>
+                {/* Demo: VIP Rider */}
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleDemoLogin("rider")}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-accent rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-white group-hover:text-accent transition-colors flex items-center gap-2">
+                        VIP Rider Experience
+                        <span className="text-[9px] font-mono bg-accent/20 text-accent px-1.5 py-0.5 rounded font-bold uppercase">Client</span>
+                      </div>
+                      <div className="text-xs text-neutral-400">Luxury 6-Step Booking & Live Tracking</div>
+                    </div>
+                  </div>
+                  {loading && loadingRole === "rider" ? (
+                    <Loader2 size={18} className="animate-spin text-accent" />
+                  ) : (
+                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+                  )}
+                </button>
 
-              <button
-                onClick={() => {
-                  setPortal("admin");
-                  setEmail("admin@luxe.com");
-                  setPassword("LuxeAdmin2026!");
-                }}
-                className="w-full flex items-center p-4 border border-neutral-200 rounded-xl hover:border-brand hover:shadow-sm transition-all group text-left"
-              >
-                <div className="w-12 h-12 rounded-full bg-neutral-50 group-hover:bg-brand/5 flex items-center justify-center text-neutral-600 group-hover:text-brand transition-colors">
-                  <Shield size={24} />
-                </div>
-                <div className="ml-4">
-                  <div className="font-bold text-brand">Staff & Operations Admin</div>
-                  <div className="text-sm text-neutral-500">Live Radar, Dispatch, & Affiliates</div>
-                </div>
-              </button>
+                {/* Demo: Chauffeur */}
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleDemoLogin("driver")}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-amber-400 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                      <Car size={20} />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors flex items-center gap-2">
+                        Executive Chauffeur HUD
+                        <span className="text-[9px] font-mono bg-amber-400/20 text-amber-400 px-1.5 py-0.5 rounded font-bold uppercase">Cockpit</span>
+                      </div>
+                      <div className="text-xs text-neutral-400">Active Schedule, Grace Countdown & Actuals</div>
+                    </div>
+                  </div>
+                  {loading && loadingRole === "driver" ? (
+                    <Loader2 size={18} className="animate-spin text-amber-400" />
+                  ) : (
+                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                  )}
+                </button>
 
-              <div className="pt-4 border-t border-neutral-100">
-                <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-center mb-3">
-                  Quick Demo Access (1-Tap Fill)
-                </div>
+                {/* Demo: Admin & Live Radar */}
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleDemoLogin("admin")}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-cyan-400 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-400/15 border border-cyan-400/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                      <Radio size={20} className="animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors flex items-center gap-2">
+                        Airspace Radar & Dispatch
+                        <span className="text-[9px] font-mono bg-cyan-400/20 text-cyan-400 px-1.5 py-0.5 rounded font-bold uppercase">Command</span>
+                      </div>
+                      <div className="text-xs text-neutral-400">60fps Live Planes, Fleet & Affiliate Vault</div>
+                    </div>
+                  </div>
+                  {loading && loadingRole === "admin" ? (
+                    <Loader2 size={18} className="animate-spin text-cyan-400" />
+                  ) : (
+                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
+                  )}
+                </button>
+              </div>
+
+              {/* Share / Text Client Box */}
+              <div className="pt-3 border-t border-neutral-800">
+                <button
+                  type="button"
+                  onClick={handleCopyClientMessage}
+                  className="w-full py-3 px-4 bg-accent hover:bg-accent/90 text-neutral-950 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
+                >
+                  {copiedSms ? (
+                    <>
+                      <Check size={16} className="text-neutral-950 font-bold" /> Copied Text Message to Clipboard!
+                    </>
+                  ) : (
+                    <>
+                      <Send size={15} /> Copy SMS / Email Demo Text for Client
+                    </>
+                  )}
+                </button>
+                <p className="text-[10px] text-neutral-500 text-center mt-2 font-medium">
+                  Copies pre-formatted direct deep links for your client to tap and open on iPhone or Android.
+                </p>
+              </div>
+
+              {/* Standard Account Sign In Toggle */}
+              <div className="pt-2 border-t border-neutral-800 text-center">
+                <div className="text-xs text-neutral-400 mb-3">Or sign in with existing credentials:</div>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setPortal("rider");
-                      setEmail("rider@luxe.com");
-                      setPassword("LuxeRider2026!");
-                    }}
-                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                    onClick={() => setPortal("rider")}
+                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
                   >
-                    <div className="text-xs font-bold text-brand group-hover:text-accent">VIP Rider</div>
-                    <div className="text-[10px] text-neutral-400">rider@luxe.com</div>
+                    Rider Sign-In
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setPortal("driver");
-                      setEmail("driver@luxe.com");
-                      setPassword("LuxeDriver2026!");
-                    }}
-                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                    onClick={() => setPortal("driver")}
+                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
                   >
-                    <div className="text-xs font-bold text-brand group-hover:text-accent">Chauffeur</div>
-                    <div className="text-[10px] text-neutral-400">driver@luxe.com</div>
+                    Driver Sign-In
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setPortal("admin");
-                      setEmail("admin@luxe.com");
-                      setPassword("LuxeAdmin2026!");
-                    }}
-                    className="p-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-xl text-center transition-all group"
+                    onClick={() => setPortal("admin")}
+                    className="p-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-center text-xs font-semibold text-neutral-300 hover:text-white transition-all"
                   >
-                    <div className="text-xs font-bold text-brand group-hover:text-accent">Admin</div>
-                    <div className="text-[10px] text-neutral-400">admin@luxe.com</div>
+                    Admin Sign-In
                   </button>
                 </div>
               </div>
+
             </div>
           )}
 
+          {/* STANDARD ROLE EMAIL / SOCIAL SIGN IN */}
           {(portal === "rider" || portal === "driver" || portal === "admin") && (
-            <div className="mt-8 space-y-6">
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <form onSubmit={handleEmailSignIn} className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-neutral-700 mb-1">Email</label>
+                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Email Address</label>
                   <div className="relative">
-                    <Mail size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <Mail size={16} aria-hidden="true" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
                     <input
                       id="email"
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={portal === "admin" ? "admin@luxe.com" : portal === "driver" ? "driver@luxe.com" : "rider@luxe.com"}
-                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                      placeholder={portal === "admin" ? "admin@luxe.app" : portal === "driver" ? "driver@luxe.app" : "client@domain.com"}
+                      className="w-full pl-10 pr-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600"
                     />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-neutral-700 mb-1">Password</label>
+                  <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Password</label>
                   <div className="relative">
-                    <KeyRound size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                    <KeyRound size={16} aria-hidden="true" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
                     <input
                       id="password"
                       type="password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
-                      className="w-full pl-9 pr-3 py-3 bg-white border border-neutral-300 rounded-lg text-base text-brand focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-neutral-400"
+                      placeholder="••••••••••••"
+                      className="w-full pl-10 pr-3.5 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent placeholder:text-neutral-600"
                     />
                   </div>
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-4 py-3 px-4 rounded-xl bg-brand text-white font-semibold text-base hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3.5 px-4 rounded-xl bg-accent text-neutral-950 font-bold text-sm hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] shadow-md"
                 >
                   {portal === "admin" && <Shield size={16} aria-hidden="true" />}
                   {portal === "driver" && <Car size={16} aria-hidden="true" />}
@@ -326,10 +470,10 @@ function LoginContent() {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-neutral-200"></div>
+                  <div className="w-full border-t border-neutral-800"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-neutral-500 font-medium">Or continue with</span>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-neutral-900 text-neutral-500 font-medium uppercase tracking-wider">Or continue with</span>
                 </div>
               </div>
               
@@ -338,6 +482,14 @@ function LoginContent() {
           )}
 
         </div>
+
+        {/* Footer info */}
+        <div className="text-center">
+          <p className="text-[11px] text-neutral-600 font-medium">
+            LUXE Chauffeured Mobility &copy; 2026. Private & Confidential.
+          </p>
+        </div>
+
       </div>
     </div>
   );
@@ -345,7 +497,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-[100dvh] flex items-center justify-center bg-neutral-50 py-12 px-4" />}>
+    <Suspense fallback={<div className="min-h-[100dvh] flex items-center justify-center bg-neutral-950 py-12 px-4" />}>
       <LoginContent />
     </Suspense>
   );

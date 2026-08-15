@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.demoPromoteToAdmin = exports.setUserRole = void 0;
+exports.loginAsDemoUser = exports.demoPromoteToAdmin = exports.setUserRole = void 0;
 const v2_1 = require("firebase-functions/v2");
 const admin_1 = require("../lib/admin");
 const zod_1 = require("zod");
@@ -51,6 +51,88 @@ exports.demoPromoteToAdmin = v2_1.https.onCall(async (request) => {
     catch (error) {
         console.error("Error promoting to admin:", error);
         throw new v2_1.https.HttpsError("internal", "Failed to promote.");
+    }
+});
+const demoLoginSchema = zod_1.z.object({
+    role: zod_1.z.enum(["rider", "driver", "admin"]),
+});
+exports.loginAsDemoUser = v2_1.https.onCall(async (request) => {
+    const parsed = demoLoginSchema.safeParse(request.data);
+    if (!parsed.success) {
+        throw new v2_1.https.HttpsError("invalid-argument", "Role must be rider, driver, or admin.");
+    }
+    const { role } = parsed.data;
+    const demoAccounts = {
+        rider: {
+            uid: "demo-rider-vip-uid",
+            email: "rider@luxe.app",
+            displayName: "Alexander Wright (VIP Rider)",
+            role: "rider",
+        },
+        driver: {
+            uid: "demo-chauffeur-01-uid",
+            email: "driver@luxe.app",
+            displayName: "Marcus Bennett (Lead Chauffeur)",
+            role: "driver",
+        },
+        admin: {
+            uid: "demo-admin-ops-uid",
+            email: "admin@luxe.app",
+            displayName: "Victoria Sterling (Dispatch Director)",
+            role: "admin",
+        },
+    };
+    const account = demoAccounts[role];
+    try {
+        // 1. Check or create Firebase Auth user
+        try {
+            await admin_1.admin.auth().getUser(account.uid);
+        }
+        catch (err) {
+            if (err.code === "auth/user-not-found") {
+                await admin_1.admin.auth().createUser({
+                    uid: account.uid,
+                    email: account.email,
+                    displayName: account.displayName,
+                });
+            }
+        }
+        // 2. Set Custom Role Claim
+        await admin_1.admin.auth().setCustomUserClaims(account.uid, { role: account.role });
+        // 3. Sync User Profile in Firestore
+        await admin_1.admin.firestore().collection("users").doc(account.uid).set({
+            uid: account.uid,
+            email: account.email,
+            displayName: account.displayName,
+            role: account.role,
+            isDemo: true,
+            updatedAt: admin_1.admin.firestore.Timestamp.now(),
+        }, { merge: true });
+        // If driver, ensure driver record exists for dispatch & today's schedule
+        if (account.role === "driver") {
+            await admin_1.admin.firestore().collection("drivers").doc(account.uid).set({
+                driverId: account.uid,
+                displayName: account.displayName,
+                email: account.email,
+                phone: "+1 (310) 555-0199",
+                active: true,
+                rating: 4.98,
+                photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256",
+                vehicleDescription: "2025 Mercedes-Maybach S 580 (Obsidian Black)",
+                updatedAt: admin_1.admin.firestore.Timestamp.now(),
+            }, { merge: true });
+        }
+        // 4. Create custom token
+        const customToken = await admin_1.admin.auth().createCustomToken(account.uid, { role: account.role });
+        return {
+            customToken,
+            role: account.role,
+            displayName: account.displayName,
+        };
+    }
+    catch (error) {
+        console.error("Error generating demo token:", error);
+        throw new v2_1.https.HttpsError("internal", error.message || "Failed to generate demo session.");
     }
 });
 //# sourceMappingURL=callables.js.map
