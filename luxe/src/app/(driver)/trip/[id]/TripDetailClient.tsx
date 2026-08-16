@@ -29,6 +29,7 @@ import { useRouter, useParams } from "next/navigation";
 import { getFunctions as getFunctionsApp, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/client";
 import { useDriverLocationTracker } from "@/hooks/useDriverLocationTracker";
+import ReservationChatDrawer from "@/components/ReservationChatDrawer";
 
 type ChecklistItem = { id: string; label: string };
 
@@ -90,6 +91,7 @@ export default function TripDetailClient() {
   const [actualWaitMinutes, setActualWaitMinutes] = useState<string>("0");
   const [driverNotes, setDriverNotes] = useState<string>("");
   const [showActualsModal, setShowActualsModal] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Live Driver GPS Telemetry Streamer
   const driverTracker = useDriverLocationTracker({
@@ -329,6 +331,15 @@ export default function TripDetailClient() {
               <span>No SMS</span>
             </button>
           )}
+
+          <button 
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+            className="col-span-2 py-3.5 px-4 rounded-xl bg-gold-gradient hover:brightness-110 text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-gold-sm active:scale-95 uppercase tracking-wider min-h-[44px]"
+          >
+            <MessageSquare size={15} />
+            <span>Open Live Concierge Chat</span>
+          </button>
         </div>
       </div>
 
@@ -565,6 +576,19 @@ export default function TripDetailClient() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Live Concierge Chat Drawer */}
+      {trip && (
+        <ReservationChatDrawer
+          reservationId={trip.reservationId}
+          confirmationCode={trip.confirmationCode}
+          currentUserId={user?.uid}
+          currentUserName={user?.displayName || trip.driverName || "Executive Chauffeur"}
+          currentUserRole="driver"
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+        />
       )}
 
     </div>

@@ -37,10 +37,10 @@ export default function ExecutiveInvoiceModal({ trip, isOpen, onClose }: Executi
   const pricing = trip.pricing;
   const confirmationCode = trip.confirmationCode || trip.reservationId.slice(-8).toUpperCase();
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     setIsGenerating(true);
     try {
-      generateExecutiveInvoicePdf(trip);
+      await generateExecutiveInvoicePdf(trip);
     } catch (err) {
       console.error("Failed to generate PDF:", err);
     } finally {

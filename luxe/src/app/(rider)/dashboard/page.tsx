@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/firebase/auth";
 import Link from "next/link";
-import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight, ShieldCheck, MapPin, Navigation, FileText } from "lucide-react";
+import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight, ShieldCheck, MapPin, Navigation, FileText, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/client";
@@ -12,6 +12,7 @@ import { formatDateTime } from "@/lib/format";
 import LiveTripMap from "@/components/LiveTripMap";
 import TripRatingModal from "@/components/TripRatingModal";
 import ExecutiveInvoiceModal from "@/components/ExecutiveInvoiceModal";
+import ReservationChatDrawer from "@/components/ReservationChatDrawer";
 
 export default function RiderDashboardPage() {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ export default function RiderDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [ratingTrip, setRatingTrip] = useState<Reservation | null>(null);
   const [selectedInvoiceTrip, setSelectedInvoiceTrip] = useState<Reservation | null>(null);
+  const [chatTrip, setChatTrip] = useState<Reservation | null>(null);
   const [limitCount, setLimitCount] = useState(10);
 
   useEffect(() => {
@@ -149,16 +151,27 @@ export default function RiderDashboardPage() {
                 </div>
 
                 {/* Driver Info */}
-                {/* Actions & Itinerary / Receipt Trigger */}
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-800 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedInvoiceTrip(trip)}
-                    className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all active:scale-95 min-h-[38px]"
-                  >
-                    <FileText size={13} className="text-accent" />
-                    <span>Executive Receipt & Itinerary</span>
-                  </button>
+                {/* Actions & Itinerary / Receipt / Chat Triggers */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-neutral-800 text-xs">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInvoiceTrip(trip)}
+                      className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all active:scale-95 min-h-[38px]"
+                    >
+                      <FileText size={13} className="text-accent" />
+                      <span>Receipt & Itinerary</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setChatTrip(trip)}
+                      className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all active:scale-95 min-h-[38px]"
+                    >
+                      <MessageSquare size={13} className="text-accent" />
+                      <span>Concierge Chat</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     {driverRated ? (
@@ -228,6 +241,19 @@ export default function RiderDashboardPage() {
           trip={selectedInvoiceTrip}
           isOpen={!!selectedInvoiceTrip}
           onClose={() => setSelectedInvoiceTrip(null)}
+        />
+      )}
+
+      {/* Real-Time Concierge Chat Drawer */}
+      {chatTrip && (
+        <ReservationChatDrawer
+          reservationId={chatTrip.reservationId}
+          confirmationCode={chatTrip.confirmationCode}
+          currentUserId={user?.uid}
+          currentUserName={user?.displayName || "VIP Passenger"}
+          currentUserRole="rider"
+          isOpen={!!chatTrip}
+          onClose={() => setChatTrip(null)}
         />
       )}
 

@@ -90,6 +90,18 @@ service cloud.firestore {
         ));
         allow write: if false;
       }
+
+      match /messages/{messageId} {
+        allow read: if isAdmin() || (isAuthenticated() && (
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.riderId == request.auth.uid ||
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.driverId == request.auth.uid
+        ));
+        allow create: if isAuthenticated() && (
+          isAdmin() ||
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.riderId == request.auth.uid ||
+          get(/databases/$(database)/documents/reservations/$(reservationId)).data.driverId == request.auth.uid
+        ) && request.resource.data.senderId == request.auth.uid;
+      }
     }
 
     // -------------------------------------------------------------------------

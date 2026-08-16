@@ -1,8 +1,8 @@
-import { jsPDF } from "jspdf";
 import { Reservation } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 
-export function generateExecutiveInvoicePdf(trip: Reservation) {
+export async function generateExecutiveInvoicePdf(trip: Reservation) {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",

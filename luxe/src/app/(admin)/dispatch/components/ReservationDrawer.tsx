@@ -3,7 +3,7 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 
 import { useState, useEffect } from "react";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
-import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap, Sparkles, FileText } from "lucide-react";
+import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap, Sparkles, FileText, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -12,6 +12,7 @@ import { app } from "@/lib/firebase/client";
 import RiderPreferencesView from "@/app/(admin)/components/RiderPreferencesView";
 import LiveTripMap from "@/components/LiveTripMap";
 import ExecutiveInvoiceModal from "@/components/ExecutiveInvoiceModal";
+import ReservationChatDrawer from "@/components/ReservationChatDrawer";
 
 export default function ReservationDrawer({ 
   reservation, 
@@ -31,6 +32,7 @@ export default function ReservationDrawer({
   const [loadingOverride, setLoadingOverride] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [showChatDrawer, setShowChatDrawer] = useState(false);
   
   const [selectedDriver, setSelectedDriver] = useState(reservation.driverId || preSelectedDriverId || "");
   const [selectedVehicle, setSelectedVehicle] = useState(reservation.vehicleId || "");
@@ -161,12 +163,22 @@ export default function ReservationDrawer({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setShowChatDrawer(true)}
+              className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              title="Open Live Concierge Chat"
+            >
+              <MessageSquare size={13} className="text-accent" />
+              <span className="hidden sm:inline">Chat</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowInvoiceModal(true)}
               className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
               title="Generate Executive Tax Invoice & Itinerary"
             >
               <FileText size={13} className="text-accent" />
-              <span className="hidden sm:inline">Tax Invoice / PDF</span>
+              <span className="hidden sm:inline">Invoice / PDF</span>
             </button>
 
             <button 
@@ -637,6 +649,19 @@ export default function ReservationDrawer({
           trip={reservation}
           isOpen={showInvoiceModal}
           onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
+
+      {/* Live Concierge Chat Drawer */}
+      {showChatDrawer && (
+        <ReservationChatDrawer
+          reservationId={reservation.reservationId}
+          confirmationCode={reservation.confirmationCode}
+          currentUserId="admin-dispatch"
+          currentUserName="Operations Dispatch"
+          currentUserRole="admin"
+          isOpen={showChatDrawer}
+          onClose={() => setShowChatDrawer(false)}
         />
       )}
     </div>
