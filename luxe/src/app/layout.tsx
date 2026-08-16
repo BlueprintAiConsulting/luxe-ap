@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/firebase/auth";
+import NetworkStatusBanner from "@/components/NetworkStatusBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#09090b] text-[#f4f4f5]`}
     >
       <body className="min-h-full flex flex-col bg-[#09090b] text-[#f4f4f5]">
+        <NetworkStatusBanner />
         <AuthProvider>
           {children}
         </AuthProvider>
