@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
@@ -12,6 +12,14 @@ import { useSearchParams } from "next/navigation";
 import TripRatingModal from "@/components/TripRatingModal";
 
 export default function DriverPastTripsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center h-64 text-white">Loading History...</div>}>
+      <DriverPastTripsInner />
+    </Suspense>
+  );
+}
+
+function DriverPastTripsInner() {
   const { user, role } = useAuth();
   const searchParams = useSearchParams();
   const targetDriverId = searchParams?.get("d") && role === "admin" ? searchParams.get("d") : user?.uid;

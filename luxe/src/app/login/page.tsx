@@ -91,9 +91,16 @@ function LoginContent() {
       const res = await loginFn({ role: targetRole });
       if (res.data?.customToken) {
         await signInWithCustomToken(auth, res.data.customToken);
+        await auth.currentUser?.getIdToken(true);
         const redirectUrl = searchParams.get("redirect");
         if (redirectUrl) {
-          router.replace(redirectUrl);
+          if (targetRole === "admin" && !redirectUrl.startsWith("/admin") && !redirectUrl.startsWith("/dispatch") && !redirectUrl.startsWith("/radar")) {
+            router.replace("/radar");
+          } else if (targetRole === "driver" && !redirectUrl.startsWith("/today") && !redirectUrl.startsWith("/portal") && !redirectUrl.startsWith("/trip") && !redirectUrl.startsWith("/past")) {
+            router.replace("/today");
+          } else {
+            router.replace(redirectUrl);
+          }
         } else if (targetRole === "admin") {
           router.replace("/radar");
         } else if (targetRole === "driver") {

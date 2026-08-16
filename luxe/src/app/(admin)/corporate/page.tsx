@@ -63,67 +63,70 @@ export default function CorporateAccountsPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen font-sans">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-screen bg-[#060608] text-white font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-brand flex items-center">
-            <Building2 className="mr-3" size={28} />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono shadow-gold-sm">
+            Enterprise Accounts
+          </div>
+          <h1 className="text-3xl font-bold font-serif text-white tracking-tight flex items-center">
+            <Building2 className="mr-3 text-accent" size={28} />
             Corporate Accounts
           </h1>
-          <p className="text-neutral-500 text-sm mt-1">Manage enterprise clients and B2B billing promo codes.</p>
+          <p className="text-neutral-400 text-xs sm:text-sm mt-0.5 font-medium">Manage enterprise clients, corporate invoicing agreements, and B2B billing promo codes.</p>
         </div>
         <button
           onClick={() => { setEditingAccount(null); setIsModalOpen(true); }}
-          className="flex items-center px-4 py-2 bg-brand text-white rounded-lg hover:bg-neutral-900 transition-colors font-semibold"
+          className="min-h-[44px] flex items-center px-5 py-2.5 bg-gold-gradient text-neutral-950 rounded-xl font-bold hover:brightness-110 shadow-gold-sm transition-all text-xs uppercase tracking-wider self-start sm:self-auto"
         >
-          <Plus size={18} className="mr-2" /> New Account
+          <Plus size={16} className="mr-1.5" /> New Corporate Account
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden">
+      <div className="bg-[#0e0e13] rounded-3xl shadow-2xl border border-neutral-800 overflow-hidden overflow-x-auto no-scrollbar">
         {loading ? (
-          <div className="p-8 text-center text-neutral-500">Loading...</div>
+          <div className="p-12 text-center text-neutral-400 font-mono text-xs">Loading enterprise directory...</div>
         ) : accounts.length === 0 ? (
           <div className="p-12 text-center text-neutral-500">
-            <Building2 size={48} className="mx-auto mb-4 opacity-20" />
-            <h3 className="text-lg font-semibold text-brand mb-2">No corporate accounts</h3>
-            <p className="mb-6">Create a corporate account to issue promo codes for B2B billing.</p>
+            <Building2 size={48} className="mx-auto mb-4 opacity-30 text-accent" />
+            <h3 className="text-lg font-serif font-bold text-white mb-1">No corporate accounts registered</h3>
+            <p className="text-xs text-neutral-400">Create a corporate account to issue dedicated authorization codes for B2B direct billing.</p>
           </div>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[650px] text-xs font-mono">
             <thead>
-              <tr className="border-b border-neutral-100 bg-neutral-50 text-neutral-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-4">Company</th>
+              <tr className="border-b border-neutral-800 bg-[#0a0a0e] text-neutral-400 text-[10px] uppercase tracking-wider font-semibold">
+                <th className="p-4">Enterprise Entity</th>
                 <th className="p-4">Billing Email</th>
-                <th className="p-4">Promo Code</th>
-                <th className="p-4">Status</th>
+                <th className="p-4">Promo / Billing Code</th>
+                <th className="p-4">Account Status</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map(acc => (
-                <tr key={acc.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
-                  <td className="p-4 font-semibold text-brand flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center mr-3">
+                <tr key={acc.id} className="border-b border-neutral-800/60 hover:bg-[#14141c] transition-colors">
+                  <td className="p-4 font-bold text-white flex items-center">
+                    <div className="w-8 h-8 rounded-xl bg-[#181822] border border-accent/40 text-accent font-bold flex items-center justify-center mr-3 font-serif">
                       {acc.companyName.charAt(0)}
                     </div>
                     {acc.companyName}
                   </td>
-                  <td className="p-4 text-sm text-neutral-600">{acc.billingEmail}</td>
+                  <td className="p-4 text-neutral-300">{acc.billingEmail}</td>
                   <td className="p-4">
-                    <div className="flex items-center text-xs font-mono font-bold bg-neutral-100 text-neutral-700 px-2 py-1 rounded w-max">
-                      <Key size={12} className="mr-1" /> {acc.promoCode}
+                    <div className="flex items-center text-xs font-mono font-bold bg-[#181822] border border-neutral-700 text-accent px-2.5 py-1 rounded-lg w-max tracking-wider">
+                      <Key size={12} className="mr-1.5 text-accent" /> {acc.promoCode}
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${acc.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {acc.active ? 'Active' : 'Inactive'}
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${acc.active ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/60' : 'bg-rose-950/60 text-rose-400 border border-rose-800/60'}`}>
+                      {acc.active ? 'Active Billing' : 'Suspended'}
                     </span>
                   </td>
                   <td className="p-4 text-right">
                     <button
                       onClick={() => { setEditingAccount(acc); setIsModalOpen(true); }}
-                      className="p-2 text-neutral-400 hover:text-brand hover:bg-neutral-100 rounded-lg transition-colors inline-block"
+                      className="p-2 text-accent hover:text-white rounded-lg transition-colors inline-block"
                       title="Edit Account"
                     >
                       <Edit2 size={16} />

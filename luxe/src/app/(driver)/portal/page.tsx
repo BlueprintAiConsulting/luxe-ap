@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
@@ -11,6 +11,14 @@ import { User } from "@/lib/types/user";
 import { useSearchParams } from "next/navigation";
 
 export default function DriverPortalPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center h-64 text-white">Loading Chauffeur Portal...</div>}>
+      <DriverPortalInner />
+    </Suspense>
+  );
+}
+
+function DriverPortalInner() {
   const { user, role } = useAuth();
   const searchParams = useSearchParams();
   const targetDriverId = searchParams?.get("d") && role === "admin" ? searchParams.get("d") : user?.uid;

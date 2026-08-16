@@ -8,7 +8,7 @@ import { collection, query, where, onSnapshot, orderBy, limit, getDocs } from "f
 import { db } from "@/lib/firebase/client";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
 import { format, startOfDay, endOfDay, addDays, subDays } from "date-fns";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, Sparkles, CheckCircle2 } from "lucide-react";
 import ReservationDrawer from "./components/ReservationDrawer";
 
 export default function DispatchPage() {
@@ -137,21 +137,36 @@ export default function DispatchPage() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-neutral-50 text-neutral-900 font-sans relative">
+    <div className="p-4 sm:p-8 max-w-[1600px] mx-auto min-h-screen bg-[#060608] text-white font-sans relative">
       
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dispatch Board</h1>
-          <p className="text-neutral-500 text-sm mt-1 font-medium">Manage and assign daily reservations.</p>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono shadow-gold-sm">
+            <Sparkles size={11} className="text-accent" /> Dispatch Control
+          </div>
+          <h1 className="text-3xl font-bold font-serif text-white tracking-tight">Dispatch Board</h1>
+          <p className="text-neutral-400 text-xs sm:text-sm mt-0.5 font-medium">Manage and assign daily reservations across the active chauffeur fleet.</p>
         </div>
         
-        <div className="flex items-center space-x-4 bg-neutral-50 p-2 rounded-xl">
-          <button onClick={handlePrevDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">&larr;</button>
-          <div className="flex items-center space-x-2 font-bold px-4">
-            <Calendar size={18} className="text-neutral-500" />
+        <div className="flex items-center space-x-2 bg-[#0e0e13] border border-neutral-800 p-1.5 rounded-2xl shadow-gold-sm self-start sm:self-auto">
+          <button 
+            onClick={handlePrevDay} 
+            aria-label="Previous day"
+            className="min-h-[44px] min-w-[44px] px-3 py-2 bg-neutral-900 border border-neutral-800 hover:border-accent/40 text-accent hover:text-white rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+          >
+            &larr;
+          </button>
+          <div className="flex items-center space-x-2 font-bold px-3 text-xs sm:text-sm font-mono text-white">
+            <Calendar size={16} className="text-accent" />
             <span>{format(selectedDate, "EEE, MMM d, yyyy")}</span>
           </div>
-          <button onClick={handleNextDay} className="px-3 py-2 hover:bg-neutral-100 rounded-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">&rarr;</button>
+          <button 
+            onClick={handleNextDay} 
+            aria-label="Next day"
+            className="min-h-[44px] min-w-[44px] px-3 py-2 bg-neutral-900 border border-neutral-800 hover:border-accent/40 text-accent hover:text-white rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+          >
+            &rarr;
+          </button>
         </div>
       </div>
 
@@ -159,16 +174,17 @@ export default function DispatchPage() {
         
         {/* Left Col: Unassigned Trips (25%) */}
         <div className="xl:col-span-1 flex flex-col h-[calc(100vh-160px)]">
-          <h2 className="text-xl font-semibold text-brand flex items-center mb-4 flex-shrink-0">
+          <h2 className="text-lg font-bold font-serif text-white flex items-center mb-4 flex-shrink-0">
             Needs Assignment
-            <span className="ml-3 bg-neutral-200 text-neutral-700 text-xs px-2 py-0.5 rounded-full">{unassigned.length}</span>
+            <span className="ml-3 bg-accent/20 border border-accent/40 text-accent font-mono text-xs px-2.5 py-0.5 rounded-full font-bold">{unassigned.length}</span>
           </h2>
           
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-20">
-            {loading && <div className="text-neutral-500">Loading...</div>}
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-20 no-scrollbar">
+            {loading && <div className="text-neutral-400 text-xs font-mono">Loading telemetry...</div>}
             {!loading && unassigned.length === 0 && (
-              <div className="p-6 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl text-center text-neutral-500 font-semibold">
-                All trips assigned!
+              <div className="p-6 bg-[#0e0e13]/80 border-2 border-dashed border-neutral-800 rounded-3xl text-center text-neutral-400 text-xs font-semibold space-y-2">
+                <CheckCircle2 size={24} className="text-emerald-400 mx-auto" />
+                <p>All active charters assigned!</p>
               </div>
             )}
 
@@ -189,26 +205,26 @@ export default function DispatchPage() {
                   }
                 }}
                 tabIndex={0}
-                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 ${
+                className={`w-full text-left p-4 rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-lg hover:border-accent/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 ${
                   draggedResId === trip.reservationId ? "opacity-50 scale-95" : "opacity-100"
                 } ${
                   trip.isUrgent 
-                    ? "bg-white border-brand hover:border-brand" 
-                    : "bg-white border-neutral-200 hover:border-neutral-300"
+                    ? "bg-[#14141c] border-amber-400/80 shadow-gold-sm" 
+                    : "bg-[#0e0e13] border-neutral-800"
                 }`}
                 style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "both" }}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <div className="font-bold text-lg">{formatDateTime(trip.dateObj, trip.timezone || "UTC")}</div>
+                  <div className="font-bold text-base text-white font-mono">{formatDateTime(trip.dateObj, trip.timezone || "UTC")}</div>
                   {trip.isUrgent && (
-                    <div className="flex items-center text-xs font-bold text-white bg-brand px-2 py-1 rounded">
-                      <AlertCircle size={14} className="mr-1" /> URGENT
+                    <div className="flex items-center text-[10px] font-bold text-neutral-950 bg-gold-gradient px-2 py-0.5 rounded font-mono shadow-gold-sm">
+                      <AlertCircle size={12} className="mr-1 text-neutral-950" /> URGENT
                     </div>
                   )}
                 </div>
-                <div className="font-semibold text-sm mb-1">{trip.riderName}</div>
-                <div className="text-xs text-neutral-500 truncate">{trip.pickup.line1 || ""}</div>
-                <div className="mt-3 text-[10px] font-bold uppercase tracking-wider bg-neutral-100 text-neutral-600 px-2 py-1 rounded w-max">
+                <div className="font-bold text-sm text-white mb-1">{trip.riderName}</div>
+                <div className="text-xs text-neutral-400 truncate">{trip.pickup.line1 || ""}</div>
+                <div className="mt-3 text-[10px] font-bold uppercase tracking-wider bg-neutral-900 border border-neutral-800 text-accent px-2.5 py-1 rounded-lg w-max font-mono">
                   {trip.className}
                 </div>
               </div>
@@ -218,19 +234,19 @@ export default function DispatchPage() {
 
         {/* Right Col: Timeline (75%) */}
         <div className="xl:col-span-3 flex flex-col h-[calc(100vh-160px)]">
-          <h2 className="text-xl font-semibold text-brand mb-4 flex-shrink-0">Timeline</h2>
+          <h2 className="text-lg font-bold font-serif text-white mb-4 flex-shrink-0">Fleet Timeline Matrix</h2>
           
-          <div className="bg-white rounded-2xl border border-neutral-200 flex-1 flex flex-col overflow-hidden shadow-sm">
+          <div className="bg-[#0e0e13] rounded-3xl border border-neutral-800 flex-1 flex flex-col overflow-hidden shadow-2xl">
             {/* Timeline Header */}
-            <div className="flex border-b border-neutral-200 bg-neutral-50">
-              <div className="w-48 flex-shrink-0 border-r border-neutral-200 p-4 font-bold text-sm text-neutral-500 flex items-center bg-neutral-50">
+            <div className="flex border-b border-neutral-800 bg-[#0a0a0e]">
+              <div className="w-48 flex-shrink-0 border-r border-neutral-800 p-4 font-bold text-xs uppercase tracking-wider text-neutral-400 flex items-center bg-[#0a0a0e]">
                 Chauffeurs
               </div>
               <div className="flex-1 relative overflow-hidden min-w-[800px]">
                 <div className="absolute inset-0 flex">
                   {hours.map(h => (
-                    <div key={h} className="flex-1 border-r border-neutral-200 last:border-r-0 relative">
-                      <span className="absolute top-2 left-2 text-xs font-semibold text-neutral-400">
+                    <div key={h} className="flex-1 border-r border-neutral-800/60 last:border-r-0 relative">
+                      <span className="absolute top-2 left-2 text-[10px] font-bold font-mono text-neutral-500">
                         {h.toString().padStart(2, '0')}:00
                       </span>
                     </div>
@@ -240,29 +256,32 @@ export default function DispatchPage() {
             </div>
 
             {/* Timeline Body */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-auto no-scrollbar">
               {drivers.length === 0 && !loading && (
-                <div className="p-8 text-center text-neutral-500 font-semibold">No active drivers found.</div>
+                <div className="p-8 text-center text-neutral-400 text-xs font-semibold">No active drivers found.</div>
               )}
               {drivers.map(driver => {
                 const driverTrips = timeline.filter(t => t.driverId === driver.driverId);
                 
                 return (
-                  <div key={driver.driverId} className="flex border-b border-neutral-100 group min-h-[80px]">
-                    <div className="w-48 flex-shrink-0 border-r border-neutral-200 p-4 bg-white z-10 flex flex-col justify-center">
-                      <div className="font-bold text-sm truncate">{driver.displayName}</div>
-                      <div className="text-xs text-neutral-500 mt-0.5">{driver.active ? "Active" : "Inactive"}</div>
+                  <div key={driver.driverId} className="flex border-b border-neutral-800/80 group min-h-[80px]">
+                    <div className="w-48 flex-shrink-0 border-r border-neutral-800 p-4 bg-[#0a0a0e] z-10 flex flex-col justify-center">
+                      <div className="font-bold text-sm text-white truncate">{driver.displayName}</div>
+                      <div className="text-[11px] text-emerald-400 font-mono mt-0.5 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {driver.active ? "Active Duty" : "Off Duty"}
+                      </div>
                     </div>
                     
                     <div 
-                      className="flex-1 relative min-w-[800px] bg-white transition-colors duration-200 hover:bg-neutral-50"
+                      className="flex-1 relative min-w-[800px] bg-[#0e0e13] transition-colors duration-200 hover:bg-[#121218]"
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, driver.driverId)}
                     >
                       {/* Grid lines */}
                       <div className="absolute inset-0 flex pointer-events-none">
                         {hours.map(h => (
-                          <div key={h} className="flex-1 border-r border-neutral-100 border-dashed last:border-r-0"></div>
+                          <div key={h} className="flex-1 border-r border-neutral-800/40 border-dashed last:border-r-0"></div>
                         ))}
                       </div>
 
@@ -271,16 +290,15 @@ export default function DispatchPage() {
                         const tripHour = trip.dateObj.getHours();
                         const tripMinute = trip.dateObj.getMinutes();
                         const startPercent = ((tripHour + tripMinute / 60) / 24) * 100;
-                        // Estimate 2 hours for duration if dropoff isn't easily calculable
                         const durationHours = 2; 
                         const widthPercent = (durationHours / 24) * 100;
                         
-                        let statusColor = "bg-neutral-800 text-white border-neutral-900";
-                        if (trip.status === "completed") statusColor = "bg-neutral-200 text-neutral-600 border-neutral-300";
-                        else if (trip.status === "cancelled" || trip.status === "no_show") statusColor = "bg-red-100 text-red-600 border-red-200 line-through opacity-70";
-                        else if (trip.status === "onboard") statusColor = "bg-brand text-white border-neutral-900";
-                        else if (trip.status === "arrived") statusColor = "bg-accent text-neutral-900 border-accent/80";
-                        else if (trip.status === "en_route") statusColor = "bg-amber-400 text-amber-900 border-amber-500";
+                        let statusColor = "bg-[#181822] text-white border-neutral-700";
+                        if (trip.status === "completed") statusColor = "bg-neutral-900/80 text-neutral-400 border-neutral-800";
+                        else if (trip.status === "cancelled" || trip.status === "no_show") statusColor = "bg-red-950/40 text-red-400 border-red-900/40 line-through opacity-70";
+                        else if (trip.status === "onboard") statusColor = "bg-emerald-950/60 text-emerald-300 border-emerald-500/40";
+                        else if (trip.status === "arrived") statusColor = "bg-accent/20 text-accent border-accent/50 shadow-gold-sm";
+                        else if (trip.status === "en_route") statusColor = "bg-amber-950/60 text-amber-300 border-amber-500/40";
 
                         return (
                           <div
@@ -296,7 +314,7 @@ export default function DispatchPage() {
                               }
                             }}
                             tabIndex={0}
-                            className={`absolute top-2 bottom-2 rounded-lg border p-2 text-xs font-semibold overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${statusColor}`}
+                            className={`absolute top-2 bottom-2 rounded-xl border p-2 text-xs font-semibold overflow-hidden shadow-md hover:shadow-gold-sm hover:-translate-y-0.5 transition-all cursor-pointer z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${statusColor}`}
                             style={{ 
                               left: `${startPercent}%`, 
                               width: `${widthPercent}%`,
@@ -304,9 +322,9 @@ export default function DispatchPage() {
                             }}
                             title={`${formatDateTime(trip.dateObj, trip.timezone || "UTC")} - ${trip.riderName}`}
                           >
-                            <div className="truncate">{trip.riderName}</div>
+                            <div className="truncate font-bold">{trip.riderName}</div>
                             <div className="truncate opacity-80 text-[10px] mt-0.5">{trip.pickup.line1}</div>
-                            <div className="absolute bottom-1 right-2 text-[9px] font-bold uppercase opacity-60">
+                            <div className="absolute bottom-1 right-2 text-[9px] font-bold uppercase font-mono opacity-80">
                               {trip.status.replace(/_/g, " ")}
                             </div>
                           </div>

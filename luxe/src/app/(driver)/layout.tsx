@@ -2,14 +2,35 @@
 
 import { useAuth } from "@/lib/firebase/auth";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, Suspense } from "react";
 import Link from "next/link";
 import { Calendar, Clock, LayoutDashboard, Car } from "lucide-react";
 
 export default function DriverLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#050507] text-white">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium tracking-wide text-neutral-400">Loading Chauffeur HUD...</span>
+        </div>
+      </div>
+    }>
+      <DriverLayoutInner>{children}</DriverLayoutInner>
+    </Suspense>
+  );
+}
+
+function DriverLayoutInner({ children }: { children: ReactNode }) {
   const { user, role, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const dParam = searchParams?.get("d") ? `?d=${searchParams.get("d")}` : "";
+  const isToday = pathname.startsWith("/today") || pathname.startsWith("/trip");
+  const isPast = pathname.startsWith("/past");
+  const isPortal = pathname.startsWith("/portal");
 
   useEffect(() => {
     if (!loading) {
@@ -31,13 +52,6 @@ export default function DriverLayout({ children }: { children: ReactNode }) {
       </div>
     );
   }
-
-  const isToday = pathname.startsWith("/today") || pathname.startsWith("/trip");
-  const isPast = pathname.startsWith("/past");
-  const isPortal = pathname.startsWith("/portal");
-
-  const searchParams = useSearchParams();
-  const dParam = searchParams?.get("d") ? `?d=${searchParams.get("d")}` : "";
 
   return (
     <div className="min-h-screen bg-[#060608] text-white font-sans flex flex-col selection:bg-accent selection:text-neutral-950">

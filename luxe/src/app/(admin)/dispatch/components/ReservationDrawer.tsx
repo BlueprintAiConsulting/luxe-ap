@@ -3,7 +3,7 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 
 import { useState, useEffect } from "react";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
-import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap } from "lucide-react";
+import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -143,21 +143,24 @@ export default function ReservationDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose}></div>
       
       {/* Drawer */}
-      <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in fade-in slide-in-from-right duration-200 ease-out">
+      <div className="relative w-full max-w-lg bg-[#0a0a0e] text-white h-full shadow-2xl border-l border-neutral-800 flex flex-col animate-in fade-in slide-in-from-right duration-200 ease-out">
         
-        <div className="flex justify-between items-center p-6 border-b border-neutral-100">
+        <div className="flex justify-between items-center p-6 border-b border-neutral-800 bg-[#0e0e13]">
           <div>
-            <h2 className="text-xl font-bold">{reservation.confirmationCode}</h2>
-            <div className="text-sm text-neutral-500">Booked by {reservation.bookedByAdmin ? "Admin" : "Rider"}</div>
+            <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-accent font-mono mb-1">
+              <Sparkles size={11} className="text-accent" /> Charter Telemetry
+            </div>
+            <h2 className="text-xl font-bold font-mono text-white tracking-tight">{reservation.confirmationCode}</h2>
+            <div className="text-xs text-neutral-400">Booked by {reservation.bookedByAdmin ? "Operations Concierge" : "VIP Client"}</div>
           </div>
           <button 
             type="button"
             aria-label="Close reservation details drawer"
             onClick={onClose} 
-            className="p-2 hover:bg-neutral-100 rounded-full"
+            className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors"
           >
             <X size={20} />
           </button>
@@ -326,15 +329,15 @@ export default function ReservationDrawer({
           </section>
 
           {/* Assignment UI */}
-          <section className="bg-neutral-50 p-5 rounded-3xl border border-neutral-200 space-y-4">
+          <section className="bg-[#0e0e13] p-5 rounded-3xl border border-neutral-800 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-500">Dispatch & Assignment</h3>
-              <div className="flex bg-neutral-200/70 p-0.5 rounded-xl text-xs font-bold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-accent font-mono">Dispatch & Assignment</h3>
+              <div className="flex bg-[#181822] p-1 rounded-xl text-xs font-bold border border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setDispatchMode("in_house")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    dispatchMode === "in_house" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+                  className={`px-3 py-1.5 rounded-lg transition-all text-xs ${
+                    dispatchMode === "in_house" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm font-bold" : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   In-House Fleet
@@ -342,8 +345,8 @@ export default function ReservationDrawer({
                 <button
                   type="button"
                   onClick={() => setDispatchMode("farm_out")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    dispatchMode === "farm_out" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500 hover:text-neutral-900"
+                  className={`px-3 py-1.5 rounded-lg transition-all text-xs ${
+                    dispatchMode === "farm_out" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm font-bold" : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   Farm-Out Partner
@@ -352,17 +355,17 @@ export default function ReservationDrawer({
             </div>
 
             {reservation.subcontractType === "farm_out" && (
-              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-1">
+              <div className="p-3.5 bg-blue-950/40 border border-blue-800/60 rounded-2xl text-xs text-blue-300 space-y-1">
                 <div className="font-bold flex items-center justify-between">
                   <span>Farmed Out to: {reservation.affiliateName}</span>
-                  <span className="uppercase font-bold text-[10px] px-2 py-0.5 bg-blue-200/60 rounded-full">
+                  <span className="uppercase font-bold text-[10px] px-2 py-0.5 bg-blue-900/60 text-blue-300 rounded-full font-mono">
                     {reservation.affiliateStatus || "pending"}
                   </span>
                 </div>
                 <div>Agreed Partner Payout: ${((reservation.affiliatePayoutCents || 0) / 100).toFixed(2)}</div>
                 {reservation.affiliateDriverName && (
-                  <div className="pt-1 text-neutral-600">
-                    Partner Driver: <span className="font-bold">{reservation.affiliateDriverName}</span> ({reservation.affiliateDriverPhone}) - {reservation.affiliateVehicleDescription}
+                  <div className="pt-1 text-neutral-400">
+                    Partner Driver: <span className="font-bold text-white">{reservation.affiliateDriverName}</span> ({reservation.affiliateDriverPhone}) - {reservation.affiliateVehicleDescription}
                   </div>
                 )}
               </div>
@@ -371,17 +374,17 @@ export default function ReservationDrawer({
             {dispatchMode === "in_house" ? (
               <div className="space-y-4">
                 {reservation.requestedDriverId && (
-                  <div className="text-xs font-bold text-amber-600 bg-amber-50 p-2 rounded border border-amber-200 flex items-center">
-                    <ShieldAlert size={14} className="mr-2" /> 
+                  <div className="text-xs font-bold text-amber-400 bg-amber-950/40 p-2.5 rounded-xl border border-amber-800/60 flex items-center font-mono">
+                    <ShieldAlert size={14} className="mr-2 text-amber-400" /> 
                     Rider requested driver ID: {reservation.requestedDriverId}
                   </div>
                 )}
 
                 <div>
-                  <label htmlFor="dispatch-select-driver" className="block text-xs font-bold text-neutral-700 mb-1">In-House Driver</label>
+                  <label htmlFor="dispatch-select-driver" className="block text-xs font-bold text-neutral-400 mb-1 font-mono uppercase">In-House Driver</label>
                   <select 
                     id="dispatch-select-driver"
-                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-accent focus:outline-none"
                     value={selectedDriver}
                     onChange={e => setSelectedDriver(e.target.value)}
                   >
@@ -393,10 +396,10 @@ export default function ReservationDrawer({
                 </div>
 
                 <div>
-                  <label htmlFor="dispatch-select-vehicle" className="block text-xs font-bold text-neutral-700 mb-1">Vehicle</label>
+                  <label htmlFor="dispatch-select-vehicle" className="block text-xs font-bold text-neutral-400 mb-1 font-mono uppercase">Vehicle</label>
                   <select 
                     id="dispatch-select-vehicle"
-                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-accent focus:outline-none"
                     value={selectedVehicle}
                     onChange={e => setSelectedVehicle(e.target.value)}
                   >
@@ -408,7 +411,7 @@ export default function ReservationDrawer({
                 </div>
 
                 {assignError && (
-                  <div className="text-xs font-bold text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                  <div className="text-xs font-bold text-rose-400 bg-rose-950/40 p-2.5 rounded-xl border border-rose-800/60">
                     {assignError}
                   </div>
                 )}
@@ -417,7 +420,7 @@ export default function ReservationDrawer({
                   type="button"
                   onClick={handleAssign}
                   disabled={loadingAssign || !selectedDriver || !selectedVehicle}
-                  className="w-full py-3 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-neutral-900 disabled:opacity-50 transition-all shadow-sm"
+                  className="w-full min-h-[44px] py-3 bg-gold-gradient text-neutral-950 text-xs font-bold rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-gold-sm uppercase tracking-wider"
                 >
                   {loadingAssign ? "Assigning..." : "Assign In-House Driver"}
                 </button>
@@ -425,9 +428,9 @@ export default function ReservationDrawer({
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">Affiliate Partner</label>
+                  <label className="block text-xs font-bold text-neutral-400 mb-1 font-mono uppercase">Affiliate Partner</label>
                   <select
-                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-sm bg-white"
+                    className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-accent focus:outline-none"
                     value={selectedAffiliateId}
                     onChange={e => setSelectedAffiliateId(e.target.value)}
                   >
@@ -441,7 +444,7 @@ export default function ReservationDrawer({
                 </div>
 
                 {selectedAffiliateId && (
-                  <div className="p-3 bg-neutral-100 rounded-xl text-xs space-y-1">
+                  <div className="p-3 bg-[#181822] border border-neutral-800 rounded-xl text-xs space-y-1.5 font-mono">
                     {(() => {
                       const selectedAff = affiliates.find(a => a.affiliateId === selectedAffiliateId);
                       if (!selectedAff) return null;
@@ -450,15 +453,15 @@ export default function ReservationDrawer({
                       const margin = (subtotal - Number(payout)).toFixed(2);
                       return (
                         <>
-                          <div className="flex justify-between font-semibold">
+                          <div className="flex justify-between font-semibold text-neutral-300">
                             <span>Client Subtotal:</span>
                             <span>${subtotal.toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-blue-700">
+                          <div className="flex justify-between font-bold text-accent">
                             <span>Affiliate Payout ({Math.round(selectedAff.defaultCommissionRate * 100)}%):</span>
                             <span>${payout}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-emerald-700">
+                          <div className="flex justify-between font-bold text-emerald-400">
                             <span>Luxe Platform Margin:</span>
                             <span>${margin}</span>
                           </div>
@@ -469,30 +472,30 @@ export default function ReservationDrawer({
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">Custom Payout Override ($)</label>
+                  <label className="block text-xs font-bold text-neutral-400 mb-1 font-mono uppercase">Custom Payout Override ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     placeholder="Optional (defaults to partner commission %)"
                     value={farmOutPayoutOverride}
                     onChange={e => setFarmOutPayoutOverride(e.target.value)}
-                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-xs bg-white"
+                    className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">Special Partner Instructions</label>
+                  <label className="block text-xs font-bold text-neutral-400 mb-1 font-mono uppercase">Special Partner Instructions</label>
                   <textarea
                     rows={2}
                     placeholder="e.g. VIP client, please send black executive SUV"
                     value={farmOutNotes}
                     onChange={e => setFarmOutNotes(e.target.value)}
-                    className="w-full border border-neutral-300 rounded-xl p-2.5 text-xs bg-white resize-none"
+                    className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-accent focus:outline-none resize-none"
                   />
                 </div>
 
                 {farmOutSuccess && (
-                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 font-medium">
+                  <div className="p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 font-medium">
                     ✓ {farmOutSuccess}
                   </div>
                 )}
@@ -518,7 +521,7 @@ export default function ReservationDrawer({
                       setLoadingFarmOut(false);
                     }
                   }}
-                  className="w-full py-3 bg-neutral-900 text-white text-xs font-bold rounded-xl hover:bg-black disabled:opacity-50 transition-all shadow-sm"
+                  className="w-full min-h-[44px] py-3 bg-gold-gradient text-neutral-950 text-xs font-bold rounded-xl hover:brightness-110 disabled:opacity-50 transition-all shadow-gold-sm uppercase tracking-wider"
                 >
                   {loadingFarmOut ? "Dispatching..." : "Dispatch to Affiliate Partner"}
                 </button>
@@ -528,26 +531,26 @@ export default function ReservationDrawer({
 
           {/* Pricing */}
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-500 mb-3 flex items-center">
-              <DollarSign size={16} className="mr-1" /> Pricing Breakdown
+            <h3 className="text-xs font-bold uppercase tracking-wider text-accent font-mono mb-3 flex items-center">
+              <DollarSign size={15} className="mr-1 text-accent" /> Pricing Breakdown
             </h3>
-            <div className="bg-white border border-neutral-200 rounded-xl p-4 text-sm space-y-2">
+            <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-4 text-xs space-y-2 font-mono">
               <div className="flex justify-between">
-                <span className="text-neutral-500">Base Fare</span>
-                <span className="font-semibold">{formatMoney((reservation.pricing.lineItems.find((li: any) => li.code === "base_fare")?.amountCents || 0))}</span>
+                <span className="text-neutral-400">Base Fare</span>
+                <span className="font-semibold text-white">{formatMoney((reservation.pricing.lineItems.find((li: any) => li.code === "base_fare")?.amountCents || 0))}</span>
               </div>
               {reservation.pricing.lineItems.filter((li: any) => li.code !== "base_fare").map((s, i) => (
                 <div key={i} className="flex justify-between">
-                  <span className="text-neutral-500">{s.label}</span>
-                  <span className="font-semibold">{formatMoney(s.amountCents)}</span>
+                  <span className="text-neutral-400">{s.label}</span>
+                  <span className="font-semibold text-white">{formatMoney(s.amountCents)}</span>
                 </div>
               ))}
-              <div className="flex justify-between border-t border-neutral-100 pt-2 font-bold">
+              <div className="flex justify-between border-t border-neutral-800 pt-2 font-bold text-sm text-accent">
                 <span>Estimated Total</span>
                 <span>{formatMoney(reservation.pricing.estimatedTotalCents)}</span>
               </div>
               {reservation.paymentStatus === "authorized" && (
-                <div className="text-xs text-emerald-600 font-semibold mt-2">
+                <div className="text-xs text-emerald-400 font-semibold mt-2">
                   Authorized: {formatMoney(reservation.authorizedAmountCents)}
                 </div>
               )}
@@ -556,18 +559,18 @@ export default function ReservationDrawer({
 
           {/* History */}
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-500 mb-3 flex items-center">
-              <Clock size={16} className="mr-1" /> History
+            <h3 className="text-xs font-bold uppercase tracking-wider text-accent font-mono mb-3 flex items-center">
+              <Clock size={15} className="mr-1 text-accent" /> Telemetry History
             </h3>
-            <div className="space-y-4 border-l-2 border-neutral-100 ml-2 pl-4">
+            <div className="space-y-4 border-l-2 border-neutral-800 ml-2 pl-4">
               {events.map((ev, i) => {
                 const date = typeof ev.createdAt?.toDate === "function" ? ev.createdAt.toDate() : new Date();
                 return (
                   <div key={i} className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-neutral-300 border-2 border-white"></div>
-                    <div className="text-xs font-bold text-neutral-800">{ev.status.toUpperCase()}</div>
-                    <div className="text-xs text-neutral-500">{formatDateTime(date, reservation.timezone || "UTC")} • {ev.actor}</div>
-                    {ev.reason && <div className="text-xs text-neutral-600 mt-1 italic">"{ev.reason}"</div>}
+                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-accent border-2 border-[#0a0a0e]"></div>
+                    <div className="text-xs font-bold text-white font-mono">{ev.status.toUpperCase()}</div>
+                    <div className="text-[11px] text-neutral-400">{formatDateTime(date, reservation.timezone || "UTC")} • {ev.actor}</div>
+                    {ev.reason && <div className="text-xs text-neutral-300 mt-1 italic">"{ev.reason}"</div>}
                   </div>
                 );
               })}
@@ -575,15 +578,15 @@ export default function ReservationDrawer({
           </section>
 
           {/* Admin Override */}
-          <section className="bg-red-50 p-5 rounded-2xl border border-red-100">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-red-700 mb-4 flex items-center">
-              <ShieldAlert size={16} className="mr-1" /> Admin Status Override
+          <section className="bg-rose-950/20 p-5 rounded-2xl border border-rose-900/40">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-4 flex items-center font-mono">
+              <ShieldAlert size={15} className="mr-1 text-rose-400" /> Admin Status Override
             </h3>
             <div className="space-y-3">
               <label htmlFor="dispatch-override-status" className="sr-only">Override Status</label>
               <select 
                 id="dispatch-override-status"
-                className="w-full border border-red-200 rounded-lg p-2 text-sm bg-white"
+                className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-rose-500 focus:outline-none"
                 value={overrideStatus}
                 onChange={e => setOverrideStatus(e.target.value as any)}
               >
@@ -596,7 +599,7 @@ export default function ReservationDrawer({
                 id="dispatch-override-reason"
                 type="text" 
                 placeholder="Reason (Required)" 
-                className="w-full border border-red-200 rounded-lg p-2 text-sm bg-white"
+                className="w-full border border-neutral-700 rounded-xl p-3 text-xs bg-[#181822] text-white focus:border-rose-500 focus:outline-none"
                 value={overrideReason}
                 onChange={e => setOverrideReason(e.target.value)}
               />
@@ -604,7 +607,7 @@ export default function ReservationDrawer({
                 type="button"
                 disabled={loadingOverride || !overrideReason}
                 onClick={handleOverride}
-                className="w-full bg-red-600 text-white rounded-lg py-2 text-sm font-bold disabled:opacity-50"
+                className="w-full min-h-[44px] bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-2.5 text-xs font-bold disabled:opacity-50 transition-all font-mono uppercase tracking-wider shadow-sm"
               >
                 {loadingOverride ? "Overriding..." : "Force Status Change"}
               </button>

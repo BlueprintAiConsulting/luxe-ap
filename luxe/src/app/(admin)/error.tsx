@@ -15,19 +15,19 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
-      <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-500 mb-4">
-        <AlertCircle className="w-12 h-12" />
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center font-sans">
+      <div className="p-4 rounded-full bg-rose-950/40 border border-rose-800/60 text-rose-400 mb-4">
+        <AlertCircle className="w-10 h-10" />
       </div>
-      <h2 className="text-xl font-bold mb-2">Something went wrong!</h2>
-      <p className="text-neutral-500 mb-6 max-w-sm">
-        An unexpected error occurred while loading this page.
+      <h2 className="text-xl font-bold font-serif text-white mb-2">Operational Interruption</h2>
+      <p className="text-neutral-400 text-xs font-mono mb-6 max-w-sm">
+        An unexpected exception occurred while loading this dispatch module.
       </p>
       <button
         onClick={() => reset()}
-        className="bg-black dark:bg-white text-white dark:text-black px-6 py-2 rounded-xl font-medium"
+        className="min-h-[44px] bg-gold-gradient text-neutral-950 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-gold-sm transition-all"
       >
-        Try again
+        Retry Interface
       </button>
     </div>
   );
