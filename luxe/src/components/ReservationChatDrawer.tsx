@@ -55,6 +55,15 @@ export default function ReservationChatDrawer({
     }
   }, [messages, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSend = async (e: React.FormEvent) => {
@@ -93,7 +102,12 @@ export default function ReservationChatDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200">
+    <div 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="concierge-channel-title"
+      className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200"
+    >
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/75 backdrop-blur-sm"
@@ -111,7 +125,7 @@ export default function ReservationChatDrawer({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-bold font-serif text-white">Live Concierge Channel</h2>
+                <h2 id="concierge-channel-title" className="text-sm font-bold font-serif text-white">Live Concierge Channel</h2>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
               <div className="text-[10px] font-mono text-neutral-400">

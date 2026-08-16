@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   X, 
   Download, 
@@ -31,6 +31,15 @@ interface ExecutiveInvoiceModalProps {
 export default function ExecutiveInvoiceModal({ trip, isOpen, onClose }: ExecutiveInvoiceModalProps) {
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !trip) return null;
 
@@ -76,7 +85,12 @@ Support: concierge@luxe.com | +1 (800) 555-0199`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+    <div 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invoice-modal-title"
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+    >
       
       {/* Modal Container */}
       <div className="bg-[#0e0e13] border border-neutral-800 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden my-auto relative text-white font-sans">
@@ -88,7 +102,7 @@ Support: concierge@luxe.com | +1 (800) 555-0199`;
               <FileText size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold font-serif text-white">Executive Tax Invoice & Itinerary</h2>
+              <h2 id="invoice-modal-title" className="text-sm font-bold font-serif text-white">Executive Tax Invoice & Itinerary</h2>
               <div className="text-[10px] font-mono text-neutral-400">Ref #{confirmationCode}</div>
             </div>
           </div>
