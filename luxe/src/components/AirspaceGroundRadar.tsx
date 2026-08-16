@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useMemo } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase/client";
 import { 
   Plane, 
   Car, 
@@ -259,6 +261,54 @@ export default function AirspaceGroundRadar({
 
   // Radar sweep angle
   const sweepAngleRef = useRef(0);
+
+  // Live Driver GPS Telemetry Subscription
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, "driverLocations"),
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const liveList: RadarVehicle[] = [];
+          snapshot.forEach((d) => {
+            const data = d.data();
+            if (data.lat && data.lng) {
+              liveList.push({
+                id: d.id,
+                driverName: data.driverName || "Executive Chauffeur",
+                driverPhone: data.driverPhone || "(310) 555-0199",
+                vehicleModel: data.vehicleDescription || "Mercedes-Benz S580 Executive",
+                licensePlate: data.licensePlate || "LUXE-77",
+                status: (data.status as any) || "en_route",
+                latitude: data.lat,
+                longitude: data.lng,
+                heading: data.headingDegrees || 0,
+                speedMph: data.speedMph || 0,
+                passengerName: data.passengerName || (data.reservationId ? `Charter #${data.reservationId.slice(-4)}` : undefined),
+                reservationId: data.reservationId || undefined,
+                destinationLabel: data.destinationLabel || "LAX Airport Corridor",
+                etaMinutes: data.etaMinutes || 6,
+              });
+            }
+          });
+
+          if (liveList.length > 0) {
+            setVehicles((prev) => {
+              const merged = [...liveList];
+              prev.forEach((p) => {
+                if (!merged.some((m) => m.id === p.id || m.driverName === p.driverName)) {
+                  merged.push(p);
+                }
+              });
+              return merged;
+            });
+          }
+        }
+      },
+      (err) => console.warn("Radar driverLocations subscribe error:", err)
+    );
+
+    return () => unsub();
+  }, []);
 
   // Projection math: Lat/Lng -> Canvas X/Y
   const latLngToCanvas = (lat: number, lng: number, width: number, height: number) => {

@@ -125,16 +125,14 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
-    // Driver Locations
+    // Driver Locations (Real-Time GPS Telemetry)
     // -------------------------------------------------------------------------
     match /driverLocations/{locationId} {
-      // Read: assigned rider or admin
-      // The `driverLocationStubSchema` has `reservationId`. We can fetch the reservation to check if the rider is assigned.
-      allow read: if isAdmin() || (isAuthenticated() && (
-        resource.data.reservationId != null &&
-        get(/databases/$(database)/documents/reservations/$(resource.data.reservationId)).data.riderId == request.auth.uid
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || (isAuthenticated() && (
+        request.auth.uid == locationId || 
+        (request.resource.data.driverId != null && request.resource.data.driverId == request.auth.uid)
       ));
-      allow write: if false;
     }
   }
 }

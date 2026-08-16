@@ -179,6 +179,8 @@ export default function RiderDashboardPage() {
                     <LiveTripMap
                       pickup={trip.pickup}
                       dropoff={trip.dropoff}
+                      driverId={trip.driverId}
+                      reservationId={trip.reservationId}
                       driverName={trip.driverName || "Marcus Bennett"}
                       vehicleDescription={trip.vehicleDescription || "Mercedes-Benz S-Class"}
                       driverPhotoUrl={trip.driverPhotoUrl}

@@ -20,11 +20,15 @@ import {
   Shield,
   Loader2,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Radio,
+  Compass,
+  Activity
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { getFunctions as getFunctionsApp, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/client";
+import { useDriverLocationTracker } from "@/hooks/useDriverLocationTracker";
 
 type ChecklistItem = { id: string; label: string };
 
@@ -86,6 +90,18 @@ export default function TripDetailClient() {
   const [actualWaitMinutes, setActualWaitMinutes] = useState<string>("0");
   const [driverNotes, setDriverNotes] = useState<string>("");
   const [showActualsModal, setShowActualsModal] = useState(false);
+
+  // Live Driver GPS Telemetry Streamer
+  const driverTracker = useDriverLocationTracker({
+    driverId: user?.uid || trip?.driverId || null,
+    driverName: user?.displayName || trip?.driverName || "Marcus Bennett",
+    vehicleDescription: trip?.vehicleDescription || "Executive Livery",
+    reservationId: trip?.reservationId || null,
+    status: trip?.status || "confirmed",
+    pickupCoords: trip?.pickup ? { lat: trip.pickup.lat, lng: trip.pickup.lng } : null,
+    dropoffCoords: trip?.dropoff ? { lat: trip.dropoff.lat, lng: trip.dropoff.lng } : null,
+    enabled: !!trip && trip.status !== "completed" && trip.status !== "cancelled",
+  });
 
   useEffect(() => {
     if (!tripId) return;
@@ -195,12 +211,73 @@ export default function TripDetailClient() {
       <div className="flex items-center justify-between">
         <button 
           onClick={() => router.push("/today")}
-          className="p-2 rounded-xl bg-[#0e0e13] border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+          className="p-2 rounded-xl bg-[#0e0e13] border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider min-h-[44px]"
         >
           <ArrowLeft size={16} />
           <span>Back</span>
         </button>
         <span className="text-xs font-mono text-neutral-500">#{trip.reservationId.slice(-6)}</span>
+      </div>
+
+      {/* Live GPS Telemetry Broadcaster HUD Card */}
+      <div className="bg-[#0e0e13] border border-amber-400/25 rounded-3xl p-5 shadow-2xl space-y-3 relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
+              <Radio size={14} className="animate-pulse" /> Live Telemetry Broadcasting
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={driverTracker.toggleSimulation}
+            className={`px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider border transition-all active:scale-95 min-h-[36px] flex items-center gap-1.5 ${
+              driverTracker.isSimulating
+                ? "bg-amber-400 text-neutral-950 border-amber-300 shadow-gold-sm"
+                : "bg-[#181822] text-neutral-300 border-neutral-700 hover:border-accent"
+            }`}
+          >
+            <Compass size={12} className={driverTracker.isSimulating ? "animate-spin" : ""} />
+            <span>{driverTracker.isSimulating ? "Simulation Active" : "Simulate Drive"}</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-center">
+          <div className="bg-[#060608] border border-neutral-800 rounded-2xl p-2.5">
+            <div className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold">Speed</div>
+            <div className="text-sm font-bold text-white mt-0.5">
+              {driverTracker.currentCoords?.speedMph || 0} <span className="text-[10px] text-neutral-400">MPH</span>
+            </div>
+          </div>
+
+          <div className="bg-[#060608] border border-neutral-800 rounded-2xl p-2.5">
+            <div className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold">Bearing</div>
+            <div className="text-sm font-bold text-accent mt-0.5">
+              {driverTracker.currentCoords?.heading || 0}°
+            </div>
+          </div>
+
+          <div className="bg-[#060608] border border-neutral-800 rounded-2xl p-2.5">
+            <div className="text-[9px] uppercase tracking-wider text-neutral-400 font-bold">Signal Ping</div>
+            <div className="text-sm font-bold text-emerald-400 mt-0.5">
+              {driverTracker.lastPingAt ? "Active" : "Ready"}
+            </div>
+          </div>
+        </div>
+
+        {driverTracker.currentCoords && (
+          <div className="text-[10px] font-mono text-neutral-400 flex items-center justify-between pt-1 border-t border-neutral-800/80">
+            <span>GPS: {driverTracker.currentCoords.lat.toFixed(4)}°, {driverTracker.currentCoords.lng.toFixed(4)}°</span>
+            <span className="text-emerald-400 font-bold">Accuracy: ±{driverTracker.currentCoords.accuracy}m</span>
+          </div>
+        )}
+
+        {driverTracker.permissionError && (
+          <div className="text-[10px] font-mono text-amber-300 bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-xl">
+            ⚠️ {driverTracker.permissionError}
+          </div>
+        )}
       </div>
 
       {errorMsg && (
