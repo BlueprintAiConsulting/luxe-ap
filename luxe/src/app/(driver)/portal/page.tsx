@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/firebase/auth";
 import { useEffect, useState, Suspense } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
 import { Star, TrendingUp, DollarSign, Award, Clock } from "lucide-react";
@@ -33,12 +33,16 @@ function DriverPortalInner() {
 
     const loadPortalData = async () => {
       try {
-        // Load Driver Profile for Ratings & Total Rides
-        const userRef = collection(db, "users");
-        const userQ = query(userRef, where("uid", "==", targetDriverId));
-        const userSnap = await getDocs(userQ);
-        if (!userSnap.empty) {
-          setDriverProfile(userSnap.docs[0].data() as User);
+        // Load Driver Profile for Ratings & Total Rides via direct document lookup
+        const userDoc = await getDoc(doc(db, "users", targetDriverId));
+        if (userDoc.exists()) {
+          setDriverProfile(userDoc.data() as User);
+        } else {
+          // Fallback to driver document if present
+          const driverDoc = await getDoc(doc(db, "drivers", targetDriverId));
+          if (driverDoc.exists()) {
+            setDriverProfile(driverDoc.data() as any);
+          }
         }
 
         // Load Completed Trips for Earnings
