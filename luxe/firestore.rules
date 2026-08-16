@@ -96,7 +96,8 @@ service cloud.firestore {
     // Pricing Rule Sets
     // -------------------------------------------------------------------------
     match /pricingRuleSets/{ruleSetId} {
-      allow read: if isAdmin();
+      // Riders need to read pricing rules for fare estimates during booking
+      allow read: if isAuthenticated();
       allow write: if false;
     }
 
