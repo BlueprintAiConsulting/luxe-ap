@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/firebase/auth";
 import Link from "next/link";
-import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight, ShieldCheck, MapPin, Navigation } from "lucide-react";
+import { Car, LogOut, Sparkles, Star, PlusCircle, Calendar, PhoneCall, ArrowRight, ShieldCheck, MapPin, Navigation, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/client";
@@ -11,12 +11,14 @@ import { Reservation } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 import LiveTripMap from "@/components/LiveTripMap";
 import TripRatingModal from "@/components/TripRatingModal";
+import ExecutiveInvoiceModal from "@/components/ExecutiveInvoiceModal";
 
 export default function RiderDashboardPage() {
   const { user } = useAuth();
   const [trips, setTrips] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [ratingTrip, setRatingTrip] = useState<Reservation | null>(null);
+  const [selectedInvoiceTrip, setSelectedInvoiceTrip] = useState<Reservation | null>(null);
   const [limitCount, setLimitCount] = useState(10);
 
   useEffect(() => {
@@ -147,11 +149,18 @@ export default function RiderDashboardPage() {
                 </div>
 
                 {/* Driver Info */}
-                {trip.driverName && (
-                  <div className="flex items-center justify-between pt-3 border-t border-neutral-800 text-xs">
-                    <span className="text-neutral-400">
-                      Chauffeur: <span className="font-bold text-white ml-1">{trip.driverName}</span>
-                    </span>
+                {/* Actions & Itinerary / Receipt Trigger */}
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-800 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInvoiceTrip(trip)}
+                    className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all active:scale-95 min-h-[38px]"
+                  >
+                    <FileText size={13} className="text-accent" />
+                    <span>Executive Receipt & Itinerary</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
                     {driverRated ? (
                       <span className="flex items-center text-accent font-bold text-[11px]">
                         <Star size={12} className="fill-accent text-accent mr-1" />
@@ -159,15 +168,16 @@ export default function RiderDashboardPage() {
                       </span>
                     ) : isCompleted ? (
                       <button
+                        type="button"
                         onClick={() => setRatingTrip(trip)}
-                        className="px-2.5 py-1 bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 rounded-xl font-bold text-[11px] flex items-center transition-all active:scale-95"
+                        className="px-2.5 py-2 bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 rounded-xl font-bold text-[11px] flex items-center transition-all active:scale-95 min-h-[38px]"
                       >
                         <Star size={11} className="fill-accent text-accent mr-1" />
                         Rate Chauffeur
                       </button>
                     ) : null}
                   </div>
-                )}
+                </div>
 
                 {/* Embedded Live GPS Tracking Map for Active Trips */}
                 {isActive && (
@@ -196,20 +206,29 @@ export default function RiderDashboardPage() {
             {trips.length >= limitCount && (
               <button 
                 onClick={() => setLimitCount(c => c + 10)}
-                className="block w-full text-center bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 px-4 py-3 rounded-2xl text-xs font-semibold transition-all active:scale-95"
+                className="block w-full text-center bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 px-4 py-3 rounded-2xl text-xs font-semibold transition-all active:scale-95 min-h-[44px]"
               >
                 Load Older Reservations
               </button>
             )}
             <Link 
               href="/book"
-              className="flex items-center justify-center w-full bg-accent hover:bg-accent/90 text-neutral-950 px-5 py-3.5 rounded-2xl font-bold text-xs transition-all active:scale-95 shadow-lg"
+              className="flex items-center justify-center w-full bg-gold-gradient hover:brightness-110 text-neutral-950 px-5 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all active:scale-95 shadow-gold-sm min-h-[44px]"
             >
-              <span>Book Another Executive Ride</span>
+              <span>Book Another Executive Charter</span>
               <ArrowRight size={14} className="ml-2" />
             </Link>
           </div>
         </div>
+      )}
+
+      {/* Executive Tax Invoice & Itinerary Modal */}
+      {selectedInvoiceTrip && (
+        <ExecutiveInvoiceModal
+          trip={selectedInvoiceTrip}
+          isOpen={!!selectedInvoiceTrip}
+          onClose={() => setSelectedInvoiceTrip(null)}
+        />
       )}
 
       {/* Trip Rating Modal */}

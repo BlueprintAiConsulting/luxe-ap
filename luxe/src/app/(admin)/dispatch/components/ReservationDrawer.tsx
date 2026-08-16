@@ -3,7 +3,7 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 
 import { useState, useEffect } from "react";
 import { Reservation, Driver, Vehicle } from "@/lib/types";
-import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap, Sparkles } from "lucide-react";
+import { X, User, MapPin, DollarSign, Clock, ShieldAlert, Plane, Zap, Sparkles, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -11,6 +11,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "@/lib/firebase/client";
 import RiderPreferencesView from "@/app/(admin)/components/RiderPreferencesView";
 import LiveTripMap from "@/components/LiveTripMap";
+import ExecutiveInvoiceModal from "@/components/ExecutiveInvoiceModal";
 
 export default function ReservationDrawer({ 
   reservation, 
@@ -29,6 +30,7 @@ export default function ReservationDrawer({
   const [loadingAssign, setLoadingAssign] = useState(false);
   const [loadingOverride, setLoadingOverride] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   
   const [selectedDriver, setSelectedDriver] = useState(reservation.driverId || preSelectedDriverId || "");
   const [selectedVehicle, setSelectedVehicle] = useState(reservation.vehicleId || "");
@@ -156,14 +158,26 @@ export default function ReservationDrawer({
             <h2 className="text-xl font-bold font-mono text-white tracking-tight">{reservation.confirmationCode}</h2>
             <div className="text-xs text-neutral-400">Booked by {reservation.bookedByAdmin ? "Operations Concierge" : "VIP Client"}</div>
           </div>
-          <button 
-            type="button"
-            aria-label="Close reservation details drawer"
-            onClick={onClose} 
-            className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowInvoiceModal(true)}
+              className="px-3 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-200 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              title="Generate Executive Tax Invoice & Itinerary"
+            >
+              <FileText size={13} className="text-accent" />
+              <span className="hidden sm:inline">Tax Invoice / PDF</span>
+            </button>
+
+            <button 
+              type="button"
+              aria-label="Close reservation details drawer"
+              onClick={onClose} 
+              className="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
@@ -616,6 +630,15 @@ export default function ReservationDrawer({
 
         </div>
       </div>
+
+      {/* Executive Tax Invoice & Itinerary Modal */}
+      {showInvoiceModal && (
+        <ExecutiveInvoiceModal
+          trip={reservation}
+          isOpen={showInvoiceModal}
+          onClose={() => setShowInvoiceModal(false)}
+        />
+      )}
     </div>
   );
 }

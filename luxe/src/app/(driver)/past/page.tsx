@@ -7,9 +7,10 @@ import { db } from "@/lib/firebase/client";
 import { Reservation } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 import Link from "next/link";
-import { MapPin, Navigation, History, DollarSign, Star, User } from "lucide-react";
+import { MapPin, Navigation, History, DollarSign, Star, User, FileText } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import TripRatingModal from "@/components/TripRatingModal";
+import ExecutiveInvoiceModal from "@/components/ExecutiveInvoiceModal";
 
 export default function DriverPastTripsPage() {
   return (
@@ -27,6 +28,7 @@ function DriverPastTripsInner() {
   const [trips, setTrips] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [ratingTrip, setRatingTrip] = useState<Reservation | null>(null);
+  const [selectedInvoiceTrip, setSelectedInvoiceTrip] = useState<Reservation | null>(null);
 
   useEffect(() => {
     if (!targetDriverId) return;
@@ -139,26 +141,46 @@ function DriverPastTripsInner() {
                   )}
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-neutral-800 flex justify-end">
-                  {!(trip as any).riderRating ? (
-                    <button
-                      onClick={(e) => { e.preventDefault(); setRatingTrip(trip); }}
-                      className="px-3 py-1 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg font-bold flex items-center transition-all active:scale-95 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-gold-sm"
-                    >
-                      <Star size={13} className="fill-accent text-accent mr-1" />
-                      Rate Rider
-                    </button>
-                  ) : (
-                    <span className="flex items-center text-accent font-bold text-sm">
-                      <Star size={13} className="fill-accent mr-1" />
-                      {(trip as any).riderRating}.0 Rated
-                    </span>
-                  )}
+                <div className="pt-4 mt-4 border-t border-neutral-800 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInvoiceTrip(trip)}
+                    className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 rounded-xl font-mono text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 min-h-[38px]"
+                  >
+                    <FileText size={13} className="text-accent" />
+                    <span>Trip Statement & Itinerary</span>
+                  </button>
+
+                  <div>
+                    {!(trip as any).riderRating ? (
+                      <button
+                        onClick={(e) => { e.preventDefault(); setRatingTrip(trip); }}
+                        className="px-3 py-2 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-xl font-bold flex items-center transition-all active:scale-95 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-gold-sm min-h-[38px]"
+                      >
+                        <Star size={13} className="fill-accent text-accent mr-1" />
+                        Rate Rider
+                      </button>
+                    ) : (
+                      <span className="flex items-center text-accent font-bold text-xs">
+                        <Star size={13} className="fill-accent mr-1" />
+                        {(trip as any).riderRating}.0 Rated
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Executive Tax Invoice & Itinerary Modal */}
+      {selectedInvoiceTrip && (
+        <ExecutiveInvoiceModal
+          trip={selectedInvoiceTrip}
+          isOpen={!!selectedInvoiceTrip}
+          onClose={() => setSelectedInvoiceTrip(null)}
+        />
       )}
 
       {ratingTrip && (
