@@ -531,16 +531,16 @@ export default function BookPage() {
         </div>
 
         {/* Linear Gold Step Progress Tracker */}
-        <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+        <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-amber-500 to-accent transition-all duration-300 ease-out" 
+            className="h-full bg-gold-gradient transition-all duration-300 ease-out shadow-gold-sm" 
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} 
           />
         </div>
       </div>
 
       {/* Main Step Body Card */}
-      <div className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
+      <div className="bg-[#0e0e13]/90 backdrop-blur-xl border border-amber-400/20 rounded-3xl p-5 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-6">
         
         {error && (
           <div className="bg-red-950/60 border border-red-800/80 text-red-200 text-xs p-4 rounded-2xl flex items-start gap-2.5">
@@ -1092,11 +1092,11 @@ export default function BookPage() {
 
       {/* Floating Sticky Bottom Action Bar */}
       {currentStep < 7 && (
-        <div className="fixed bottom-14 sm:bottom-0 left-0 right-0 z-40 bg-neutral-900/95 backdrop-blur-2xl border-t border-white/10 p-3.5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <div className="fixed bottom-14 sm:bottom-0 left-0 right-0 z-40 bg-[#0e0e13]/95 backdrop-blur-2xl border-t border-white/10 p-3.5 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.7)]">
           <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Estimated Fare</div>
-              <div className="text-lg font-bold text-accent font-mono leading-tight">
+              <div className="text-xl font-bold text-accent font-mono leading-tight">
                 {activePriceEstimate !== null ? `$${(activePriceEstimate / 100).toFixed(2)}` : "--"}
               </div>
             </div>
@@ -1106,7 +1106,7 @@ export default function BookPage() {
                 type="button"
                 onClick={handleNext} 
                 disabled={loading || (currentStep === 1 && !pickupAddress)}
-                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-accent text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-40 transition-all shadow-lg active:scale-95"
+                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 transition-all shadow-gold-sm hover:shadow-gold-md active:scale-95"
               >
                 <span>Continue</span>
                 <ArrowRight size={16} />
@@ -1116,12 +1116,12 @@ export default function BookPage() {
                 type="button"
                 onClick={handleConfirm}
                 disabled={loading || !quote}
-                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-accent text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-40 transition-all shadow-lg active:scale-95"
+                className="flex-1 sm:flex-initial sm:px-10 py-3.5 rounded-2xl bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 transition-all shadow-gold-sm hover:shadow-gold-md active:scale-95"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                {loading ? <Loader2 className="animate-spin text-neutral-950" size={18} /> : (
                   <>
                     <span>Confirm & Book</span>
-                    <Sparkles size={16} />
+                    <Sparkles size={16} className="text-neutral-950" />
                   </>
                 )}
               </button>

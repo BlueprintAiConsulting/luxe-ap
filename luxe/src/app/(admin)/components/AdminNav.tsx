@@ -55,7 +55,7 @@ export function AdminNav() {
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group active:scale-[0.98] ${
                 isActive
-                  ? "bg-neutral-800 text-white font-bold border border-white/10 shadow-lg"
+                  ? "bg-neutral-800 text-white font-bold border border-accent/30 shadow-gold-sm"
                   : "text-neutral-400 hover:bg-neutral-900 hover:text-white font-medium"
               }`}
             >
@@ -63,15 +63,15 @@ export function AdminNav() {
                 size={20} 
                 className={
                   isActive 
-                    ? item.highlight ? "text-cyan-400" : "text-accent" 
+                    ? "text-accent" 
                     : "opacity-60 group-hover:opacity-100 group-hover:text-neutral-200 transition-all"
                 } 
               />
               <span className="flex-1 text-sm">{item.name}</span>
               {item.name === "Live Radar" && (
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent"></span>
                 </span>
               )}
             </Link>
@@ -95,7 +95,7 @@ export function AdminNav() {
           href="/today"
           className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-neutral-400 hover:bg-neutral-900 hover:text-white text-xs font-semibold group"
         >
-          <Car size={18} className="opacity-60 group-hover:text-amber-400 transition-colors" />
+          <Car size={18} className="opacity-60 group-hover:text-accent transition-colors" />
           Driver Cockpit
           <ArrowUpRight size={13} className="ml-auto opacity-50" />
         </Link>
@@ -116,12 +116,12 @@ export function AdminNav() {
       {/* Mobile Top Bar */}
       <div className="lg:hidden flex items-center justify-between px-5 py-3.5 bg-neutral-900/95 backdrop-blur-xl border-b border-neutral-800 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+          <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
             <Globe size={16} />
           </div>
           <div>
             <div className="font-bold text-sm text-white tracking-wider uppercase font-serif">LUXE</div>
-            <div className="text-[10px] text-cyan-400 font-mono leading-none">OPERATIONS</div>
+            <div className="text-[10px] text-accent font-mono leading-none">OPERATIONS</div>
           </div>
         </div>
 
@@ -136,16 +136,16 @@ export function AdminNav() {
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 pt-20 bg-neutral-950/98 backdrop-blur-2xl flex flex-col p-6 h-full overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="lg:hidden fixed inset-0 z-30 pt-20 bg-[#060608]/98 backdrop-blur-2xl flex flex-col p-6 h-full overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
           <NavLinks />
         </div>
       )}
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-neutral-900 border-r border-neutral-800 h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#0c0c10] border-r border-neutral-800/80 h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto">
         <div className="px-4 mb-8">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-2">
-            <Sparkles size={11} /> Operations
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-2 shadow-gold-sm">
+            <Sparkles size={11} className="text-accent" /> Operations
           </div>
           <h1 className="font-bold text-2xl text-white tracking-tight font-serif uppercase">LUXE</h1>
           <div className="text-[11px] font-medium text-neutral-400 mt-0.5 tracking-wider uppercase">Airspace & Dispatch</div>

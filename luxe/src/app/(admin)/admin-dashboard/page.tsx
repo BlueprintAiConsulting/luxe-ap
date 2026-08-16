@@ -77,9 +77,9 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#050507] text-white">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-medium tracking-wider uppercase text-neutral-400">Loading Operations Cockpit...</span>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono shadow-gold-sm">
             <Radio size={11} className="animate-pulse" /> Operations Command
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold font-serif text-white tracking-tight">Operations Cockpit</h1>
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/radar"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-900 border border-cyan-500/30 text-cyan-400 rounded-xl text-xs font-bold hover:bg-neutral-800 transition-all active:scale-95 shadow-lg"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-900 border border-accent/40 text-accent hover:border-accent rounded-xl text-xs font-bold hover:bg-neutral-850 transition-all active:scale-95 shadow-gold-sm"
         >
           <Globe size={14} />
           <span>Launch Full Radar</span>
@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-5 shadow-xl">
+        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
           <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Today's Trips</span>
             <Calendar size={16} className="text-neutral-500" />
@@ -118,15 +118,15 @@ export default function AdminDashboardPage() {
           <div className="text-3xl sm:text-4xl font-bold font-mono text-white">{stats.todayReservations}</div>
         </div>
 
-        <div className="bg-neutral-900/90 border border-amber-400/40 rounded-2xl p-5 shadow-xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-amber-950/20">
-          <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <div className="bg-[#0e0e13] border border-accent/40 rounded-2xl p-5 shadow-xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-amber-950/20">
+          <div className="text-[11px] font-bold text-accent uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Needs Dispatch</span>
-            <Car size={16} className="text-amber-400" />
+            <Car size={16} className="text-accent" />
           </div>
-          <div className="text-3xl sm:text-4xl font-bold font-mono text-amber-400">{stats.unassignedTrips}</div>
+          <div className="text-3xl sm:text-4xl font-bold font-mono text-accent">{stats.unassignedTrips}</div>
         </div>
 
-        <div className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-5 shadow-xl">
+        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
           <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Active Drivers</span>
             <UserCheck size={16} className="text-neutral-500" />
@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
           <div className="text-3xl sm:text-4xl font-bold font-mono text-white">{stats.activeDrivers}</div>
         </div>
 
-        <div className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-5 shadow-xl">
+        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
           <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>In Progress</span>
             <Activity size={16} className="text-emerald-400" />
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-xl sm:text-2xl font-bold font-serif text-white tracking-tight">Live Airspace & Ground Fleet Radar</h2>
             <p className="text-xs text-neutral-400">Synchronized commercial/private jet inbounds & chauffeur rendezvous.</p>
           </div>
-          <Link href="/radar" className="text-xs font-bold text-cyan-400 hover:underline flex items-center gap-1">
+          <Link href="/radar" className="text-xs font-bold text-accent hover:underline flex items-center gap-1">
             <span>Enlarge Radar</span>
             <ArrowRight size={12} />
           </Link>

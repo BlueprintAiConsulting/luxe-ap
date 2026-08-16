@@ -135,14 +135,14 @@ export default function DriverPastTripsPage() {
                   {!(trip as any).riderRating ? (
                     <button
                       onClick={(e) => { e.preventDefault(); setRatingTrip(trip); }}
-                      className="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-lg font-bold flex items-center transition-all active:scale-95 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                      className="px-3 py-1 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg font-bold flex items-center transition-all active:scale-95 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent shadow-gold-sm"
                     >
-                      <Star size={13} className="fill-amber-400 text-amber-500 mr-1" />
+                      <Star size={13} className="fill-accent text-accent mr-1" />
                       Rate Rider
                     </button>
                   ) : (
-                    <span className="flex items-center text-amber-500 font-bold text-sm">
-                      <Star size={13} className="fill-amber-500 mr-1" />
+                    <span className="flex items-center text-accent font-bold text-sm">
+                      <Star size={13} className="fill-accent mr-1" />
                       {(trip as any).riderRating}.0 Rated
                     </span>
                   )}

@@ -84,8 +84,8 @@ export default function RiderDashboardPage() {
       
       {/* Trips list */}
       {trips.length === 0 ? (
-        <div className="text-center bg-neutral-900/80 backdrop-blur-xl border border-neutral-800 rounded-3xl py-14 px-6 shadow-xl space-y-4">
-          <div className="w-16 h-16 bg-neutral-800/80 border border-neutral-700 rounded-2xl flex items-center justify-center mx-auto text-accent">
+        <div className="text-center bg-[#0e0e13]/90 backdrop-blur-xl border border-amber-400/20 rounded-3xl py-14 px-6 shadow-2xl space-y-4">
+          <div className="w-16 h-16 bg-[#181822] border border-neutral-700 rounded-2xl flex items-center justify-center mx-auto text-accent shadow-gold-sm">
             <Car size={30} />
           </div>
           <div>
@@ -97,7 +97,7 @@ export default function RiderDashboardPage() {
           <div className="pt-2">
             <Link 
               href="/book"
-              className="bg-accent hover:bg-accent/90 text-neutral-950 px-6 py-3.5 rounded-2xl font-bold text-xs inline-flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-amber-500/10"
+              className="bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 px-6 py-3.5 rounded-2xl font-bold text-xs inline-flex items-center gap-2 transition-all active:scale-95 shadow-gold-sm hover:shadow-gold-md"
             >
               <span>Book An Executive Ride</span>
               <ArrowRight size={14} />
@@ -114,7 +114,7 @@ export default function RiderDashboardPage() {
             return (
               <div 
                 key={trip.reservationId} 
-                className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 p-5 rounded-3xl shadow-xl space-y-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4"
+                className="bg-[#0e0e13]/90 backdrop-blur-xl border border-neutral-800 hover:border-amber-400/30 p-5 rounded-3xl shadow-xl space-y-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 transition-all"
                 style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
               >
                 {/* Status & Date */}
@@ -140,7 +140,7 @@ export default function RiderDashboardPage() {
                       ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse" 
                       : isCompleted 
                         ? "bg-neutral-800 border-neutral-700 text-neutral-300"
-                        : "bg-amber-400/10 border-amber-400/30 text-amber-400"
+                        : "bg-accent/15 border-accent/30 text-accent font-bold"
                   }`}>
                     {trip.status.replace(/_/g, " ")}
                   </span>

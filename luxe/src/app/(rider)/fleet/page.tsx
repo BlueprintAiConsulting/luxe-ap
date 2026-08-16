@@ -96,7 +96,7 @@ export default function FleetPage() {
           return (
             <div 
               key={vehicle.id}
-              className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl space-y-4 group"
+              className="bg-[#0e0e13]/90 backdrop-blur-xl border border-neutral-800 hover:border-amber-400/30 rounded-3xl overflow-hidden shadow-2xl space-y-4 group transition-all"
             >
               {/* Image Banner with Badge */}
               <div className="relative h-44 w-full overflow-hidden bg-neutral-950">
@@ -109,13 +109,13 @@ export default function FleetPage() {
                 
                 <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
                   <div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-accent bg-neutral-950/80 px-2 py-0.5 rounded-md border border-neutral-800">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-accent bg-[#060608]/90 px-2.5 py-0.5 rounded-md border border-amber-400/30 shadow-gold-sm">
                       {vehicle.startingFare} Base
                     </span>
                     <h2 className="text-xl font-bold font-serif text-white mt-1">{vehicle.name}</h2>
                   </div>
                   
-                  <div className="flex items-center gap-2 bg-neutral-950/90 border border-neutral-800 px-2.5 py-1 rounded-xl text-xs text-neutral-300 font-mono">
+                  <div className="flex items-center gap-2 bg-[#060608]/90 border border-neutral-800 px-2.5 py-1 rounded-xl text-xs text-neutral-300 font-mono">
                     <div className="flex items-center gap-1">
                       <User size={12} className="text-accent" />
                       <span>{vehicle.passengers}</span>
@@ -147,7 +147,7 @@ export default function FleetPage() {
                 <div className="pt-2">
                   <Link
                     href={`/book`}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-accent hover:bg-accent/90 text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-amber-500/10"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-gold-sm hover:shadow-gold-md"
                   >
                     <span>Reserve {vehicle.name}</span>
                     <ArrowRight size={14} />

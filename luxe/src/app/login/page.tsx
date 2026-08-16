@@ -201,28 +201,28 @@ ${origin}/login?demo=admin
   );
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-neutral-950 py-10 px-4 sm:px-6 lg:px-8 relative selection:bg-accent selection:text-neutral-950">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-[#050507] py-10 px-4 sm:px-6 lg:px-8 relative selection:bg-accent selection:text-neutral-950">
       {/* Ambient background lighting */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-neutral-950/80 to-neutral-950 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/15 via-[#09090c]/80 to-[#050507] pointer-events-none" />
 
       <div className="max-w-md w-full relative z-10 space-y-6">
         
         {/* Luxury Glass Card */}
-        <div className="bg-neutral-900/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-[#0e0e13]/90 backdrop-blur-2xl border border-amber-400/20 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-6">
           
           {/* Header */}
           <div className="relative flex flex-col items-center text-center">
             {portal !== "select" && (
               <button 
                 onClick={() => setPortal("select")} 
-                className="absolute left-0 top-1 text-neutral-400 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-neutral-800"
+                className="absolute left-0 top-1 text-neutral-400 hover:text-white transition-colors p-1.5 rounded-xl hover:bg-neutral-800/80"
                 title="Back to portal selection"
               >
                 <ArrowLeft size={20} />
               </button>
             )}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[11px] font-bold uppercase tracking-widest mb-3">
-              <Sparkles size={12} /> Executive Mobility System
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent text-[11px] font-bold uppercase tracking-widest mb-3 shadow-gold-sm">
+              <Sparkles size={12} className="text-accent" /> Executive Mobility System
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase leading-none font-serif">
               LUXE
@@ -260,7 +260,7 @@ ${origin}/login?demo=admin
                   type="button"
                   disabled={loading}
                   onClick={() => handleDemoLogin("rider")}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-accent rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-900/95 to-neutral-850 border border-neutral-800 hover:border-accent/60 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md hover:shadow-gold-sm"
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
@@ -269,7 +269,7 @@ ${origin}/login?demo=admin
                     <div>
                       <div className="font-bold text-sm text-white group-hover:text-accent transition-colors flex items-center gap-2">
                         VIP Rider Experience
-                        <span className="text-[9px] font-mono bg-accent/20 text-accent px-1.5 py-0.5 rounded font-bold uppercase">Client</span>
+                        <span className="text-[9px] font-mono bg-accent/20 text-accent border border-accent/30 px-1.5 py-0.5 rounded font-bold uppercase">Client</span>
                       </div>
                       <div className="text-xs text-neutral-400">Luxury 6-Step Booking & Live Tracking</div>
                     </div>
@@ -286,24 +286,24 @@ ${origin}/login?demo=admin
                   type="button"
                   disabled={loading}
                   onClick={() => handleDemoLogin("driver")}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-amber-400 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-900/95 to-neutral-850 border border-neutral-800 hover:border-accent/60 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md hover:shadow-gold-sm"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
                       <Car size={20} />
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors flex items-center gap-2">
+                      <div className="font-bold text-sm text-white group-hover:text-accent transition-colors flex items-center gap-2">
                         Executive Chauffeur HUD
-                        <span className="text-[9px] font-mono bg-amber-400/20 text-amber-400 px-1.5 py-0.5 rounded font-bold uppercase">Cockpit</span>
+                        <span className="text-[9px] font-mono bg-accent/20 text-accent border border-accent/30 px-1.5 py-0.5 rounded font-bold uppercase">Cockpit</span>
                       </div>
                       <div className="text-xs text-neutral-400">Active Schedule, Grace Countdown & Actuals</div>
                     </div>
                   </div>
                   {loading && loadingRole === "driver" ? (
-                    <Loader2 size={18} className="animate-spin text-amber-400" />
+                    <Loader2 size={18} className="animate-spin text-accent" />
                   ) : (
-                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
                   )}
                 </button>
 
@@ -312,24 +312,24 @@ ${origin}/login?demo=admin
                   type="button"
                   disabled={loading}
                   onClick={() => handleDemoLogin("admin")}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-800/90 to-neutral-850 border border-neutral-700/80 hover:border-cyan-400 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-neutral-900/95 to-neutral-850 border border-neutral-800 hover:border-accent/60 rounded-2xl transition-all group text-left active:scale-[0.98] shadow-md hover:shadow-gold-sm"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-400/15 border border-cyan-400/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
                       <Radio size={20} className="animate-pulse" />
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors flex items-center gap-2">
+                      <div className="font-bold text-sm text-white group-hover:text-accent transition-colors flex items-center gap-2">
                         Airspace Radar & Dispatch
-                        <span className="text-[9px] font-mono bg-cyan-400/20 text-cyan-400 px-1.5 py-0.5 rounded font-bold uppercase">Command</span>
+                        <span className="text-[9px] font-mono bg-accent/20 text-accent border border-accent/30 px-1.5 py-0.5 rounded font-bold uppercase">Command</span>
                       </div>
                       <div className="text-xs text-neutral-400">60fps Live Planes, Fleet & Affiliate Vault</div>
                     </div>
                   </div>
                   {loading && loadingRole === "admin" ? (
-                    <Loader2 size={18} className="animate-spin text-cyan-400" />
+                    <Loader2 size={18} className="animate-spin text-accent" />
                   ) : (
-                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight size={18} className="text-neutral-500 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
                   )}
                 </button>
               </div>
@@ -339,7 +339,7 @@ ${origin}/login?demo=admin
                 <button
                   type="button"
                   onClick={handleCopyClientMessage}
-                  className="w-full py-3.5 px-4 bg-accent hover:bg-accent/90 text-neutral-950 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
+                  className="w-full py-3.5 px-4 bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 shadow-gold-sm hover:shadow-gold-md active:scale-95"
                 >
                   {copiedSms ? (
                     <>
@@ -351,7 +351,7 @@ ${origin}/login?demo=admin
                     </>
                   )}
                 </button>
-                <p className="text-[10px] text-neutral-500 text-center mt-2 font-medium">
+                <p className="text-[10px] text-neutral-400 text-center mt-2 font-medium">
                   Copies pre-formatted direct deep links for your client to tap and open on iPhone or Android.
                 </p>
               </div>
@@ -372,8 +372,8 @@ ${origin}/login?demo=admin
                 <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">Authenticating For</div>
                 <div className="text-base font-bold text-white flex items-center justify-center gap-2">
                   {portal === "rider" && <><User size={16} className="text-accent" /> VIP Rider / Client Portal</>}
-                  {portal === "driver" && <><Car size={16} className="text-amber-400" /> Executive Chauffeur Cockpit</>}
-                  {portal === "admin" && <><Shield size={16} className="text-cyan-400" /> Operations & Radar Admin</>}
+                  {portal === "driver" && <><Car size={16} className="text-accent" /> Executive Chauffeur Cockpit</>}
+                  {portal === "admin" && <><Shield size={16} className="text-accent" /> Operations & Radar Admin</>}
                 </div>
               </div>
               

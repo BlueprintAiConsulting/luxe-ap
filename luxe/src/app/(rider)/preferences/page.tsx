@@ -165,14 +165,14 @@ export default function PreferencesPage() {
       </div>
 
       {/* Linear Gold Progress */}
-      <div className="h-1 w-full bg-neutral-800 rounded-full overflow-hidden mb-6">
-        <div className="h-full bg-gradient-to-r from-amber-500 to-accent transition-all duration-500" style={{ width: `${completion}%` }} />
+      <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden mb-6">
+        <div className="h-full bg-gold-gradient transition-all duration-500 shadow-gold-sm" style={{ width: `${completion}%` }} />
       </div>
 
       <div className="space-y-4">
         
         {/* Profile Picture */}
-        <section className="bg-neutral-900/90 backdrop-blur-xl p-5 rounded-3xl border border-neutral-800 flex flex-col items-center space-y-3 shadow-xl">
+        <section className="bg-[#0e0e13]/90 backdrop-blur-xl p-5 rounded-3xl border border-neutral-800 hover:border-amber-400/30 flex flex-col items-center space-y-3 shadow-xl transition-all">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-neutral-800 border-2 border-neutral-700 flex items-center justify-center overflow-hidden">
               {uploadingPhoto ? (

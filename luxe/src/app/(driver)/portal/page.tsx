@@ -104,10 +104,10 @@ export default function DriverPortalPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         {/* Rating Card */}
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-sm">
-          <div className="text-amber-500 mb-2 flex items-center justify-between">
-            <Star size={24} className="fill-amber-500" />
-            <div className="text-xs text-neutral-500 font-bold bg-neutral-800 px-2 py-1 rounded">{ratingCount} Reviews</div>
+        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-sm">
+          <div className="text-accent mb-2 flex items-center justify-between">
+            <Star size={24} className="fill-accent text-accent" />
+            <div className="text-xs text-neutral-400 font-bold bg-neutral-800 px-2 py-1 rounded">{ratingCount} Reviews</div>
           </div>
           <div className="text-3xl font-bold text-white mb-1">{rating.toFixed(2)}</div>
           <div className="text-xs text-neutral-400 font-bold uppercase tracking-wider">Avg Rating</div>
