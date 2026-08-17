@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:smoke": "vitest run src/__tests__/smoke",
     "emulators": "firebase emulators:start --import=./emulator-data --export-on-exit",
     "seed:users": "npx tsx scripts/seed-users.ts",
     "seed:pricing": "npx tsx scripts/seed-pricing.ts",

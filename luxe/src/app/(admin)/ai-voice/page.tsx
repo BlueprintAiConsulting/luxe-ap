@@ -166,34 +166,7 @@ export default function AiVoiceDispatchSimulatorPage() {
 
       const lower = userPrompt.toLowerCase();
 
-      if (lower.includes("where") || lower.includes("eta") || lower.includes("driver") || lower.includes("pickup") || lower.includes("lax")) {
-        toolExec = {
-          id: "tool_" + Math.random().toString(36).slice(2, 7),
-          name: "check_driver_live_gps_telemetry",
-          args: { riderPhone: "(310) 555-0199", destination: "LAX Terminal 4" },
-          result: "Assigned: Marcus Bennett | Vehicle: Black Mercedes-Benz S580 (LUXE-77) | Speed: 38mph | Distance: 1.4mi | ETA: 4 mins",
-          timestamp: now
-        };
-        aiResponse = "I have your reservation on screen, Mr. Vance. Your assigned chauffeur Marcus is currently 4 minutes away in a Black Mercedes-Benz S580, license plate LUXE-77, approaching the lower arrivals level. I have just sent his live vector GPS tracking link directly to your mobile phone.";
-      } else if (lower.includes("how much") || lower.includes("quote") || lower.includes("escalade") || lower.includes("beverly hills")) {
-        toolExec = {
-          id: "tool_" + Math.random().toString(36).slice(2, 7),
-          name: "calculate_executive_charter_quote",
-          args: { pickup: "Beverly Hills Hotel", dropoff: "LAX Terminal 4", vehicleClass: "Executive SUV (Cadillac Escalade ESV)", passengers: 4 },
-          result: "Base: $185.00 | Mileage: $20.00 | Airport Access: $15.00 | Gratuity (20%): $44.00 | Total: $245.00 USD",
-          timestamp: now
-        };
-        aiResponse = "For 4 passengers from Beverly Hills to LAX in our Cadillac Escalade ESV tomorrow at 6:00 AM, the total is $245.00 all-inclusive with airport fees and 20% gratuity. I have just generated a draft charter and texted a secure 1-tap Apple Pay confirmation link to your phone.";
-      } else if (lower.includes("delay") || lower.includes("flight") || lower.includes("1420") || lower.includes("dl")) {
-        toolExec = {
-          id: "tool_" + Math.random().toString(36).slice(2, 7),
-          name: "update_flight_radar_schedule",
-          args: { flightNumber: "DL1420", delayMinutes: 45, newPickupAt: "7:45 PM" },
-          result: "Radar synced: Delta DL 1420 landed delay +45m. Chauffeur staging shifted to 7:45 PM. Marcus notified.",
-          timestamp: now
-        };
-        aiResponse = "No problem at all. Our live airspace radar has automatically synchronized with Delta Flight 1420. Your chauffeur Marcus has been notified and will be holding in the VIP curbside staging area when your flight touches down at 7:45 PM.";
-      } else if (lower.includes("emergency") || lower.includes("joe") || lower.includes("speak") || lower.includes("human")) {
+      if (lower.includes("emergency") || lower.includes("joe") || lower.includes("human") || lower.includes("urgent")) {
         toolExec = {
           id: "tool_" + Math.random().toString(36).slice(2, 7),
           name: "warm_transfer_to_owner_dispatch",
@@ -202,6 +175,33 @@ export default function AiVoiceDispatchSimulatorPage() {
           timestamp: now
         };
         aiResponse = "I understand completely. I am connecting you directly to Joe on his priority line right now with your full trip briefing. Please hold for one moment.";
+      } else if (lower.includes("how much") || lower.includes("quote") || lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("book")) {
+        toolExec = {
+          id: "tool_" + Math.random().toString(36).slice(2, 7),
+          name: "calculate_executive_charter_quote",
+          args: { pickup: "Beverly Hills Hotel", dropoff: "LAX Terminal 4", vehicleClass: "Executive SUV (Cadillac Escalade ESV)", passengers: 4 },
+          result: "Base: $185.00 | Mileage: $20.00 | Airport Access: $15.00 | Gratuity (20%): $44.00 | Total: $245.00 USD",
+          timestamp: now
+        };
+        aiResponse = "For 4 passengers from Beverly Hills to LAX in our Cadillac Escalade ESV tomorrow at 6:00 AM, the total is $245.00 all-inclusive with airport fees and 20% gratuity. I have just generated a draft charter and texted a secure 1-tap Apple Pay confirmation link to your phone.";
+      } else if (lower.includes("delay") || lower.includes("flight") || lower.includes("1420") || lower.includes("dl") || lower.includes("gate")) {
+        toolExec = {
+          id: "tool_" + Math.random().toString(36).slice(2, 7),
+          name: "update_flight_radar_schedule",
+          args: { flightNumber: "DL1420", delayMinutes: 45, newPickupAt: "7:45 PM" },
+          result: "Radar synced: Delta DL 1420 landed delay +45m. Chauffeur staging shifted to 7:45 PM. Marcus notified.",
+          timestamp: now
+        };
+        aiResponse = "No problem at all. Our live airspace radar has automatically synchronized with Delta Flight 1420. Your chauffeur Marcus has been notified and will be holding in the VIP curbside staging area when your flight touches down at 7:45 PM.";
+      } else if (lower.includes("where") || lower.includes("eta") || lower.includes("driver") || lower.includes("pickup") || lower.includes("chauffeur") || lower.includes("car")) {
+        toolExec = {
+          id: "tool_" + Math.random().toString(36).slice(2, 7),
+          name: "check_driver_live_gps_telemetry",
+          args: { riderPhone: "(310) 555-0199", destination: "LAX Terminal 4" },
+          result: "Assigned: Marcus Bennett | Vehicle: Black Mercedes-Benz S580 (LUXE-77) | Speed: 38mph | Distance: 1.4mi | ETA: 4 mins",
+          timestamp: now
+        };
+        aiResponse = "I have your reservation on screen, Mr. Vance. Your assigned chauffeur Marcus is currently 4 minutes away in a Black Mercedes-Benz S580, license plate LUXE-77, approaching the lower arrivals loop. I have just sent his live vector GPS tracking link directly to your mobile phone.";
       } else {
         toolExec = {
           id: "tool_" + Math.random().toString(36).slice(2, 7),
