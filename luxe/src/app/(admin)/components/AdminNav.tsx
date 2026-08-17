@@ -18,12 +18,16 @@ import {
   Network, 
   Globe,
   Sparkles,
-  ShieldAlert
+  ShieldAlert,
+  Mic,
+  PhoneCall
 } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
   { name: "Live Radar", href: "/radar", icon: Globe, highlight: true },
+  { name: "AI Voice Dispatch", href: "/ai-voice", icon: Mic, highlight: true },
+  { name: "Call Logs", href: "/calls", icon: PhoneCall },
   { name: "Dispatch", href: "/dispatch", icon: Radio },
   { name: "Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
   { name: "Affiliates", href: "/affiliates", icon: Network },
