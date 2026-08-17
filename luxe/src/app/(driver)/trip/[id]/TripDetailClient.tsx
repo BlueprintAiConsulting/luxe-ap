@@ -514,44 +514,44 @@ export default function TripDetailClient() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1">Toll Charges ($)</label>
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Toll Charges ($)</label>
                 <input 
                   type="number" 
                   step="0.01" 
                   value={actualTolls} 
                   onChange={e => setActualTolls(e.target.value)} 
-                  className="w-full bg-[#181822] border border-neutral-700 rounded-xl p-2.5 text-white outline-none focus:border-accent"
+                  className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1">Airport / Venue Parking ($)</label>
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Airport / Venue Parking ($)</label>
                 <input 
                   type="number" 
                   step="0.01" 
                   value={actualParking} 
                   onChange={e => setActualParking(e.target.value)} 
-                  className="w-full bg-[#181822] border border-neutral-700 rounded-xl p-2.5 text-white outline-none focus:border-accent"
+                  className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1">Extra Waiting Minutes</label>
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Extra Waiting Minutes</label>
                 <input 
                   type="number" 
                   value={actualWaitMinutes} 
                   onChange={e => setActualWaitMinutes(e.target.value)} 
-                  className="w-full bg-[#181822] border border-neutral-700 rounded-xl p-2.5 text-white outline-none focus:border-accent"
+                  className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1">Chauffeur Closing Notes</label>
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Chauffeur Closing Notes</label>
                 <textarea 
                   value={driverNotes} 
                   onChange={e => setDriverNotes(e.target.value)} 
                   placeholder="Special events, luggage assistance, or routing details..."
-                  className="w-full bg-[#181822] border border-neutral-700 rounded-xl p-2.5 text-white outline-none focus:border-accent h-20 resize-none"
+                  className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent h-20 resize-none"
                 />
               </div>
             </div>

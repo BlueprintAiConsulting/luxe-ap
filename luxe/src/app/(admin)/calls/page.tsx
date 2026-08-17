@@ -185,21 +185,21 @@ export default function CallCenterPage() {
         <div className="lg:col-span-6 space-y-4">
           
           {/* Search & Filter Bar */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by caller name or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-[#0e0e13] border border-neutral-800 rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent font-mono"
+                className="w-full pl-9 pr-4 py-3 bg-[#121727] border border-[#1e263c] rounded-2xl text-base sm:text-xs text-white placeholder-slate-400 focus:outline-none focus:border-accent font-mono"
               />
             </div>
             <select
               value={filterIntent}
               onChange={(e) => setFilterIntent(e.target.value)}
-              className="bg-[#0e0e13] border border-neutral-800 text-neutral-300 text-xs rounded-2xl px-3 py-2.5 font-mono focus:outline-none"
+              className="bg-[#121727] border border-[#1e263c] text-slate-300 text-xs rounded-2xl px-3 py-3 font-mono focus:outline-none min-h-[44px]"
             >
               <option value="all">All Call Types</option>
               <option value="driver_eta">Driver Status / ETA</option>
@@ -212,9 +212,9 @@ export default function CallCenterPage() {
           {/* List of Calls */}
           <div className="space-y-3">
             {filteredCalls.length === 0 ? (
-              <div className="p-8 text-center bg-[#0a0a0e] border border-neutral-800 rounded-3xl space-y-3">
-                <PhoneCall size={24} className="mx-auto text-neutral-600" />
-                <div className="text-xs font-bold text-neutral-300 font-mono">No call logs found</div>
+              <div className="p-8 text-center bg-[#121727] border border-[#1e263c] rounded-3xl space-y-3">
+                <PhoneCall size={24} className="mx-auto text-slate-500" />
+                <div className="text-xs font-bold text-slate-300 font-mono">No call logs found</div>
                 <button
                   type="button"
                   onClick={() => { setSearchQuery(""); setFilterIntent("all"); }}
@@ -232,8 +232,8 @@ export default function CallCenterPage() {
                     onClick={() => setSelectedCall(call)}
                     className={`p-4 rounded-3xl border transition-all cursor-pointer space-y-3 ${
                       isSelected
-                        ? "bg-[#14141d] border-accent shadow-gold-sm"
-                        : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
+                        ? "bg-[#161c2e] border-accent shadow-gold-sm"
+                        : "bg-[#121727] border-[#1e263c] hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
