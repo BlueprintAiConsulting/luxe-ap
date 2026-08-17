@@ -27,9 +27,38 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "LUXE — Private Aviation Livery & Chauffeur Sanctuary",
-  description: "Book an executive private chauffeur in seconds. Luxury sedans, SUVs, and sprinters with concierge-level flight tracking tailored to your exact preferences.",
+  metadataBase: new URL("https://luxe-app-1786335311.web.app"),
+  title: "LUXE — Private Aviation Livery & Executive Chauffeur",
+  description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services. World-class Mercedes S-Class, Cadillac Escalade ESV, and Sprinter Jet Charters.",
   applicationName: "LUXE",
+  authors: [{ name: "LUXE Livery Group" }],
+  keywords: ["Luxury Chauffeur", "Private Jet Livery", "Executive Transportation", "FBO Airport Transfer", "AI Voice Dispatch", "LAX VIP Chauffeur"],
+  openGraph: {
+    title: "LUXE — Private Aviation Livery & Executive Chauffeur",
+    description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services. World-class Mercedes S-Class, Cadillac Escalade ESV, and Sprinter Jet Charters.",
+    url: "https://luxe-app-1786335311.web.app",
+    siteName: "LUXE Livery Group",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 675,
+        alt: "LUXE Executive Livery & Private Aviation Monogram",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LUXE — Private Aviation Livery & Executive Chauffeur",
+    description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services.",
+    images: ["/og-image.jpg"],
+  },
+  icons: {
+    icon: "/og-image.png",
+    apple: "/og-image.png",
+  },
   appleWebApp: { 
     capable: true, 
     statusBarStyle: "black-translucent", 
