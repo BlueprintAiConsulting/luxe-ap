@@ -94,46 +94,46 @@ export default function MeetingPresentationDeckPage() {
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-3xl bg-[#121218] border border-rose-900/40 space-y-2">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-rose-900/40 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-rose-400 font-bold">40% of Calls</span>
                 <Car size={16} className="text-rose-400" />
               </div>
               <h4 className="text-sm font-bold text-white">"Where is my driver?"</h4>
-              <p className="text-xs text-neutral-400 font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 Clients standing at LAX Door 4 calling for ETAs, license plates, and driver phone numbers.
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#121218] border border-amber-900/40 space-y-2">
+            <div className="p-5 rounded-3xl bg-[#141b30] border border-accent/40 space-y-2 shadow-gold-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-accent font-bold">30% of Calls</span>
                 <DollarSign size={16} className="text-accent" />
               </div>
               <h4 className="text-sm font-bold text-white">"How much for tomorrow morning?"</h4>
-              <p className="text-xs text-neutral-400 font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 Manual quote calculations, writing notes on napkins, and typing credit cards over the phone.
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#121218] border border-blue-900/40 space-y-2">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-blue-900/40 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-blue-400 font-bold">15% of Calls</span>
                 <Plane size={16} className="text-blue-400" />
               </div>
               <h4 className="text-sm font-bold text-white">"My flight was delayed 2 hours"</h4>
-              <p className="text-xs text-neutral-400 font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 Scrambling driver staging times at midnight and calling drivers to adjust routes.
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#121218] border border-purple-900/40 space-y-2">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-purple-900/40 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-purple-400 font-bold">Missed Revenue</span>
                 <Zap size={16} className="text-purple-400" />
               </div>
               <h4 className="text-sm font-bold text-white">The "Busy Line" Trap</h4>
-              <p className="text-xs text-neutral-400 font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 When you're on a call with one client, a $1,200 multi-day charter calls in, hits voicemail, and calls your competitor.
               </p>
             </div>
@@ -151,11 +151,11 @@ export default function MeetingPresentationDeckPage() {
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 rounded-3xl bg-[#101017] border border-neutral-800 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-[#1e263c] space-y-3">
               <div className="flex items-center gap-2 text-accent font-bold text-xs font-mono">
                 <PhoneCall size={15} /> 1. 24/7 AI Voice & SMS Dispatcher
               </div>
-              <ul className="text-xs text-neutral-300 font-mono space-y-1.5 list-disc list-inside">
+              <ul className="text-xs text-slate-300 font-mono space-y-1.5 list-disc list-inside">
                 <li>Answers in 1 ring with natural luxury British/American voice</li>
                 <li>Queries live GPS and texts tracking link in 3 seconds</li>
                 <li>Calculates exact tariffs & texts 1-tap Apple Pay checkout</li>
@@ -163,11 +163,11 @@ export default function MeetingPresentationDeckPage() {
               </ul>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#101017] border border-neutral-800 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-[#1e263c] space-y-3">
               <div className="flex items-center gap-2 text-accent font-bold text-xs font-mono">
                 <Globe size={15} /> 2. Web Portal & Google SEO Engine
               </div>
-              <ul className="text-xs text-neutral-300 font-mono space-y-1.5 list-disc list-inside">
+              <ul className="text-xs text-slate-300 font-mono space-y-1.5 list-disc list-inside">
                 <li>High-converting booking page for Executive Assistants</li>
                 <li>Corporate billing & invoice portals</li>
                 <li>Google Business Profile review automation</li>
@@ -175,11 +175,11 @@ export default function MeetingPresentationDeckPage() {
               </ul>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#101017] border border-neutral-800 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-[#1e263c] space-y-3">
               <div className="flex items-center gap-2 text-accent font-bold text-xs font-mono">
                 <Smartphone size={15} /> 3. VIP Rider Mobile Experience
               </div>
-              <ul className="text-xs text-neutral-300 font-mono space-y-1.5 list-disc list-inside">
+              <ul className="text-xs text-slate-300 font-mono space-y-1.5 list-disc list-inside">
                 <li>Live GPS vector map of assigned Mercedes/Escalade</li>
                 <li>Curbside real-time concierge chat with quick chips</li>
                 <li>Executive PDF tax invoices & itinerary export</li>
@@ -187,11 +187,11 @@ export default function MeetingPresentationDeckPage() {
               </ul>
             </div>
 
-            <div className="p-5 rounded-3xl bg-[#101017] border border-neutral-800 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#121727] border border-[#1e263c] space-y-3">
               <div className="flex items-center gap-2 text-accent font-bold text-xs font-mono">
                 <Radio size={15} /> 4. Chauffeur Cockpit & Radar
               </div>
-              <ul className="text-xs text-neutral-300 font-mono space-y-1.5 list-disc list-inside">
+              <ul className="text-xs text-slate-300 font-mono space-y-1.5 list-disc list-inside">
                 <li>Driver journey checklist with VIP passenger notes</li>
                 <li>Automated GPS telemetry broadcaster</li>
                 <li>Airspace & ground fleet radar synchronization</li>

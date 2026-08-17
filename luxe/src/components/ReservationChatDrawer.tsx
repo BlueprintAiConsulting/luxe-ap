@@ -115,7 +115,7 @@ export default function ReservationChatDrawer({
       />
 
       {/* Slide-out Drawer */}
-      <div className="relative w-full max-w-md bg-[#09090d] text-white h-full shadow-2xl border-l border-neutral-800 flex flex-col z-10">
+      <div className="relative w-full max-w-md bg-[#09090d] text-white h-dvh max-h-dvh shadow-2xl border-l border-neutral-800 flex flex-col z-10">
         
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-neutral-800 bg-[#0e0e13] flex items-center justify-between">
@@ -138,7 +138,7 @@ export default function ReservationChatDrawer({
             type="button"
             aria-label="Close concierge chat"
             onClick={onClose}
-            className="p-2 rounded-xl bg-[#181822] border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all min-h-[38px] min-w-[38px] flex items-center justify-center"
+            className="p-2.5 rounded-xl bg-[#181822] border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             <X size={18} />
           </button>
@@ -152,7 +152,7 @@ export default function ReservationChatDrawer({
               type="button"
               onClick={() => handleQuickChip(chip)}
               disabled={sending}
-              className="px-3 py-1.5 rounded-full bg-[#181822] hover:border-accent border border-neutral-800 text-[11px] font-mono text-neutral-300 hover:text-white whitespace-nowrap transition-all active:scale-95 shrink-0"
+              className="px-3.5 py-2 rounded-full bg-[#181822] hover:border-accent border border-neutral-800 text-xs font-mono text-neutral-300 hover:text-white whitespace-nowrap transition-all active:scale-95 shrink-0 min-h-[36px]"
             >
               {chip}
             </button>
@@ -197,7 +197,7 @@ export default function ReservationChatDrawer({
                         ? "bg-purple-950/60 border border-purple-800/80 text-purple-300"
                         : isDriver 
                           ? "bg-blue-950/60 border border-blue-800/80 text-blue-300"
-                          : "bg-amber-950/60 border border-amber-800/80 text-amber-300"
+                          : "bg-[#241a0e] border border-accent/40 text-accent"
                     }`}>
                       {msg.senderRole}
                     </span>
@@ -236,7 +236,7 @@ export default function ReservationChatDrawer({
             onChange={(e) => setInputVal(e.target.value)}
             disabled={sending}
             maxLength={500}
-            className="flex-1 bg-[#181822] border border-neutral-700 focus:border-accent text-white placeholder-neutral-500 rounded-2xl px-4 py-3 text-xs focus:outline-none transition-all"
+            className="flex-1 bg-[#181822] border border-neutral-700 focus:border-accent text-white placeholder-neutral-500 rounded-2xl px-4 py-3 text-base sm:text-xs focus:outline-none transition-all"
           />
           <button
             type="submit"
