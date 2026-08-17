@@ -110,15 +110,15 @@ export default function AdminDashboardPage() {
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
-          <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <div className="bg-[#121727] border border-[#1e263c] rounded-2xl p-5 shadow-lg">
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Today's Trips</span>
-            <Calendar size={16} className="text-neutral-500" />
+            <Calendar size={16} className="text-slate-400" />
           </div>
           <div className="text-3xl sm:text-4xl font-bold font-mono text-white">{stats.todayReservations}</div>
         </div>
 
-        <div className="bg-[#0e0e13] border border-accent/40 rounded-2xl p-5 shadow-xl bg-gradient-to-br from-neutral-900 via-neutral-900 to-amber-950/20">
+        <div className="bg-[#141b30] border border-accent/40 rounded-2xl p-5 shadow-lg shadow-gold-sm">
           <div className="text-[11px] font-bold text-accent uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Needs Dispatch</span>
             <Car size={16} className="text-accent" />
@@ -126,15 +126,15 @@ export default function AdminDashboardPage() {
           <div className="text-3xl sm:text-4xl font-bold font-mono text-accent">{stats.unassignedTrips}</div>
         </div>
 
-        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
-          <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <div className="bg-[#121727] border border-[#1e263c] rounded-2xl p-5 shadow-lg">
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Active Drivers</span>
-            <UserCheck size={16} className="text-neutral-500" />
+            <UserCheck size={16} className="text-slate-400" />
           </div>
           <div className="text-3xl sm:text-4xl font-bold font-mono text-white">{stats.activeDrivers}</div>
         </div>
 
-        <div className="bg-[#0e0e13] border border-neutral-800 rounded-2xl p-5 shadow-xl">
+        <div className="bg-[#121727] border border-[#1e263c] rounded-2xl p-5 shadow-lg">
           <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>In Progress</span>
             <Activity size={16} className="text-emerald-400" />
@@ -148,9 +148,9 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold font-serif text-white tracking-tight">Live Airspace & Ground Fleet Radar</h2>
-            <p className="text-xs text-neutral-400">Synchronized commercial/private jet inbounds & chauffeur rendezvous.</p>
+            <p className="text-xs text-slate-400">Synchronized commercial/private jet inbounds & chauffeur rendezvous.</p>
           </div>
-          <Link href="/radar" className="text-xs font-bold text-accent hover:underline flex items-center gap-1">
+          <Link href="/radar" className="text-xs font-bold text-accent hover:underline flex items-center gap-1 font-mono">
             <span>Enlarge Radar</span>
             <ArrowRight size={12} />
           </Link>
@@ -159,17 +159,17 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Needs Attention Table */}
-      <div className="bg-neutral-900/90 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
-        <div className="p-5 sm:p-6 border-b border-neutral-800 flex items-center justify-between">
+      <div className="bg-[#121727] border border-[#1e263c] rounded-3xl overflow-hidden shadow-xl">
+        <div className="p-5 sm:p-6 border-b border-[#1e263c] flex items-center justify-between bg-[#151c30]">
           <h2 className="text-lg sm:text-xl font-bold font-serif text-white tracking-tight">Action Items & Dispatch Queue</h2>
-          <Link href="/dispatch" className="text-xs font-bold text-accent hover:underline flex items-center gap-1 transition-colors">
+          <Link href="/dispatch" className="text-xs font-bold text-accent hover:underline flex items-center gap-1 transition-colors font-mono">
             <span>Go to Dispatch Board</span>
             <ArrowRight size={12} />
           </Link>
         </div>
         
         {needsAttention.length === 0 ? (
-          <div className="p-8 text-center text-xs text-neutral-400 font-medium">
+          <div className="p-8 text-center text-xs text-slate-400 font-mono">
             All active charter reservations are currently allocated to verified chauffeurs.
           </div>
         ) : (

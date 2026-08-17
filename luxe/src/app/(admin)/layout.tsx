@@ -21,17 +21,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (loading || !user || role !== "admin") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050507] text-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0d14] text-white">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium tracking-wide text-neutral-400">Loading Dispatch Command...</span>
+          <span className="text-sm font-medium tracking-wide text-slate-400">Loading Dispatch Command...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#060608] font-sans text-white selection:bg-accent selection:text-neutral-950">
+    <div className="flex min-h-screen bg-[#0a0d14] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(30,41,59,0.5),rgba(10,13,20,1))] font-sans text-slate-100 selection:bg-accent selection:text-neutral-950">
       <AdminNav />
       <div className="flex-1 lg:ml-64 pt-16 lg:pt-0 min-w-0">
         {children}

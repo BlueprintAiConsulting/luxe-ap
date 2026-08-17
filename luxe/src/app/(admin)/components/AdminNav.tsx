@@ -50,7 +50,7 @@ export function AdminNav() {
 
   const NavLinks = () => (
     <div className="flex flex-col h-full">
-      <div className="space-y-1 flex-1">
+      <div className="space-y-1.5 flex-1">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -61,8 +61,8 @@ export function AdminNav() {
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group active:scale-[0.98] ${
                 isActive
-                  ? "bg-neutral-800 text-white font-bold border border-accent/30 shadow-gold-sm"
-                  : "text-neutral-400 hover:bg-neutral-900 hover:text-white font-medium"
+                  ? "bg-[#1c243c] text-white font-bold border border-accent/40 shadow-gold-sm"
+                  : "text-slate-400 hover:bg-[#151c2e] hover:text-white font-medium"
               }`}
             >
               <Icon 
@@ -70,7 +70,7 @@ export function AdminNav() {
                 className={
                   isActive 
                     ? "text-accent" 
-                    : "opacity-60 group-hover:opacity-100 group-hover:text-neutral-200 transition-all"
+                    : "opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all"
                 } 
               />
               <span className="flex-1 text-sm">{item.name}</span>
@@ -85,30 +85,30 @@ export function AdminNav() {
         })}
       </div>
       
-      <div className="pt-6 mt-4 border-t border-neutral-800 flex flex-col gap-1 pb-safe">
-        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+      <div className="pt-6 mt-4 border-t border-[#1e263c] flex flex-col gap-1.5 pb-safe">
+        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Client & Cockpit Switcher
         </div>
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-neutral-400 hover:bg-neutral-900 hover:text-white text-xs font-semibold group"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-slate-400 hover:bg-[#151c2e] hover:text-white text-xs font-semibold group"
         >
-          <UserCircle size={18} className="opacity-60 group-hover:text-accent transition-colors" />
+          <UserCircle size={18} className="opacity-70 group-hover:text-accent transition-colors" />
           Rider View
           <ArrowUpRight size={13} className="ml-auto opacity-50" />
         </Link>
         <Link
           href="/today"
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-neutral-400 hover:bg-neutral-900 hover:text-white text-xs font-semibold group"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-slate-400 hover:bg-[#151c2e] hover:text-white text-xs font-semibold group"
         >
-          <Car size={18} className="opacity-60 group-hover:text-accent transition-colors" />
+          <Car size={18} className="opacity-70 group-hover:text-accent transition-colors" />
           Driver Cockpit
           <ArrowUpRight size={13} className="ml-auto opacity-50" />
         </Link>
         
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-2.5 mt-2 rounded-xl transition-all text-red-400 hover:bg-red-950/40 hover:text-red-300 text-xs font-semibold"
+          className="w-full flex items-center gap-3 px-4 py-2.5 mt-2 rounded-xl transition-all text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 text-xs font-semibold"
         >
           <LogOut size={18} className="opacity-70" />
           Sign Out
@@ -120,9 +120,9 @@ export function AdminNav() {
   return (
     <>
       {/* Mobile Top Bar */}
-      <div className="lg:hidden flex items-center justify-between px-5 py-3.5 bg-neutral-900/95 backdrop-blur-xl border-b border-neutral-800 fixed top-0 left-0 right-0 z-40">
+      <div className="lg:hidden flex items-center justify-between px-5 py-3.5 bg-[#0f1422]/95 backdrop-blur-xl border-b border-[#1e263c] fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
+          <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shadow-gold-sm">
             <Globe size={16} />
           </div>
           <div>
@@ -134,7 +134,7 @@ export function AdminNav() {
         <button 
           aria-label="Toggle navigation menu" 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-          className="p-2.5 -mr-2 text-neutral-300 hover:text-white rounded-xl bg-neutral-800 border border-neutral-700/80 min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-all"
+          className="p-2.5 -mr-2 text-slate-300 hover:text-white rounded-xl bg-[#161c2e] border border-[#222c44] min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-all"
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -142,19 +142,19 @@ export function AdminNav() {
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 pt-20 bg-[#060608]/98 backdrop-blur-2xl flex flex-col p-6 h-full overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="lg:hidden fixed inset-0 z-30 pt-20 bg-[#0a0d14]/98 backdrop-blur-2xl flex flex-col p-6 h-full overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
           <NavLinks />
         </div>
       )}
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#0c0c10] border-r border-neutral-800/80 h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#0f1422] border-r border-[#1e263c] h-screen fixed top-0 left-0 py-8 px-4 z-10 text-white overflow-y-auto shadow-2xl">
         <div className="px-4 mb-8">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-2 shadow-gold-sm">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest mb-2 shadow-gold-sm font-mono">
             <Sparkles size={11} className="text-accent" /> Operations
           </div>
           <h1 className="font-bold text-2xl text-white tracking-tight font-serif uppercase">LUXE</h1>
-          <div className="text-[11px] font-medium text-neutral-400 mt-0.5 tracking-wider uppercase">Airspace & Dispatch</div>
+          <div className="text-[11px] font-medium text-slate-400 mt-0.5 tracking-wider uppercase font-mono">Airspace & Dispatch</div>
         </div>
         <NavLinks />
       </aside>
