@@ -304,7 +304,7 @@ export default function ReservationDrawer({
                           setLoadingShift(false);
                         }
                       }}
-                      className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                      className="flex-1 py-2.5 bg-gold-gradient hover:brightness-110 active:scale-95 text-neutral-950 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-gold-sm"
                     >
                       <Zap size={14} /> {loadingShift ? "Shifting..." : `Auto-Shift Pickup (+${flightStatus.delayMinutes}m)`}
                     </button>

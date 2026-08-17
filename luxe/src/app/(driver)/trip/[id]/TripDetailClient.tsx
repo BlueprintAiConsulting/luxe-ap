@@ -236,7 +236,7 @@ export default function TripDetailClient() {
             onClick={driverTracker.toggleSimulation}
             className={`px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider border transition-all active:scale-95 min-h-[36px] flex items-center gap-1.5 ${
               driverTracker.isSimulating
-                ? "bg-amber-400 text-neutral-950 border-amber-300 shadow-gold-sm"
+                ? "bg-gold-gradient text-neutral-950 border-accent shadow-gold-sm"
                 : "bg-[#181822] text-neutral-300 border-neutral-700 hover:border-accent"
             }`}
           >
