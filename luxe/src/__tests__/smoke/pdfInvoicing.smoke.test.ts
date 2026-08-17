@@ -14,16 +14,15 @@ export function calculateInvoiceTotals(pricing: PriceBreakdown) {
 describe("Executive PDF Invoicing & Tariff Breakdown — Smoke Tests", () => {
   it("Smoke Test 1: Verifies line item financial totals match final reservation total", () => {
     const mockPricing: PriceBreakdown = {
-      baseCents: 18500,
+      currency: "usd",
       subtotalCents: 20000,
       gratuityCents: 4400,
       gratuityPercent: 20,
+      gratuityEditable: true,
       taxCents: 100,
       totalCents: 24500,
       estimatedTotalCents: 24500,
       isFinal: true,
-      pricingPlanId: "standard_tariff_2026",
-      vehicleClassId: "executive_suv",
       lineItems: [
         { code: "base_fare", label: "Executive SUV Base Rate", amountCents: 18500, detail: null },
         { code: "mileage", label: "Estimated Mileage (18.4 mi)", amountCents: 1500, detail: null },
@@ -37,16 +36,15 @@ describe("Executive PDF Invoicing & Tariff Breakdown — Smoke Tests", () => {
 
   it("Smoke Test 2: Handles zero-tax and custom corporate discount line items", () => {
     const mockPricing: PriceBreakdown = {
-      baseCents: 30000,
+      currency: "usd",
       subtotalCents: 27000,
       gratuityCents: 5400,
       gratuityPercent: 20,
+      gratuityEditable: false,
       taxCents: 0,
       totalCents: 32400,
       estimatedTotalCents: 32400,
       isFinal: true,
-      pricingPlanId: "corporate_tariff_2026",
-      vehicleClassId: "first_class_sedan",
       lineItems: [
         { code: "base_fare", label: "First Class Sedan Base Rate", amountCents: 30000, detail: null },
         { code: "corp_discount", label: "Corporate Volume Discount (-10%)", amountCents: -3000, detail: null },

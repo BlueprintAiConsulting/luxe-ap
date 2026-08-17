@@ -20,11 +20,13 @@ import {
   Sparkles,
   ShieldAlert,
   Mic,
-  PhoneCall
+  PhoneCall,
+  Presentation
 } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
+  { name: "Pitch Deck", href: "/presentation", icon: Presentation, highlight: true },
   { name: "Live Radar", href: "/radar", icon: Globe, highlight: true },
   { name: "AI Voice Dispatch", href: "/ai-voice", icon: Mic, highlight: true },
   { name: "Call Logs", href: "/calls", icon: PhoneCall },
