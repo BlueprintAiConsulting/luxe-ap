@@ -18,18 +18,18 @@
   --color-accent-deep: #523614;
   --color-gold-glow: rgba(197, 154, 88, 0.28);
 
-  /* Consistent Obsidian & Onyx Neutrals */
-  --color-neutral-50:  #0f0f13;
-  --color-neutral-100: #16161c;
-  --color-neutral-200: #202029;
-  --color-neutral-300: #2e2e3a;
-  --color-neutral-400: #6b6b7b;
-  --color-neutral-500: #9898a6;
-  --color-neutral-600: #c4c4cf;
-  --color-neutral-700: #e2e2e8;
-  --color-neutral-800: #f0f0f4;
-  --color-neutral-900: #fafafc;
-  --color-neutral-950: #ffffff;
+  /* Consistent Obsidian & Onyx Neutrals (50=Lightest Text, 950=Deepest Canvas) */
+  --color-neutral-50:  #fafafc;
+  --color-neutral-100: #f0f0f4;
+  --color-neutral-200: #e2e2e8;
+  --color-neutral-300: #c4c4cf;
+  --color-neutral-400: #9898a6;
+  --color-neutral-500: #6b6b7b;
+  --color-neutral-600: #484858;
+  --color-neutral-700: #2d2d3c;
+  --color-neutral-800: #1c1c28;
+  --color-neutral-900: #12121c;
+  --color-neutral-950: #08080d;
 }
 
 @theme inline {
