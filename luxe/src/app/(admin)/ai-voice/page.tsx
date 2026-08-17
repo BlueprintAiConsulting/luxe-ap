@@ -87,9 +87,41 @@ export default function AiVoiceDispatchSimulatorPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Hardened cleanup: stop any speaking on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation, toolLogs]);
+
+  const handlePersonaChange = (newPersona: "eleanor" | "julian") => {
+    setVoicePersona(newPersona);
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  const handleResetConversation = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+    setConversation([
+      {
+        sender: "ai",
+        text: "Good afternoon. Thank you for calling LUXE Private Chauffeur & Executive Aviation Dispatch. How may I assist with your ground charter today?",
+        timestamp: "Just now"
+      }
+    ]);
+    setToolLogs([]);
+  };
 
   const speakText = (text: string) => {
     if (audioMuted || typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -97,7 +129,7 @@ export default function AiVoiceDispatchSimulatorPage() {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
-    utterance.pitch = voicePersona === "eleanor" ? 1.1 : 0.95;
+    utterance.pitch = voicePersona === "eleanor" ? 1.05 : 0.95;
     
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(v => 
@@ -241,10 +273,11 @@ export default function AiVoiceDispatchSimulatorPage() {
           </p>
         </div>
 
-        {/* Voice Persona Selector */}
-        <div className="flex items-center gap-3 bg-[#0e0e13] border border-neutral-800 p-1.5 rounded-2xl">
+        {/* Voice Persona Selector & Reset */}
+        <div className="flex flex-wrap items-center gap-2 bg-[#0e0e13] border border-neutral-800 p-1.5 rounded-2xl">
           <button
-            onClick={() => setVoicePersona("eleanor")}
+            type="button"
+            onClick={() => handlePersonaChange("eleanor")}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
               voicePersona === "eleanor"
                 ? "bg-gold-gradient text-neutral-950 shadow-gold-sm"
@@ -254,7 +287,8 @@ export default function AiVoiceDispatchSimulatorPage() {
             Eleanor (British Concierge)
           </button>
           <button
-            onClick={() => setVoicePersona("julian")}
+            type="button"
+            onClick={() => handlePersonaChange("julian")}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
               voicePersona === "julian"
                 ? "bg-gold-gradient text-neutral-950 shadow-gold-sm"
@@ -264,14 +298,25 @@ export default function AiVoiceDispatchSimulatorPage() {
             Julian (Executive Dispatch)
           </button>
           <button
+            type="button"
             onClick={() => {
               setAudioMuted(!audioMuted);
               if (!audioMuted && typeof window !== "undefined") window.speechSynthesis.cancel();
             }}
-            aria-label="Toggle audio mute"
+            aria-label={audioMuted ? "Unmute voice synthesis" : "Mute voice synthesis"}
             className="p-2 rounded-xl bg-[#181822] text-neutral-400 hover:text-white transition-colors"
           >
             {audioMuted ? <VolumeX size={16} /> : <Volume2 size={16} className="text-accent" />}
+          </button>
+          <button
+            type="button"
+            onClick={handleResetConversation}
+            aria-label="Reset simulation history"
+            title="Reset Simulation History"
+            className="p-2 rounded-xl bg-[#181822] hover:border-accent border border-neutral-700 text-neutral-400 hover:text-white transition-all active:scale-95 flex items-center gap-1 text-xs font-mono"
+          >
+            <RefreshCw size={14} className="text-accent" />
+            <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>

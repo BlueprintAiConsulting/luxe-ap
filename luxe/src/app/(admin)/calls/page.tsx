@@ -115,6 +115,8 @@ export default function CallCenterPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterIntent, setFilterIntent] = useState<string>("all");
 
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
   const filteredCalls = calls.filter((c) => {
     const matchesSearch = c.callerName.toLowerCase().includes(searchQuery.toLowerCase()) || c.callerPhone.includes(searchQuery);
     const matchesFilter = filterIntent === "all" || c.intent === filterIntent;
@@ -209,49 +211,63 @@ export default function CallCenterPage() {
 
           {/* List of Calls */}
           <div className="space-y-3">
-            {filteredCalls.map((call) => {
-              const isSelected = selectedCall?.id === call.id;
-              return (
-                <div
-                  key={call.id}
-                  onClick={() => setSelectedCall(call)}
-                  className={`p-4 rounded-3xl border transition-all cursor-pointer space-y-3 ${
-                    isSelected
-                      ? "bg-[#14141d] border-accent shadow-gold-sm"
-                      : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
-                  }`}
+            {filteredCalls.length === 0 ? (
+              <div className="p-8 text-center bg-[#0a0a0e] border border-neutral-800 rounded-3xl space-y-3">
+                <PhoneCall size={24} className="mx-auto text-neutral-600" />
+                <div className="text-xs font-bold text-neutral-300 font-mono">No call logs found</div>
+                <button
+                  type="button"
+                  onClick={() => { setSearchQuery(""); setFilterIntent("all"); }}
+                  className="text-xs text-accent font-mono underline hover:text-white"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-[#181822] border border-neutral-800 flex items-center justify-center text-accent">
-                        {call.intent === "driver_eta" ? <Car size={15} /> : call.intent === "charter_quote" ? <DollarSign size={15} /> : call.intent === "flight_reschedule" ? <Plane size={15} /> : <AlertTriangle size={15} className="text-amber-400" />}
+                  Reset filters
+                </button>
+              </div>
+            ) : (
+              filteredCalls.map((call) => {
+                const isSelected = selectedCall?.id === call.id;
+                return (
+                  <div
+                    key={call.id}
+                    onClick={() => setSelectedCall(call)}
+                    className={`p-4 rounded-3xl border transition-all cursor-pointer space-y-3 ${
+                      isSelected
+                        ? "bg-[#14141d] border-accent shadow-gold-sm"
+                        : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-[#181822] border border-neutral-800 flex items-center justify-center text-accent">
+                          {call.intent === "driver_eta" ? <Car size={15} /> : call.intent === "charter_quote" ? <DollarSign size={15} /> : call.intent === "flight_reschedule" ? <Plane size={15} /> : <AlertTriangle size={15} className="text-amber-400" />}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white">{call.callerName}</div>
+                          <div className="text-[10px] font-mono text-neutral-500">{call.callerPhone}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">{call.callerName}</div>
-                        <div className="text-[10px] font-mono text-neutral-500">{call.callerPhone}</div>
+
+                      <div className="text-right">
+                        <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                          call.resolutionStatus === "resolved_ai"
+                            ? "bg-emerald-950/60 border-emerald-800/80 text-emerald-400"
+                            : call.resolutionStatus === "quote_sent"
+                              ? "bg-amber-950/60 border-amber-800/80 text-accent"
+                              : "bg-purple-950/60 border-purple-800/80 text-purple-300"
+                        }`}>
+                          {call.resolutionStatus.replace(/_/g, " ")}
+                        </span>
+                        <div className="text-[10px] font-mono text-neutral-500 mt-1">{call.timestamp} • {call.duration}</div>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                        call.resolutionStatus === "resolved_ai"
-                          ? "bg-emerald-950/60 border-emerald-800/80 text-emerald-400"
-                          : call.resolutionStatus === "quote_sent"
-                            ? "bg-amber-950/60 border-amber-800/80 text-accent"
-                            : "bg-purple-950/60 border-purple-800/80 text-purple-300"
-                      }`}>
-                        {call.resolutionStatus.replace(/_/g, " ")}
-                      </span>
-                      <div className="text-[10px] font-mono text-neutral-500 mt-1">{call.timestamp} • {call.duration}</div>
-                    </div>
+                    <p className="text-[11px] text-neutral-400 font-mono line-clamp-2 leading-relaxed">
+                      {call.summary}
+                    </p>
                   </div>
-
-                  <p className="text-[11px] text-neutral-400 font-mono line-clamp-2 leading-relaxed">
-                    {call.summary}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
         </div>
@@ -273,20 +289,25 @@ export default function CallCenterPage() {
 
                 <a
                   href={`tel:${selectedCall.callerPhone}`}
-                  className="px-4 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-white rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                  className="px-4 py-2 bg-[#181822] hover:border-accent border border-neutral-700 text-white rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 min-h-[44px]"
                 >
                   <PhoneCall size={13} className="text-accent" />
                   <span>Call Back</span>
                 </a>
               </div>
 
-              {/* Simulated Audio Player Waveform */}
+              {/* Interactive Audio Player Waveform */}
               <div className="p-4 rounded-2xl bg-[#060608] border border-neutral-800 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
-                  <span className="flex items-center gap-1.5 text-accent">
-                    <Sparkles size={13} /> Recorded Audio Waveform
-                  </span>
-                  <span>{selectedCall.duration}</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                    className="flex items-center gap-2 text-accent font-bold hover:underline"
+                  >
+                    {isPlayingAudio ? <Pause size={14} className="text-accent" /> : <Play size={14} className="text-accent" />}
+                    <span>{isPlayingAudio ? "Pause Audio Replay" : "Play Recorded Call"}</span>
+                  </button>
+                  <span className="text-neutral-500 font-mono">{isPlayingAudio ? "Streaming Audio..." : selectedCall.duration}</span>
                 </div>
                 
                 {/* Waveform bars */}
@@ -294,7 +315,11 @@ export default function CallCenterPage() {
                   {Array.from({ length: 36 }).map((_, i) => (
                     <div
                       key={i}
-                      className={`w-1 rounded-full ${i % 3 === 0 ? "bg-accent h-6" : i % 2 === 0 ? "bg-neutral-600 h-4" : "bg-neutral-800 h-2"}`}
+                      className={`w-1 rounded-full transition-all duration-300 ${
+                        isPlayingAudio 
+                          ? i % 2 === 0 ? "bg-accent h-7 animate-pulse" : "bg-gold-light h-4 animate-bounce" 
+                          : i % 3 === 0 ? "bg-accent h-6" : i % 2 === 0 ? "bg-neutral-600 h-4" : "bg-neutral-800 h-2"
+                      }`}
                     />
                   ))}
                 </div>
