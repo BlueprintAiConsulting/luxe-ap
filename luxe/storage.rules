@@ -19,6 +19,16 @@ service firebase.storage {
     }
 
     // -------------------------------------------------------------------------
+    // Executive Invoices & Receipts
+    // -------------------------------------------------------------------------
+    match /invoices/{invoiceFile} {
+      // Readable by authenticated users or admins
+      allow read: if isAuthenticated();
+      // Writable by Cloud Functions admin / admin role
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
     // Avatars / Profile Pictures / Vehicles
     // -------------------------------------------------------------------------
     match /{allImages=**} {

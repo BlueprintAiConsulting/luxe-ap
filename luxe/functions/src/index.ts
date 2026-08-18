@@ -13,6 +13,7 @@ export * from "./api/flight";
 export * from "./api/affiliates";
 export * from "./crons/stripe";
 export * from "./crons/flightSync";
+export * from "./crons/earnings";
 
 export * from "./triggers/notifications";
 export * from "./triggers/mail";
