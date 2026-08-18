@@ -99,7 +99,11 @@ exports.reservationSchema = zod_1.z.object({
     parkingCents: zod_1.z.number().int(),
     driverNotes: zod_1.z.string(),
     // --- Payment ---
-    stripePaymentIntentId: zod_1.z.string().nullable(),
+    stripePaymentIntentId: zod_1.z.string().nullable().optional(),
+    squarePaymentId: zod_1.z.string().nullable().optional(),
+    squareReceiptUrl: zod_1.z.string().nullable().optional(),
+    squareCardBrand: zod_1.z.string().nullable().optional(),
+    squareCardLast4: zod_1.z.string().nullable().optional(),
     corporateAccountId: zod_1.z.string().nullable().optional(),
     billedToCorporate: zod_1.z.boolean().optional(),
     paymentStatus: zod_1.z.enum(["none", "authorized", "captured", "failed", "refunded"]),

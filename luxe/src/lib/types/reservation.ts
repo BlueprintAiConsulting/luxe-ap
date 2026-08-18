@@ -112,7 +112,11 @@ export const reservationSchema = z.object({
   driverNotes: z.string(),
 
   // --- Payment ---
-  stripePaymentIntentId: z.string().nullable(),
+  stripePaymentIntentId: z.string().nullable().optional(),
+  squarePaymentId: z.string().nullable().optional(),
+  squareReceiptUrl: z.string().nullable().optional(),
+  squareCardBrand: z.string().nullable().optional(),
+  squareCardLast4: z.string().nullable().optional(),
   corporateAccountId: z.string().nullable().optional(),
   billedToCorporate: z.boolean().optional(),
   paymentStatus: z.enum(["none", "authorized", "captured", "failed", "refunded"]),

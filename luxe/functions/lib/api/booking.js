@@ -1,9 +1,42 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cancelReservation = exports.createReservation = exports.createQuote = void 0;
+exports.processSquarePayment = exports.cancelReservation = exports.createReservation = exports.createQuote = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-admin/firestore");
 const stripe_1 = __importDefault(require("stripe"));
@@ -341,7 +374,7 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
     const ruleSet = ruleSetSnap.data();
     const cancellationFeeCents = (0, pricing_1.calculateCancellationFee)(reservation.pickupAt, new Date(), // cancelAt = now
     reservation.classId, ruleSet, reservation.pricing.estimatedTotalCents || 0);
-    // Handle Stripe hold
+    // Handle Stripe & Square holds/refunds
     if (stripe && reservation.stripePaymentIntentId) {
         try {
             if (cancellationFeeCents > 0) {
@@ -353,7 +386,6 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
             }
             else {
                 // Release the hold (cancel the PaymentIntent)
-                // Wait, if it was already authorized, we can cancel it to release the auth.
                 const intent = await stripe.paymentIntents.retrieve(reservation.stripePaymentIntentId);
                 if (intent.status === "requires_capture") {
                     await stripe.paymentIntents.cancel(reservation.stripePaymentIntentId);
@@ -362,8 +394,24 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         }
         catch (e) {
             console.error("Stripe cancellation error:", e.message);
-            // We still proceed with the DB update even if Stripe fails, 
-            // but in production we might want to flag this.
+        }
+    }
+    // Handle Square Cancellation & Refund
+    if (reservation.squarePaymentId) {
+        try {
+            const totalPaid = reservation.capturedAmountCents || reservation.authorizedAmountCents || reservation.pricing.estimatedTotalCents || 0;
+            const refundAmount = Math.max(0, totalPaid - cancellationFeeCents);
+            if (refundAmount > 0) {
+                const { refundSquarePayment } = await Promise.resolve().then(() => __importStar(require("../services/square")));
+                await refundSquarePayment({
+                    paymentId: reservation.squarePaymentId,
+                    amountCents: refundAmount,
+                    reason: cancellationFeeCents > 0 ? "LUXE Charter Late Cancellation Partial Refund" : "LUXE Charter Full Cancellation",
+                });
+            }
+        }
+        catch (e) {
+            console.error("Square cancellation refund error:", e.message);
         }
     }
     const batch = db.batch();
@@ -372,7 +420,7 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
         cancelledAt: firestore_1.FieldValue.serverTimestamp(),
         cancelledBy: request.auth.uid,
         cancellationFeeCents,
-        paymentStatus: cancellationFeeCents > 0 ? "captured" : "refunded", // if we released the hold, effectively refunded/none
+        paymentStatus: cancellationFeeCents > 0 ? "captured" : "refunded",
         updatedAt: firestore_1.FieldValue.serverTimestamp(),
     });
     const eventRef = resRef.collection("statusEvents").doc();
@@ -388,5 +436,107 @@ exports.cancelReservation = (0, https_1.onCall)({ minInstances: 1 }, async (requ
     });
     await batch.commit();
     return { success: true, fee: cancellationFeeCents };
+});
+/**
+ * processSquarePayment authorizes and captures payment via Square Web SDK nonces.
+ * Supports credit cards, Apple Pay, Google Pay, and cards on file.
+ */
+exports.processSquarePayment = (0, https_1.onCall)({ minInstances: 1 }, async (request) => {
+    if (!request.auth) {
+        throw new https_1.HttpsError("unauthenticated", "Must be logged in to process payment.");
+    }
+    const { reservationId, sourceId, verificationToken, saveCard = false, cardholderName } = request.data;
+    if (!reservationId || !sourceId) {
+        throw new https_1.HttpsError("invalid-argument", "reservationId and sourceId (nonce) are required.");
+    }
+    const resRef = db.collection("reservations").doc(reservationId);
+    const resSnap = await resRef.get();
+    if (!resSnap.exists) {
+        throw new https_1.HttpsError("not-found", "Reservation not found.");
+    }
+    const reservation = resSnap.data();
+    // Authorization check
+    if (reservation.riderId !== request.auth.uid && request.auth.token.role !== "admin") {
+        throw new https_1.HttpsError("permission-denied", "You do not have permission to pay for this reservation.");
+    }
+    if (reservation.paymentStatus === "captured") {
+        return {
+            success: true,
+            message: "Reservation is already paid.",
+            paymentId: reservation.squarePaymentId,
+            receiptUrl: reservation.squareReceiptUrl,
+        };
+    }
+    const { createSquarePayment, createOrGetSquareCustomer, vaultSquareCard } = await Promise.resolve().then(() => __importStar(require("../services/square")));
+    // Retrieve user details for customer record
+    const userSnap = await db.collection("users").doc(request.auth.uid).get();
+    const userData = userSnap.data();
+    const customerId = await createOrGetSquareCustomer({
+        uid: request.auth.uid,
+        email: userData?.email || reservation.riderEmail,
+        name: userData ? `${userData.firstName} ${userData.lastName}` : reservation.riderName,
+        phone: userData?.phone || reservation.riderPhone,
+    });
+    const amountToCharge = reservation.pricing.totalCents || reservation.pricing.estimatedTotalCents;
+    // Execute Square Payment
+    const paymentResult = await createSquarePayment({
+        sourceId,
+        amountCents: amountToCharge,
+        currency: "USD",
+        reservationId,
+        confirmationCode: reservation.confirmationCode,
+        customerId: customerId || undefined,
+        note: `LUXE Charter #${reservation.confirmationCode} - ${reservation.className}`,
+        autocomplete: true,
+        verificationToken,
+    });
+    if (!paymentResult.success) {
+        throw new https_1.HttpsError("internal", paymentResult.errorMessage || "Square payment processing failed.");
+    }
+    // Optionally vault card for repeat bookings
+    let vaultedCardId;
+    if (saveCard && customerId && sourceId.startsWith("cnon:")) {
+        const vaultRes = await vaultSquareCard({
+            customerId,
+            sourceId,
+            cardholderName: cardholderName || reservation.riderName,
+            verificationToken,
+        });
+        if (vaultRes.success) {
+            vaultedCardId = vaultRes.cardId;
+        }
+    }
+    // Update Reservation in Firestore
+    const batch = db.batch();
+    batch.update(resRef, {
+        paymentStatus: "captured",
+        squarePaymentId: paymentResult.paymentId || null,
+        squareReceiptUrl: paymentResult.receiptUrl || null,
+        squareCardBrand: paymentResult.cardBrand || null,
+        squareCardLast4: paymentResult.cardLast4 || null,
+        authorizedAmountCents: amountToCharge,
+        capturedAmountCents: amountToCharge,
+        updatedAt: firestore_1.FieldValue.serverTimestamp(),
+    });
+    // Write Status Event
+    const eventRef = resRef.collection("statusEvents").doc();
+    batch.set(eventRef, {
+        reservationId,
+        from: reservation.status,
+        to: reservation.status,
+        at: firestore_1.FieldValue.serverTimestamp(),
+        actorId: request.auth.uid,
+        actorRole: "rider",
+        note: `Square Payment Captured: $${(amountToCharge / 100).toFixed(2)} USD via ${paymentResult.cardBrand || "Card"} (•••• ${paymentResult.cardLast4 || "####"})`,
+        location: null,
+    });
+    await batch.commit();
+    return {
+        success: true,
+        paymentId: paymentResult.paymentId,
+        receiptUrl: paymentResult.receiptUrl,
+        status: paymentResult.status,
+        vaultedCardId,
+    };
 });
 //# sourceMappingURL=booking.js.map
