@@ -23,7 +23,10 @@ import {
   AlertTriangle,
   Radio,
   Compass,
-  Activity
+  Activity,
+  CreditCard,
+  Smartphone,
+  Check
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { getFunctions as getFunctionsApp, httpsCallable } from "firebase/functions";
@@ -92,6 +95,93 @@ export default function TripDetailClient() {
   const [driverNotes, setDriverNotes] = useState<string>("");
   const [showActualsModal, setShowActualsModal] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Square Terminal In-Vehicle State
+  const [showTerminalModal, setShowTerminalModal] = useState(false);
+  const [terminalAmount, setTerminalAmount] = useState("45.00");
+  const [terminalReason, setTerminalReason] = useState<"extra_wait_time" | "hourly_extension" | "in_vehicle_tip" | "incidentals" | "additional_stops">("extra_wait_time");
+  const [terminalStatus, setTerminalStatus] = useState<"idle" | "requesting" | "awaiting_card" | "completed" | "error">("idle");
+  const [terminalCheckoutId, setTerminalCheckoutId] = useState<string | null>(null);
+  const [terminalMsg, setTerminalMsg] = useState<string | null>(null);
+
+  // Poll terminal status when awaiting card
+  useEffect(() => {
+    if (terminalStatus !== "awaiting_card" || !terminalCheckoutId || !trip) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const functions = getFunctionsApp(app);
+        const checkStatusFn = httpsCallable(functions, "checkTerminalPaymentStatus");
+        const res: any = await checkStatusFn({
+          checkoutId: terminalCheckoutId,
+          reservationId: trip.reservationId,
+        });
+        if (res.data?.status === "COMPLETED") {
+          setTerminalStatus("completed");
+          setTerminalMsg("Payment successful! Receipt attached to charter.");
+        } else if (res.data?.status === "CANCELED") {
+          setTerminalStatus("idle");
+          setTerminalMsg("Terminal checkout was canceled.");
+        }
+      } catch (err: any) {
+        console.warn("Error polling terminal status:", err);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [terminalStatus, terminalCheckoutId, trip]);
+
+  const handleRequestTerminal = async () => {
+    if (!trip) return;
+    setTerminalStatus("requesting");
+    setTerminalMsg(null);
+    try {
+      const amountCents = Math.round(parseFloat(terminalAmount || "0") * 100);
+      if (amountCents <= 0) {
+        throw new Error("Please enter a valid payment amount.");
+      }
+
+      const functions = getFunctionsApp(app);
+      const requestTerminalFn = httpsCallable(functions, "requestInVehicleTerminalPayment");
+      const res: any = await requestTerminalFn({
+        reservationId: trip.reservationId,
+        amountCents,
+        reason: terminalReason,
+      });
+
+      if (res.data?.success && res.data?.checkoutId) {
+        setTerminalCheckoutId(res.data.checkoutId);
+        setTerminalStatus("awaiting_card");
+        setTerminalMsg("Prompt active. Hand Square Terminal to VIP.");
+      } else {
+        throw new Error(res.data?.message || "Failed to initialize terminal.");
+      }
+    } catch (err: any) {
+      setTerminalStatus("error");
+      setTerminalMsg(err.message || "Failed to push terminal payment prompt.");
+    }
+  };
+
+  const handleCancelTerminal = async () => {
+    if (!terminalCheckoutId || !trip) {
+      setShowTerminalModal(false);
+      return;
+    }
+    try {
+      const functions = getFunctionsApp(app);
+      const cancelFn = httpsCallable(functions, "cancelTerminalPayment");
+      await cancelFn({
+        checkoutId: terminalCheckoutId,
+        reservationId: trip.reservationId,
+      });
+    } catch (e) {
+      console.warn("Cancel terminal error:", e);
+    } finally {
+      setTerminalStatus("idle");
+      setTerminalCheckoutId(null);
+      setShowTerminalModal(false);
+    }
+  };
 
   // Live Driver GPS Telemetry Streamer
   const driverTracker = useDriverLocationTracker({
@@ -340,6 +430,22 @@ export default function TripDetailClient() {
             <MessageSquare size={15} />
             <span>Open Live Concierge Chat</span>
           </button>
+
+          {/* Square Terminal Charge Button */}
+          {trip.status !== "completed" && trip.status !== "cancelled" && (
+            <button 
+              type="button"
+              onClick={() => {
+                setShowTerminalModal(true);
+                setTerminalStatus("idle");
+                setTerminalMsg(null);
+              }}
+              className="col-span-2 py-3 px-4 rounded-xl bg-[#121727] border border-accent/40 hover:bg-accent/15 text-accent font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-gold-sm active:scale-95 uppercase tracking-wider font-mono min-h-[44px]"
+            >
+              <CreditCard size={15} className="text-accent" />
+              <span>Charge on In-Vehicle Square Terminal</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -574,6 +680,128 @@ export default function TripDetailClient() {
                 Confirm & Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Square Terminal In-Vehicle Checkout Modal */}
+      {showTerminalModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-[#0e0e13] border border-neutral-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl text-xs font-mono">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="text-accent" size={18} />
+                <h3 className="text-base font-bold font-serif text-white">In-Vehicle Square Terminal</h3>
+              </div>
+              <span className="text-[10px] uppercase font-bold text-accent px-2 py-0.5 bg-accent/15 border border-accent/30 rounded-full font-mono">
+                PCI-DSS
+              </span>
+            </div>
+
+            {terminalStatus === "idle" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Payment Reason</label>
+                  <select
+                    value={terminalReason}
+                    onChange={e => setTerminalReason(e.target.value as any)}
+                    className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent"
+                  >
+                    <option value="extra_wait_time">Excess Wait Time</option>
+                    <option value="hourly_extension">Charter Hourly Extension</option>
+                    <option value="in_vehicle_tip">Additional Chauffeur Gratuity</option>
+                    <option value="additional_stops">Unscheduled Additional Stop</option>
+                    <option value="incidentals">Incidentals / Cleaning</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Amount to Charge ($ USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={terminalAmount}
+                    onChange={e => setTerminalAmount(e.target.value)}
+                    className="w-full bg-[#161c2e] border border-[#222c44] rounded-xl p-3 text-white text-base sm:text-xs outline-none focus:border-accent font-bold text-lg font-mono text-accent"
+                  />
+                </div>
+
+                {terminalMsg && (
+                  <div className="p-3 bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl text-[11px]">
+                    {terminalMsg}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTerminalModal(false)}
+                    className="flex-1 min-h-[44px] border border-neutral-700 text-neutral-300 rounded-xl font-bold hover:bg-neutral-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRequestTerminal}
+                    className="flex-1 min-h-[44px] bg-gold-gradient text-neutral-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-110 shadow-gold-sm flex items-center justify-center gap-1.5"
+                  >
+                    <Smartphone size={15} />
+                    <span>Push to Terminal</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {terminalStatus === "requesting" && (
+              <div className="py-8 text-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" />
+                <div className="text-sm font-bold text-white font-serif">Connecting to Vehicle Reader...</div>
+                <p className="text-[11px] text-slate-400 font-mono">Sending ${terminalAmount} prompt via Square Terminal API</p>
+              </div>
+            )}
+
+            {terminalStatus === "awaiting_card" && (
+              <div className="py-6 text-center space-y-4 bg-[#121727] p-5 rounded-2xl border border-accent/30">
+                <div className="w-12 h-12 rounded-full bg-accent/15 border border-accent flex items-center justify-center mx-auto animate-pulse">
+                  <CreditCard className="text-accent" size={24} />
+                </div>
+                <div>
+                  <div className="text-base font-bold text-white font-serif">Terminal Prompt Live</div>
+                  <div className="text-2xl font-bold font-mono text-accent mt-1">${terminalAmount}</div>
+                  <p className="text-[11px] text-slate-400 mt-1">Please hand the Square Terminal to the VIP passenger for Chip / Apple Pay / Contactless Tap.</p>
+                </div>
+                <div className="text-[10px] text-emerald-400 font-bold animate-pulse flex items-center justify-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Awaiting Card Dip / Tap...
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelTerminal}
+                  className="w-full py-2.5 bg-neutral-800 border border-neutral-700 text-neutral-300 rounded-xl font-bold text-xs"
+                >
+                  Cancel Terminal Prompt
+                </button>
+              </div>
+            )}
+
+            {terminalStatus === "completed" && (
+              <div className="py-6 text-center space-y-4 bg-emerald-950/40 p-5 rounded-2xl border border-emerald-800">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center mx-auto text-emerald-400">
+                  <Check size={24} className="stroke-[3]" />
+                </div>
+                <div>
+                  <div className="text-base font-bold text-white font-serif">Payment Captured</div>
+                  <div className="text-xl font-bold font-mono text-emerald-400 mt-0.5">${terminalAmount}</div>
+                  <p className="text-[11px] text-slate-300 mt-1">Authorized via Square Terminal and attached to charter ledger.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTerminalModal(false)}
+                  className="w-full min-h-[44px] bg-emerald-500 text-neutral-950 rounded-xl font-bold uppercase tracking-wider hover:bg-emerald-400"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
