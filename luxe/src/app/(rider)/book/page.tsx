@@ -25,57 +25,13 @@ import {
   Calendar as CalendarIcon,
   Tag
 } from "lucide-react";
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { QuoteInput, PriceBreakdown, CreateReservationInput, Address, defaultPreferences } from "@/lib/types";
 import { useJsApiLoader, Autocomplete, GoogleMap, DirectionsRenderer } from "@react-google-maps/api";
 import { calculatePrice } from "../../../../functions/src/pricing/index";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_mock");
+import SquarePaymentForm from "@/components/SquarePaymentForm";
 
 const defaultCenter = { lat: 37.7749, lng: -122.4194 };
 const libraries: ("places")[] = ["places"];
-
-function CheckoutForm({ clientSecret }: { clientSecret: string }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setLoading(true);
-    setError(null);
-    const isSetup = clientSecret.startsWith("seti_");
-    const confirmFn = isSetup ? stripe.confirmSetup : stripe.confirmPayment;
-    const { error: submitError } = await confirmFn({
-      elements,
-      confirmParams: { return_url: `${window.location.origin}/dashboard` },
-    });
-    if (submitError) {
-      setError(submitError.message || "Payment failed");
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
-      {error && (
-        <div className="text-red-400 text-xs p-3 bg-red-950/60 border border-red-800 rounded-xl">
-          {error}
-        </div>
-      )}
-      <button 
-        disabled={!stripe || loading} 
-        className="w-full bg-accent text-neutral-950 py-4 rounded-2xl font-bold text-sm flex items-center justify-center hover:bg-accent/90 disabled:opacity-50 transition-all shadow-lg active:scale-[0.98]"
-      >
-        {loading ? <Loader2 className="animate-spin" size={20} /> : "Submit Payment"}
-      </button>
-    </form>
-  );
-}
 
 const steps = ["Trip Type", "Logistics", "Passengers", "Vehicle", "Driver", "Preferences", "Review", "Payment"];
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -124,7 +80,7 @@ export default function BookPage() {
   const [availableClasses, setAvailableClasses] = useState<{id: string, name: string, capacity: number}[]>([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [quote, setQuote] = useState<PriceBreakdown | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [createdReservation, setCreatedReservation] = useState<{ reservationId: string; confirmationCode: string; amountCents: number } | null>(null);
   
   // Billing
   const [promoCode, setPromoCode] = useState("");
@@ -475,14 +431,15 @@ export default function BookPage() {
       };
 
       const res = await createReservation(resInput);
-      const data = res.data as { reservationId: string; clientSecret: string; confirmationCode: string };
+      const data = res.data as { reservationId: string; confirmationCode: string };
       
-      if (data.clientSecret && data.clientSecret !== "mock_client_secret_for_emulator") {
-        setClientSecret(data.clientSecret);
-        setCurrentStep(7);
-      } else {
-        router.push("/dashboard");
-      }
+      const totalAmount = quote.estimatedTotalCents;
+      setCreatedReservation({
+        reservationId: data.reservationId,
+        confirmationCode: data.confirmationCode,
+        amountCents: totalAmount,
+      });
+      setCurrentStep(7);
     } catch (e: any) {
       setError(e.message || "Failed to create reservation");
     } finally {
@@ -1073,17 +1030,24 @@ export default function BookPage() {
           </div>
         )}
 
-        {/* STEP 8: Stripe Payment */}
-        {currentStep === 7 && clientSecret && (
+        {/* STEP 8: Square Payment */}
+        {currentStep === 7 && createdReservation && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold font-serif tracking-tight text-white">Payment Method</h2>
-              <p className="text-xs text-neutral-400 mt-1 font-medium">Encrypted card pre-authorization</p>
+              <p className="text-xs text-slate-400 mt-1 font-medium">Encrypted Square PCI-DSS Level 1 authorization</p>
             </div>
-            <div className="bg-neutral-950 p-4 rounded-2xl border border-neutral-800">
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <CheckoutForm clientSecret={clientSecret} />
-              </Elements>
+            <div className="bg-[#0e0e13] p-4 sm:p-6 rounded-3xl border border-[#1e263c] shadow-2xl">
+              <SquarePaymentForm
+                reservationId={createdReservation.reservationId}
+                confirmationCode={createdReservation.confirmationCode}
+                amountCents={createdReservation.amountCents}
+                riderName={user?.displayName || "VIP Passenger"}
+                onSuccess={() => {
+                  router.push("/dashboard");
+                }}
+                onError={(msg) => setError(msg)}
+              />
             </div>
           </div>
         )}
