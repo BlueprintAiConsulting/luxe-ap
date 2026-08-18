@@ -274,3 +274,115 @@ export async function refundSquarePayment(params: {
     };
   }
 }
+
+export interface TerminalCheckoutParams {
+  amountCents: number;
+  currency?: string;
+  reservationId: string;
+  confirmationCode?: string;
+  deviceId?: string;
+  note?: string;
+}
+
+export interface TerminalCheckoutResult {
+  success: boolean;
+  checkoutId?: string;
+  status?: string;
+  paymentId?: string;
+  errorMessage?: string;
+}
+
+/**
+ * Creates an in-vehicle card dip/tap prompt on a Square Terminal device.
+ */
+export async function createSquareTerminalCheckout(params: TerminalCheckoutParams): Promise<TerminalCheckoutResult> {
+  if (!SQUARE_ACCESS_TOKEN) {
+    return {
+      success: true,
+      checkoutId: `sq_term_mock_${Date.now()}`,
+      status: "PENDING",
+    };
+  }
+
+  try {
+    const response = await squareClient.terminal.checkouts.create({
+      idempotencyKey: `term_${params.reservationId}_${Date.now()}`,
+      checkout: {
+        amountMoney: {
+          amount: BigInt(params.amountCents),
+          currency: (params.currency || "USD") as any,
+        },
+        deviceOptions: {
+          deviceId: params.deviceId || process.env.SQUARE_DEFAULT_DEVICE_ID || "DEVICE_SIMULATOR",
+        },
+        referenceId: params.confirmationCode || params.reservationId,
+        note: params.note || `LUXE In-Vehicle Settlement (${params.confirmationCode})`,
+      },
+    });
+
+    const checkout = response.checkout;
+    return {
+      success: true,
+      checkoutId: checkout?.id,
+      status: checkout?.status,
+    };
+  } catch (error: any) {
+    console.error("Square createTerminalCheckout error:", error);
+    return {
+      success: false,
+      errorMessage: error.message || "Failed to create terminal checkout",
+    };
+  }
+}
+
+/**
+ * Polls the real-time status of a Square Terminal checkout.
+ */
+export async function getSquareTerminalCheckout(checkoutId: string): Promise<TerminalCheckoutResult> {
+  if (!SQUARE_ACCESS_TOKEN || checkoutId.startsWith("sq_term_mock_")) {
+    return {
+      success: true,
+      checkoutId,
+      status: "COMPLETED",
+      paymentId: `sq_pay_mock_${Date.now()}`,
+    };
+  }
+
+  try {
+    const response = await squareClient.terminal.checkouts.get({ checkoutId });
+    const checkout = response.checkout;
+    const paymentIds = checkout?.paymentIds || [];
+    return {
+      success: true,
+      checkoutId: checkout?.id,
+      status: checkout?.status,
+      paymentId: paymentIds.length > 0 ? paymentIds[0] : undefined,
+    };
+  } catch (error: any) {
+    console.error("Square getTerminalCheckout error:", error);
+    return {
+      success: false,
+      errorMessage: error.message || "Failed to get terminal status",
+    };
+  }
+}
+
+/**
+ * Cancels an active Square Terminal checkout prompt.
+ */
+export async function cancelSquareTerminalCheckout(checkoutId: string): Promise<{ success: boolean; errorMessage?: string }> {
+  if (!SQUARE_ACCESS_TOKEN || checkoutId.startsWith("sq_term_mock_")) {
+    return { success: true };
+  }
+
+  try {
+    await squareClient.terminal.checkouts.cancel({ checkoutId });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Square cancelTerminalCheckout error:", error);
+    return {
+      success: false,
+      errorMessage: error.message || "Failed to cancel terminal checkout",
+    };
+  }
+}

@@ -26,6 +26,7 @@ __exportStar(require("./api/ratings"), exports);
 __exportStar(require("./api/flight"), exports);
 __exportStar(require("./api/affiliates"), exports);
 __exportStar(require("./api/invoice"), exports);
+__exportStar(require("./api/terminal"), exports);
 __exportStar(require("./crons/stripe"), exports);
 __exportStar(require("./crons/flightSync"), exports);
 __exportStar(require("./crons/earnings"), exports);

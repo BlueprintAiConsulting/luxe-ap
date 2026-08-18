@@ -12,6 +12,7 @@ export * from "./api/ratings";
 export * from "./api/flight";
 export * from "./api/affiliates";
 export * from "./api/invoice";
+export * from "./api/terminal";
 export * from "./crons/stripe";
 export * from "./crons/flightSync";
 export * from "./crons/earnings";
