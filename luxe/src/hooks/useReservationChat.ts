@@ -15,9 +15,18 @@ export interface ChatMessage {
   id: string;
   senderId: string;
   senderName: string;
-  senderRole: "rider" | "driver" | "admin";
+  senderRole: "rider" | "driver" | "admin" | "system";
   text: string;
+  mediaUrl?: string | null;
+  mediaType?: "image" | "audio" | "document" | null;
+  audioDurationSeconds?: number | null;
   createdAt: any;
+}
+
+export interface SendMessageOptions {
+  mediaUrl?: string | null;
+  mediaType?: "image" | "audio" | "document" | null;
+  audioDurationSeconds?: number | null;
 }
 
 export function useReservationChat(
@@ -49,9 +58,12 @@ export function useReservationChat(
           list.push({
             id: d.id,
             senderId: data.senderId,
-            senderName: data.senderName || "User",
+            senderName: data.senderName || (data.senderRole === "system" ? "LUXE Concierge" : "User"),
             senderRole: data.senderRole || "rider",
-            text: data.text || "",
+            text: data.text || data.content || "",
+            mediaUrl: data.mediaUrl || null,
+            mediaType: data.mediaType || null,
+            audioDurationSeconds: data.audioDurationSeconds || null,
             createdAt: data.createdAt,
           });
         });
@@ -67,17 +79,20 @@ export function useReservationChat(
     return () => unsub();
   }, [reservationId]);
 
-  const sendMessage = async (text: string) => {
-    if (!reservationId || !currentUserId || !text.trim()) return;
+  const sendMessage = async (text: string, options?: SendMessageOptions) => {
+    if (!reservationId || !currentUserId || (!text.trim() && !options?.mediaUrl)) return;
 
     setSending(true);
     try {
       const messagesRef = collection(db, "reservations", reservationId, "messages");
       await addDoc(messagesRef, {
         senderId: currentUserId,
-        senderName: currentUserName || (currentUserRole === "driver" ? "Chauffeur" : currentUserRole === "admin" ? "Dispatch Ops" : "VIP Client"),
+        senderName: currentUserName || (currentUserRole === "driver" ? "Executive Chauffeur" : currentUserRole === "admin" ? "Dispatch Ops" : "VIP Client"),
         senderRole: currentUserRole,
         text: text.trim(),
+        mediaUrl: options?.mediaUrl || null,
+        mediaType: options?.mediaType || null,
+        audioDurationSeconds: options?.audioDurationSeconds || null,
         createdAt: serverTimestamp(),
       });
     } catch (err) {
