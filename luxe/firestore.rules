@@ -137,9 +137,41 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
+    // Affiliates (Farm-Out Subcontractors)
+    // -------------------------------------------------------------------------
+    match /affiliates/{affiliateId} {
+      allow read, write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Admin Notifications
+    // -------------------------------------------------------------------------
+    match /adminNotifications/{notificationId} {
+      allow read, update: if isAdmin();
+      allow create, delete: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // Driver Payouts (Weekly Earnings Statements)
+    // -------------------------------------------------------------------------
+    match /driverPayouts/{payoutId} {
+      // Read: Admin or Chauffeur owning the statement
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.driverId == request.auth.uid);
+      allow write: if false; // Generated exclusively by Cloud Functions
+    }
+
+    // -------------------------------------------------------------------------
     // Driver Locations (Real-Time GPS Telemetry)
     // -------------------------------------------------------------------------
     match /driverLocations/{locationId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || (isAuthenticated() && (
+        request.auth.uid == locationId || 
+        (request.resource.data.driverId != null && request.resource.data.driverId == request.auth.uid)
+      ));
+    }
+
+    match /driver_locations/{locationId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin() || (isAuthenticated() && (
         request.auth.uid == locationId || 

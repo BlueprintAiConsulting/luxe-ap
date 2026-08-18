@@ -13,10 +13,6 @@ service firebase.storage {
     function isAdmin() {
       return isAuthenticated() && request.auth.token.role == 'admin';
     }
-    
-    function isOwner(uid) {
-      return isAuthenticated() && request.auth.uid == uid;
-    }
 
     // -------------------------------------------------------------------------
     // Executive Invoices & Receipts
