@@ -28,6 +28,7 @@ __exportStar(require("./api/affiliates"), exports);
 __exportStar(require("./crons/stripe"), exports);
 __exportStar(require("./crons/flightSync"), exports);
 __exportStar(require("./crons/earnings"), exports);
+__exportStar(require("./crons/preTripStaging"), exports);
 __exportStar(require("./triggers/notifications"), exports);
 __exportStar(require("./triggers/mail"), exports);
 __exportStar(require("./triggers/onFlightDelayDetected"), exports);
