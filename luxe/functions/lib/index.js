@@ -29,4 +29,5 @@ __exportStar(require("./crons/stripe"), exports);
 __exportStar(require("./crons/flightSync"), exports);
 __exportStar(require("./triggers/notifications"), exports);
 __exportStar(require("./triggers/mail"), exports);
+__exportStar(require("./triggers/onFlightDelayDetected"), exports);
 //# sourceMappingURL=index.js.map

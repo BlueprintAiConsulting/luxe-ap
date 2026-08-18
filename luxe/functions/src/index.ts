@@ -16,3 +16,4 @@ export * from "./crons/flightSync";
 
 export * from "./triggers/notifications";
 export * from "./triggers/mail";
+export * from "./triggers/onFlightDelayDetected";
