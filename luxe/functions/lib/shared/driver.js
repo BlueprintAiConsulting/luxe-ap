@@ -15,6 +15,8 @@ exports.driverSchema = zod_1.z.object({
     ratingCount: zod_1.z.number().int(),
     active: zod_1.z.boolean(),
     bookable: zod_1.z.boolean(),
+    driverType: zod_1.z.enum(["in_house", "floater", "affiliate"]).default("in_house").optional(),
+    assignedVehicleId: zod_1.z.string().nullable().optional(),
     createdAt: timestamp_1.timestampSchema,
 });
 exports.driverCredentialsSchema = zod_1.z.object({

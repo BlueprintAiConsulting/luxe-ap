@@ -56,12 +56,32 @@ export default function ReservationDrawer({
   const [loadingFarmOut, setLoadingFarmOut] = useState(false);
   const [farmOutSuccess, setFarmOutSuccess] = useState<string | null>(null);
 
+  // AI Dispatch Waterfall State
+  const [aiMatchData, setAiMatchData] = useState<any>(null);
+  const [loadingAiMatch, setLoadingAiMatch] = useState(false);
+  const [autoDispatchSuccess, setAutoDispatchSuccess] = useState<string | null>(null);
+
   const functions = getFunctions(app);
   const assignDriverAndVehicle = httpsCallable(functions, "assignDriverAndVehicle");
   const adminOverrideStatus = httpsCallable(functions, "adminOverrideStatus");
   const checkFlightStatus = httpsCallable(functions, "checkFlightStatus");
   const autoShiftPickupForFlight = httpsCallable(functions, "autoShiftPickupForFlight");
   const farmOutReservation = httpsCallable(functions, "farmOutReservation");
+  const findBestDriverMatches = httpsCallable(functions, "findBestDriverMatches");
+  const autoDispatchReservation = httpsCallable(functions, "autoDispatchReservation");
+
+  // Load AI Dispatch Waterfall matches
+  useEffect(() => {
+    if (!reservation.driverId) {
+      setLoadingAiMatch(true);
+      findBestDriverMatches({ reservationId: reservation.reservationId })
+        .then((res: any) => {
+          setAiMatchData(res.data);
+        })
+        .catch((err) => console.warn("AI match query note:", err))
+        .finally(() => setLoadingAiMatch(false));
+    }
+  }, [reservation.reservationId, reservation.driverId]);
 
   useEffect(() => {
     const q = query(collection(db, "affiliates"));
@@ -403,6 +423,82 @@ export default function ReservationDrawer({
                   <div className="text-xs font-bold text-amber-400 bg-amber-950/40 p-2.5 rounded-xl border border-amber-800/60 flex items-center font-mono">
                     <ShieldAlert size={14} className="mr-2 text-amber-400" /> 
                     Rider requested driver ID: {reservation.requestedDriverId}
+                  </div>
+                )}
+
+                {/* AI Dispatch Waterfall Recommender Banner */}
+                {!reservation.driverId && (
+                  <div className="p-4 rounded-2xl bg-[#121727] border border-accent/30 space-y-3 shadow-gold-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-accent font-mono uppercase">
+                        <Sparkles size={14} className="text-accent" />
+                        <span>AI Dispatch Matching Waterfall</span>
+                      </div>
+                      {loadingAiMatch && <span className="text-[10px] text-slate-400 font-mono animate-pulse">Analyzing fleet...</span>}
+                    </div>
+
+                    {autoDispatchSuccess && (
+                      <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 font-mono text-center">
+                        ✓ {autoDispatchSuccess}
+                      </div>
+                    )}
+
+                    {aiMatchData?.recommendedDriver && (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between text-xs bg-[#161c2e] p-3 rounded-xl border border-[#1e263c]">
+                          <div>
+                            <div className="font-bold text-white flex items-center gap-1.5">
+                              <span>{aiMatchData.recommendedDriver.name}</span>
+                              <span className="text-[10px] font-mono text-accent font-bold px-1.5 py-0.5 bg-accent/15 border border-accent/30 rounded">
+                                Tier {aiMatchData.recommendedDriver.tier}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                              ★ {aiMatchData.recommendedDriver.rating.toFixed(1)} • {aiMatchData.recommendedDriver.distanceMiles} mi away • ETA {aiMatchData.recommendedDriver.etaMinutes}m
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDriver(aiMatchData.recommendedDriver.driverId);
+                              if (aiMatchData.recommendedDriver.assignedVehicleId) {
+                                setSelectedVehicle(aiMatchData.recommendedDriver.assignedVehicleId);
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-accent/15 border border-accent/30 hover:bg-accent/25 text-accent rounded-xl text-xs font-mono font-bold transition-all active:scale-95"
+                          >
+                            Use Match
+                          </button>
+                        </div>
+
+                        {/* 1-Click Auto Dispatch Button */}
+                        <button
+                          type="button"
+                          disabled={loadingAssign}
+                          onClick={async () => {
+                            setLoadingAssign(true);
+                            setAutoDispatchSuccess(null);
+                            try {
+                              const res: any = await autoDispatchReservation({ reservationId: reservation.reservationId });
+                              if (res.data.autoAssigned) {
+                                setAutoDispatchSuccess(`Auto-dispatched to ${res.data.assignedDriver.name}!`);
+                              } else {
+                                alert(res.data.message || "Auto-dispatch could not complete.");
+                              }
+                            } catch (err: any) {
+                              alert("Auto-dispatch error: " + err.message);
+                            } finally {
+                              setLoadingAssign(false);
+                            }
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-gold-gradient text-neutral-950 font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 shadow-gold-sm transition-all active:scale-95"
+                        >
+                          <Zap size={14} />
+                          <span>1-Tap AI Auto-Dispatch ({aiMatchData.recommendedDriver.name})</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

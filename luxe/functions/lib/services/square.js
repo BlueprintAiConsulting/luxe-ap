@@ -6,7 +6,11 @@ exports.createOrGetSquareCustomer = createOrGetSquareCustomer;
 exports.vaultSquareCard = vaultSquareCard;
 exports.refundSquarePayment = refundSquarePayment;
 const square_1 = require("square");
+const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
+if (!(0, app_1.getApps)().length) {
+    (0, app_1.initializeApp)();
+}
 const db = (0, firestore_1.getFirestore)();
 // Environment & Credentials
 const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN || "";

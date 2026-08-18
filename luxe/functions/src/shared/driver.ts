@@ -13,6 +13,8 @@ export const driverSchema = z.object({
   ratingCount: z.number().int(),
   active: z.boolean(),
   bookable: z.boolean(),
+  driverType: z.enum(["in_house", "floater", "affiliate"]).default("in_house").optional(),
+  assignedVehicleId: z.string().nullable().optional(),
   createdAt: timestampSchema,
 });
 
