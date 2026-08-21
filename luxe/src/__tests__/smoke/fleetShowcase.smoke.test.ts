@@ -12,6 +12,7 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
     expect(escalade?.classId).toBe("suv");
     expect(escalade?.passengers).toBe(6);
     expect(escalade?.luggage).toBe(6);
+    expect(escalade?.angles.length).toBeGreaterThanOrEqual(3);
     expect(escalade?.interiorSnapshots.length).toBeGreaterThanOrEqual(4);
 
     const sClass = LUXURY_FLEET_SHOWCASE.find((v) => v.id === "mercedes_s580");
@@ -20,26 +21,29 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
     expect(sClass?.classId).toBe("sedan");
     expect(sClass?.passengers).toBe(3);
     expect(sClass?.luggage).toBe(3);
+    expect(sClass?.angles.length).toBeGreaterThanOrEqual(3);
 
     const sprinter = LUXURY_FLEET_SHOWCASE.find((v) => v.id === "sprinter_jet");
     expect(sprinter).toBeDefined();
     expect(sprinter?.classId).toBe("sprinter");
     expect(sprinter?.passengers).toBe(14);
     expect(sprinter?.luggage).toBe(14);
+    expect(sprinter?.angles.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("should verify 360 degree turntable continuous rotational calculations", () => {
-    const normalizeAngle = (deg: number) => (deg + 360) % 360;
-
-    expect(normalizeAngle(0)).toBe(0);
-    expect(normalizeAngle(90)).toBe(90);
-    expect(normalizeAngle(180)).toBe(180);
-    expect(normalizeAngle(270)).toBe(270);
-    expect(normalizeAngle(360)).toBe(0);
-    expect(normalizeAngle(-45)).toBe(315);
+  it("should verify photographic vehicle angles have valid image URLs and degree metrics", () => {
+    LUXURY_FLEET_SHOWCASE.forEach((vehicle) => {
+      vehicle.angles.forEach((ang) => {
+        expect(ang.angleDeg).toBeGreaterThanOrEqual(0);
+        expect(ang.angleDeg).toBeLessThanOrEqual(360);
+        expect(ang.label).toBeDefined();
+        expect(ang.imageUrl).toContain("http");
+        expect(ang.tagline).toBeDefined();
+      });
+    });
   });
 
-  it("should verify interior snapshot metadata and 3D orbital hotspot coordinate boundaries", () => {
+  it("should verify interior snapshot metadata and hotspot coordinate boundaries", () => {
     LUXURY_FLEET_SHOWCASE.forEach((vehicle) => {
       // Verify snapshots
       vehicle.interiorSnapshots.forEach((snap) => {
@@ -50,12 +54,12 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
         expect(snap.tag).toBeDefined();
       });
 
-      // Verify 3D orbital hotspots are within [0, 360] degrees and [0, 100] elevation
+      // Verify hotspots are within [0, 100]% position boundary
       vehicle.hotspots.forEach((hotspot) => {
-        expect(hotspot.angle).toBeGreaterThanOrEqual(0);
-        expect(hotspot.angle).toBeLessThanOrEqual(360);
-        expect(hotspot.elevation).toBeGreaterThanOrEqual(0);
-        expect(hotspot.elevation).toBeLessThanOrEqual(100);
+        expect(hotspot.x).toBeGreaterThanOrEqual(0);
+        expect(hotspot.x).toBeLessThanOrEqual(100);
+        expect(hotspot.y).toBeGreaterThanOrEqual(0);
+        expect(hotspot.y).toBeLessThanOrEqual(100);
         expect(hotspot.title).toBeDefined();
         expect(hotspot.detail).toBeDefined();
       });

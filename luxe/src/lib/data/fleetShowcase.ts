@@ -1,4 +1,40 @@
-import { VehicleShowcaseData } from "@/components/fleet/Vehicle360Viewer";
+export interface VehicleAnglePhoto {
+  angleDeg: number;
+  label: string;
+  imageUrl: string;
+  tagline: string;
+}
+
+export interface VehicleShowcaseData {
+  id: string;
+  classId: "suv" | "sedan" | "sprinter";
+  name: string;
+  model: string;
+  tagline: string;
+  priceEstimate: string;
+  passengers: number;
+  luggage: number;
+  heroImage: string;
+  angles: VehicleAnglePhoto[];
+  interiorSnapshots: {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    tag: string;
+  }[];
+  hotspots: {
+    x: number; // 0 to 100% position on hero image
+    y: number;
+    title: string;
+    detail: string;
+  }[];
+  specs: {
+    label: string;
+    value: string;
+    detail: string;
+  }[];
+}
 
 export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
   {
@@ -10,8 +46,32 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     priceEstimate: "$195.00 Base Charter",
     passengers: 6,
     luggage: 6,
-    exterior360Images: [
-      "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80",
+    heroImage: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1400&q=85",
+    angles: [
+      {
+        angleDeg: 45,
+        label: "Front 3/4 Stance",
+        imageUrl: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Galvano gloss-black mesh grille with illuminated Cadillac crest and LED blades.",
+      },
+      {
+        angleDeg: 90,
+        label: "Side Profile (ESV)",
+        imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=85",
+        tagline: "+15.9 inches extended wheelbase with 22-inch 12-spoke polished dark finish alloy wheels.",
+      },
+      {
+        angleDeg: 0,
+        label: "Front Grille",
+        imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Acoustic laminated double-pane windshield with active aerodynamic cooling shutters.",
+      },
+      {
+        angleDeg: 180,
+        label: "Rear Departure",
+        imageUrl: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Full-height vertical OLED tail blades and power gesture liftgate for 6 full-size trunks.",
+      },
     ],
     interiorSnapshots: [
       {
@@ -51,10 +111,9 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { angle: 0, elevation: 48, title: "Galvano Chrome Mesh Grille", detail: "Signature illuminated Cadillac shield with active aerodynamic shutters." },
-      { angle: 90, elevation: 52, title: "Extended ESV Wheelbase (+15.9\")", detail: "+15.9 inches of additional rear cabin stretch and luggage volume." },
-      { angle: 180, elevation: 42, title: "Vertical LED Tailblade Lighting", detail: "Full 3-foot light blade signature with hands-free gesture tailgate." },
-      { angle: 270, elevation: 35, title: "Acoustic Double-Pane Glass", detail: "Double-laminated windows creating a 54 dB whisper-quiet cabin." },
+      { x: 30, y: 48, title: "Galvano Chrome Mesh Grille", detail: "Signature illuminated Cadillac shield with active aerodynamic shutters." },
+      { x: 60, y: 55, title: "Extended ESV Wheelbase (+15.9\")", detail: "+15.9 inches of additional rear cabin stretch and luggage volume." },
+      { x: 80, y: 38, title: "Acoustic Double-Pane Glass", detail: "Double-laminated windows creating a 54 dB whisper-quiet cabin." },
     ],
     specs: [
       { label: "Cabin Decibel", value: "54 dB", detail: "Whisper-quiet acoustic glass" },
@@ -71,8 +130,26 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     priceEstimate: "$155.00 Base Charter",
     passengers: 3,
     luggage: 3,
-    exterior360Images: [
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80",
+    heroImage: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=85",
+    angles: [
+      {
+        angleDeg: 45,
+        label: "Front 3/4 Hero",
+        imageUrl: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Obsidian Black metallic finish with DIGITAL LIGHT 1.3M micro-mirror optics.",
+      },
+      {
+        angleDeg: 90,
+        label: "Side Profile",
+        imageUrl: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Long-wheelbase chassis with motorized flush door handles and soft-close latching.",
+      },
+      {
+        angleDeg: 0,
+        label: "Front Chrome Grille",
+        imageUrl: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1400&q=85",
+        tagline: "Iconic three-point star with integrated long-range radar and night vision sensors.",
+      },
     ],
     interiorSnapshots: [
       {
@@ -105,10 +182,9 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { angle: 0, elevation: 50, title: "DIGITAL LIGHT LED Headlamps", detail: "1.3 million micro-mirror projection with welcome lighting." },
-      { angle: 90, elevation: 52, title: "Flush Motorized Door Handles", detail: "Electrically extend seamlessly upon VIP passenger approach." },
-      { angle: 180, elevation: 44, title: "3D Ruby OLED Tail Lamp Array", detail: "Animated horizontal light signature with chrome garnish." },
-      { angle: 270, elevation: 36, title: "4MATIC All-Wheel Drive Chassis", detail: "AIRMATIC adaptive air suspension for cloud-like road isolation." },
+      { x: 35, y: 50, title: "DIGITAL LIGHT LED Headlamps", detail: "1.3 million micro-mirror projection with welcome lighting." },
+      { x: 65, y: 48, title: "Flush Motorized Door Handles", detail: "Electrically extend seamlessly upon VIP passenger approach." },
+      { x: 80, y: 35, title: "AIRMATIC Adaptive Suspension", detail: "Cloud-like road isolation absorbing road imperfections." },
     ],
     specs: [
       { label: "Cabin Decibel", value: "52 dB", detail: "Industry-leading acoustic glass" },
@@ -125,8 +201,20 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     priceEstimate: "$285.00 Base Charter",
     passengers: 14,
     luggage: 14,
-    exterior360Images: [
-      "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
+    heroImage: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1400&q=85",
+    angles: [
+      {
+        angleDeg: 45,
+        label: "Front 3/4 Executive",
+        imageUrl: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1400&q=85",
+        tagline: "High-roof jet stance with dark executive matte accents and automatic power entrance step.",
+      },
+      {
+        angleDeg: 90,
+        label: "Extended Salon Profile",
+        imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1400&q=85",
+        tagline: "170-inch extended wheelbase with privacy limousine glass and overhead climate nacelles.",
+      },
     ],
     interiorSnapshots: [
       {
@@ -152,10 +240,9 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { angle: 0, elevation: 42, title: "Aerodynamic Executive Nose", detail: "High-visibility LED projection optics and active radar sensors." },
-      { angle: 90, elevation: 30, title: "6ft 4in Full Standing Headroom", detail: "Walk-in luxury cabin with motorized automatic entrance step." },
-      { angle: 180, elevation: 45, title: "Rear VIP Luggage Cargo Bay", detail: "Accommodates up to 14 checked flight cases with ease." },
-      { angle: 270, elevation: 36, title: "Deep Privacy Limo Tint", detail: "99% UV and solar thermal reflection for complete client confidentiality." },
+      { x: 30, y: 40, title: "6ft 4in Standing Headroom", detail: "Walk-in luxury cabin with motorized automatic entrance step." },
+      { x: 65, y: 45, title: "Acoustic Partition Wall", detail: "Complete sound isolation between passenger salon and driver." },
+      { x: 85, y: 55, title: "Rear VIP Cargo Bay", detail: "Accommodates up to 14 checked flight cases with ease." },
     ],
     specs: [
       { label: "Headroom", value: "6 ft 4 in", detail: "Full upright standing height" },
