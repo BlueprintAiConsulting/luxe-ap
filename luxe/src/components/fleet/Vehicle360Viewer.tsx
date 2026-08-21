@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { 
   RotateCw, 
   Sparkles, 
@@ -15,7 +16,10 @@ import {
   Layers,
   Compass,
   Radio,
-  Car
+  Car,
+  Camera,
+  Maximize2,
+  Box
 } from "lucide-react";
 import { VehicleShowcaseData } from "@/lib/data/fleetShowcase";
 
@@ -27,34 +31,30 @@ const FINISH_OPTIONS = [
   { 
     id: "black", 
     name: "Obsidian Onyx", 
-    bodyGrad: ["#1c1f26", "#0c0d12", "#050608"],
-    highlight: "#525e75",
+    hex: "#0b0c10",
     glow: "rgba(212, 175, 55, 0.35)", 
-    hex: "#0b0c10" 
+    filter: "brightness(1.0) contrast(1.05)",
   },
   { 
     id: "midnight", 
     name: "Caviar Sapphire", 
-    bodyGrad: ["#1a2a4a", "#0d172e", "#050914"],
-    highlight: "#4870b8",
+    hex: "#0a1128", 
     glow: "rgba(59, 130, 246, 0.35)", 
-    hex: "#0a1128" 
+    filter: "brightness(0.95) contrast(1.1) hue-rotate(185deg)",
   },
   { 
     id: "gold", 
     name: "Imperial Champagne", 
-    bodyGrad: ["#42361f", "#241c0e", "#0f0b05"],
-    highlight: "#d4af37",
+    hex: "#262013", 
     glow: "rgba(212, 175, 55, 0.5)", 
-    hex: "#262013" 
+    filter: "brightness(1.05) contrast(1.1) sepia(0.3) hue-rotate(15deg)",
   },
   { 
     id: "platinum", 
     name: "Pearl Platinum", 
-    bodyGrad: ["#4a5568", "#2d3748", "#1a202c"],
-    highlight: "#cbd5e0",
+    hex: "#2d3748", 
     glow: "rgba(244, 244, 245, 0.35)", 
-    hex: "#2d3748" 
+    filter: "brightness(1.25) contrast(0.95) saturate(0.7)",
   },
 ];
 
@@ -66,6 +66,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
   const [selectedFinish, setSelectedFinish] = useState(FINISH_OPTIONS[0]);
   const [headlightsOn, setHeadlightsOn] = useState(true);
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"photorealistic" | "wireframe">("photorealistic");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -78,7 +79,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
     const loop = (time: number) => {
       const delta = (time - lastTime) / 1000;
       lastTime = time;
-      setAngle((prev) => (prev + delta * 22) % 360);
+      setAngle((prev) => (prev + delta * 20) % 360);
       animationFrameRef.current = requestAnimationFrame(loop);
     };
 
@@ -108,7 +109,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
     setIsDragging(false);
   };
 
-  // Render High-Detail Luxury Car & Turntable Canvas
+  // Render Turntable Ground Disc & Lighting on Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -121,18 +122,18 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
 
     const rad = (angle * Math.PI) / 180;
     const cx = width / 2;
-    const cy = height * 0.58;
+    const cy = height * 0.62;
 
-    // 1. Draw Turntable Mirror Disc with Radial Studio Glow
-    const discRadiusX = width * 0.44;
+    // 1. Turntable Mirror Disc with Radial Studio Glow
+    const discRadiusX = width * 0.45;
     const discRadiusY = height * 0.22;
 
     ctx.save();
     ctx.beginPath();
-    ctx.ellipse(cx, cy + 28, discRadiusX, discRadiusY, 0, 0, Math.PI * 2);
-    const discGrad = ctx.createRadialGradient(cx, cy + 28, 15, cx, cy + 28, discRadiusX);
-    discGrad.addColorStop(0, "rgba(28, 35, 52, 0.5)");
-    discGrad.addColorStop(0.5, "rgba(12, 16, 26, 0.7)");
+    ctx.ellipse(cx, cy + 24, discRadiusX, discRadiusY, 0, 0, Math.PI * 2);
+    const discGrad = ctx.createRadialGradient(cx, cy + 24, 15, cx, cy + 24, discRadiusX);
+    discGrad.addColorStop(0, "rgba(28, 35, 52, 0.45)");
+    discGrad.addColorStop(0.5, "rgba(12, 16, 26, 0.65)");
     discGrad.addColorStop(1, "rgba(4, 5, 8, 0.98)");
     ctx.fillStyle = discGrad;
     ctx.fill();
@@ -144,7 +145,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
     for (let i = 0; i < 36; i++) {
       const tickRad = (i * 10 * Math.PI) / 180 + rad;
       const tx = cx + Math.cos(tickRad) * (discRadiusX - 12);
-      const ty = cy + 28 + Math.sin(tickRad) * (discRadiusY - 12);
+      const ty = cy + 24 + Math.sin(tickRad) * (discRadiusY - 12);
       ctx.fillStyle = i % 9 === 0 ? "rgba(212, 175, 55, 0.9)" : "rgba(255, 255, 255, 0.18)";
       ctx.fillRect(tx - 1.5, ty - 1.5, 3, 3);
     }
@@ -157,12 +158,12 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
     if (headlightsOn && isFrontFacing) {
       ctx.save();
       const beamGrad = ctx.createRadialGradient(cx, cy + 20, 20, cx, cy + 85, discRadiusX * 0.88);
-      beamGrad.addColorStop(0, "rgba(255, 250, 230, 0.4)");
-      beamGrad.addColorStop(0.4, "rgba(212, 175, 55, 0.18)");
+      beamGrad.addColorStop(0, "rgba(255, 250, 230, 0.35)");
+      beamGrad.addColorStop(0.4, "rgba(212, 175, 55, 0.15)");
       beamGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = beamGrad;
       ctx.beginPath();
-      ctx.ellipse(cx, cy + 60, discRadiusX * 0.85, discRadiusY * 0.7, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy + 55, discRadiusX * 0.85, discRadiusY * 0.7, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -170,220 +171,25 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
     if (headlightsOn && isRearFacing) {
       ctx.save();
       const redGrad = ctx.createRadialGradient(cx, cy + 20, 20, cx, cy + 65, discRadiusX * 0.75);
-      redGrad.addColorStop(0, "rgba(239, 68, 68, 0.4)");
-      redGrad.addColorStop(0.5, "rgba(239, 68, 68, 0.1)");
+      redGrad.addColorStop(0, "rgba(239, 68, 68, 0.35)");
+      redGrad.addColorStop(0.5, "rgba(239, 68, 68, 0.08)");
       redGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = redGrad;
       ctx.beginPath();
-      ctx.ellipse(cx, cy + 50, discRadiusX * 0.75, discRadiusY * 0.65, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy + 45, discRadiusX * 0.75, discRadiusY * 0.65, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // 3. 3D Keypoint Projector for Realistic Automotive Geometry
-    const isSUV = vehicle.classId === "suv";
-    const isSedan = vehicle.classId === "sedan";
-
-    const carLength = isSUV ? 300 : isSedan ? 260 : 330;
-    const carWidth = isSUV ? 140 : isSedan ? 120 : 135;
-    const carHeight = isSUV ? 115 : isSedan ? 80 : 155;
-
-    const project = (x: number, y: number, z: number) => {
-      const rx = x * Math.cos(rad) - z * Math.sin(rad);
-      const rz = x * Math.sin(rad) + z * Math.cos(rad);
-      const fov = 720;
-      const scale = fov / (fov + rz);
-      return {
-        x: cx + rx * scale,
-        y: cy - y * scale + (rz * 0.22),
-        scale,
-        depth: rz,
-      };
-    };
-
-    // 4. Contact Tire Shadow
-    const shadowP1 = project(-carWidth * 0.55, 0, carLength * 0.5);
-    const shadowP2 = project(carWidth * 0.55, 0, carLength * 0.5);
-    const shadowP3 = project(carWidth * 0.55, 0, -carLength * 0.5);
-    const shadowP4 = project(-carWidth * 0.55, 0, -carLength * 0.5);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(shadowP1.x, shadowP1.y + 12);
-    ctx.lineTo(shadowP2.x, shadowP2.y + 12);
-    ctx.lineTo(shadowP3.x, shadowP3.y + 12);
-    ctx.lineTo(shadowP4.x, shadowP4.y + 12);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
-    ctx.filter = "blur(12px)";
-    ctx.fill();
-    ctx.restore();
-
-    // 5. Draw 3D Metallic Vehicle Body (Sleek Curvatures, Glass & Lighting)
-    // Points definition for realistic silhouette:
-    // Front Bumper / Grille Base
-    const fBumperL = project(-carWidth * 0.48, 12, carLength * 0.5);
-    const fBumperR = project(carWidth * 0.48, 12, carLength * 0.5);
-    const fGrilleTopL = project(-carWidth * 0.46, carHeight * 0.5, carLength * 0.49);
-    const fGrilleTopR = project(carWidth * 0.46, carHeight * 0.5, carLength * 0.49);
-
-    // Hood & Windshield Base
-    const fHoodBaseL = project(-carWidth * 0.45, carHeight * 0.55, carLength * 0.18);
-    const fHoodBaseR = project(carWidth * 0.45, carHeight * 0.55, carLength * 0.18);
-
-    // Roof & Greenhouse
-    const rRoofFrontL = project(-carWidth * 0.4, carHeight, carLength * 0.12);
-    const rRoofFrontR = project(carWidth * 0.4, carHeight, carLength * 0.12);
-    const rRoofRearL = project(-carWidth * 0.4, carHeight * (isSedan ? 0.92 : 0.98), -carLength * (isSedan ? 0.22 : 0.44));
-    const rRoofRearR = project(carWidth * 0.4, carHeight * (isSedan ? 0.92 : 0.98), -carLength * (isSedan ? 0.22 : 0.44));
-
-    // Rear Deck / Trunk / Tailgate
-    const rTrunkBaseL = project(-carWidth * 0.47, carHeight * 0.52, -carLength * 0.48);
-    const rTrunkBaseR = project(carWidth * 0.47, carHeight * 0.52, -carLength * 0.48);
-    const rBumperL = project(-carWidth * 0.48, 14, -carLength * 0.5);
-    const rBumperR = project(carWidth * 0.48, 14, -carLength * 0.5);
-
-    // Helper to draw realistic metallic surface
-    const drawPolygon = (points: { x: number; y: number }[], fillStyle: string | CanvasGradient, strokeStyle?: string) => {
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = fillStyle;
-      ctx.fill();
-      if (strokeStyle) {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = strokeStyle;
-        ctx.stroke();
-      }
-    };
-
-    // Body paint gradients
-    const bodyBaseGrad = ctx.createLinearGradient(0, cy - carHeight, 0, cy);
-    bodyBaseGrad.addColorStop(0, selectedFinish.bodyGrad[0]);
-    bodyBaseGrad.addColorStop(0.5, selectedFinish.bodyGrad[1]);
-    bodyBaseGrad.addColorStop(1, selectedFinish.bodyGrad[2]);
-
-    const hoodGrad = ctx.createLinearGradient(cx - 100, cy - 50, cx + 100, cy);
-    hoodGrad.addColorStop(0, selectedFinish.highlight);
-    hoodGrad.addColorStop(0.7, selectedFinish.bodyGrad[0]);
-    hoodGrad.addColorStop(1, selectedFinish.bodyGrad[1]);
-
-    const glassGrad = ctx.createLinearGradient(cx, cy - carHeight, cx, cy);
-    glassGrad.addColorStop(0, "rgba(22, 30, 48, 0.9)");
-    glassGrad.addColorStop(0.6, "rgba(10, 14, 24, 0.95)");
-    glassGrad.addColorStop(1, "rgba(5, 7, 12, 0.98)");
-
-    // Render 3D Body Surfaces
-    // 1. Lower Rocker Body Base
-    drawPolygon([fBumperL, fBumperR, rBumperR, rBumperL], bodyBaseGrad, "rgba(212, 175, 55, 0.2)");
-
-    // 2. Side Beltline Panels
-    drawPolygon([fBumperL, fGrilleTopL, fHoodBaseL, rTrunkBaseL, rBumperL], bodyBaseGrad, "rgba(212, 175, 55, 0.3)");
-    drawPolygon([fBumperR, fGrilleTopR, fHoodBaseR, rTrunkBaseR, rBumperR], bodyBaseGrad, "rgba(212, 175, 55, 0.3)");
-
-    // 3. Hood Top
-    drawPolygon([fGrilleTopL, fGrilleTopR, fHoodBaseR, fHoodBaseL], hoodGrad, "rgba(212, 175, 55, 0.4)");
-
-    // 4. Tinted Glass Greenhouse (Windshield, Side Windows, Rear Window)
-    // Windshield
-    drawPolygon([fHoodBaseL, fHoodBaseR, rRoofFrontR, rRoofFrontL], glassGrad, "rgba(212, 175, 55, 0.5)");
-    // Side Passenger Glass
-    drawPolygon([fHoodBaseL, rRoofFrontL, rRoofRearL, rTrunkBaseL], glassGrad, "rgba(212, 175, 55, 0.4)");
-    drawPolygon([fHoodBaseR, rRoofFrontR, rRoofRearR, rTrunkBaseR], glassGrad, "rgba(212, 175, 55, 0.4)");
-    // Roof Top (Panoramic Starline Glass)
-    drawPolygon([rRoofFrontL, rRoofFrontR, rRoofRearR, rRoofRearL], "rgba(8, 11, 18, 0.98)", "rgba(212, 175, 55, 0.6)");
-    // Rear Window
-    drawPolygon([rRoofRearL, rRoofRearR, rTrunkBaseR, rTrunkBaseL], glassGrad, "rgba(212, 175, 55, 0.4)");
-
-    // 6. Draw Detailed Front Grille & Headlights (when facing forward)
-    if (isFrontFacing) {
-      // Front Grille Mesh
-      const grilleGrad = ctx.createLinearGradient(fGrilleTopL.x, fGrilleTopL.y, fGrilleTopR.x, fBumperR.y);
-      grilleGrad.addColorStop(0, "#1f2430");
-      grilleGrad.addColorStop(1, "#07090e");
-      drawPolygon([fGrilleTopL, fGrilleTopR, fBumperR, fBumperL], grilleGrad, "rgba(212, 175, 55, 0.8)");
-
-      // Center Gold Emblem (Cadillac Crest / Mercedes Star)
-      const emblemCenter = project(0, carHeight * 0.32, carLength * 0.5);
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(emblemCenter.x, emblemCenter.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "#d4af37";
-      ctx.shadowColor = "#d4af37";
-      ctx.shadowBlur = 10;
-      ctx.fill();
-      ctx.restore();
-
-      // Vertical LED DRL Blades (Cadillac / Mercedes)
-      if (headlightsOn) {
-        ctx.save();
-        ctx.fillStyle = "#fffef0";
-        ctx.shadowColor = "#fef08a";
-        ctx.shadowBlur = 16;
-        ctx.fillRect(fGrilleTopL.x - 3, fGrilleTopL.y, 4.5, fBumperL.y - fGrilleTopL.y);
-        ctx.fillRect(fGrilleTopR.x - 1.5, fGrilleTopR.y, 4.5, fBumperR.y - fGrilleTopR.y);
-        ctx.restore();
-      }
-    }
-
-    // 7. Draw Rear Fascia & Ruby OLED Tail Blades (when facing rear)
-    if (isRearFacing) {
-      drawPolygon([rTrunkBaseL, rTrunkBaseR, rBumperR, rBumperL], "#080a10", "rgba(239, 68, 68, 0.5)");
-
-      if (headlightsOn) {
-        ctx.save();
-        ctx.fillStyle = "#ef4444";
-        ctx.shadowColor = "#dc2626";
-        ctx.shadowBlur = 16;
-        // Dual vertical tail blades
-        ctx.fillRect(rTrunkBaseL.x - 3, rRoofRearL.y + 10, 4, rBumperL.y - rRoofRearL.y - 10);
-        ctx.fillRect(rTrunkBaseR.x - 1, rRoofRearR.y + 10, 4, rBumperR.y - rRoofRearR.y - 10);
-        ctx.restore();
-      }
-    }
-
-    // 8. Draw 4 3D Detailed Multi-Spoke Alloy Wheels
-    const wheelRadius = isSUV ? 24 : isSedan ? 19 : 26;
-    const wheelPositions = [
-      { x: -carWidth * 0.48, z: carLength * 0.32 }, // Front Left
-      { x: carWidth * 0.48, z: carLength * 0.32 },  // Front Right
-      { x: -carWidth * 0.48, z: -carLength * 0.32 }, // Rear Left
-      { x: carWidth * 0.48, z: -carLength * 0.32 },  // Rear Right
-    ];
-
-    wheelPositions.forEach((wp) => {
-      const pWheel = project(wp.x, wheelRadius, wp.z);
-      ctx.save();
-      // Outer Tire
-      ctx.beginPath();
-      ctx.ellipse(pWheel.x, pWheel.y, wheelRadius * pWheel.scale * 0.45, wheelRadius * pWheel.scale, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "#0d0f14";
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#272e3d";
-      ctx.stroke();
-
-      // Inner Alloy Rim (12-Spoke Dark Polish)
-      ctx.beginPath();
-      ctx.ellipse(pWheel.x, pWheel.y, wheelRadius * pWheel.scale * 0.3, wheelRadius * pWheel.scale * 0.7, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "#1e2430";
-      ctx.fill();
-      ctx.strokeStyle = "#d4af37";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Gold Brake Caliper
-      ctx.fillStyle = "#d4af37";
-      ctx.fillRect(pWheel.x - 2, pWheel.y - 6, 3, 7);
-      ctx.restore();
-    });
-
-  }, [angle, selectedFinish, headlightsOn, vehicle.classId]);
+  }, [angle, selectedFinish, headlightsOn]);
 
   const currentAngleDeg = Math.round(angle);
+
+  // Determine current 3D perspective transform & flip for realistic car rendering
+  const rad = (angle * Math.PI) / 180;
+  const sinAngle = Math.sin(rad);
+  const cosAngle = Math.cos(rad);
+  const isFlipped = cosAngle < 0;
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-b from-[#101322] via-[#080a12] to-[#030406] border border-accent/30 shadow-2xl p-4 sm:p-8 select-none font-sans">
@@ -426,28 +232,63 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
         </div>
       </div>
 
-      {/* 3D Interactive Luxury Car Canvas Stage */}
+      {/* 3D Interactive Turntable Stage with REAL PHOTOREALISTIC VEHICLE */}
       <div 
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         className="relative w-full aspect-[16/9] sm:aspect-[21/9] flex items-center justify-center cursor-grab active:cursor-grabbing my-4 overflow-hidden rounded-2xl bg-[#04060a]"
+        style={{ perspective: "1200px" }}
       >
+        {/* Canvas for Glowing Turntable Floor & Volumetric Beams */}
         <canvas
           ref={canvasRef}
           width={960}
           height={420}
-          className="w-full h-full object-contain pointer-events-none"
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
         />
+
+        {/* Ground Reflection & Shadow under Tires */}
+        <div 
+          className="absolute bottom-6 sm:bottom-10 w-3/5 h-20 rounded-[100%] blur-2xl pointer-events-none transition-all duration-500 z-10"
+          style={{ 
+            backgroundColor: selectedFinish.glow,
+            transform: `translateX(${sinAngle * 25}px)`
+          }}
+        />
+
+        {/* THE REAL VEHICLE FIGURE (3D Perspective Rotation on Turntable) */}
+        <div 
+          className="relative w-4/5 sm:w-3/5 h-4/5 flex items-center justify-center transition-transform duration-75 pointer-events-none z-20"
+          style={{
+            transform: `
+              rotateY(${sinAngle * 28}deg) 
+              rotateX(${-cosAngle * 4}deg) 
+              scale(${1 - Math.abs(cosAngle) * 0.08})
+              scaleX(${isFlipped ? -1 : 1})
+            `,
+            filter: selectedFinish.filter,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <Image
+            src={vehicle.heroImage}
+            alt={vehicle.name}
+            fill
+            sizes="(max-width: 1200px) 100vw, 1200px"
+            className="object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.95)]"
+            priority
+          />
+        </div>
 
         {/* Orbiting 3D Hotspot Overlays */}
         {vehicle.hotspots.map((hotspot, idx) => {
           const deltaDeg = (idx * 90 - angle + 360) % 360;
           const isVisible = deltaDeg < 80 || deltaDeg > 280;
-          const rad = (deltaDeg * Math.PI) / 180;
-          const xOffset = Math.sin(rad) * 40;
-          const depthScale = Math.cos(rad) * 0.3 + 0.7;
+          const radVal = (deltaDeg * Math.PI) / 180;
+          const xOffset = Math.sin(radVal) * 38;
+          const depthScale = Math.cos(radVal) * 0.3 + 0.7;
 
           if (!isVisible) return null;
 
@@ -456,7 +297,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
               key={idx}
               style={{
                 left: `${50 + xOffset}%`,
-                top: `${42 + (idx % 2 === 0 ? -5 : 8)}%`,
+                top: `${44 + (idx % 2 === 0 ? -6 : 6)}%`,
                 transform: `scale(${depthScale})`,
                 opacity: depthScale,
               }}
@@ -485,7 +326,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
         })}
 
         {/* Drag Hint Overlay */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#05070c]/85 backdrop-blur-md border border-neutral-800 text-[10px] font-mono text-neutral-400 flex items-center gap-2 pointer-events-none opacity-80">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#05070c]/85 backdrop-blur-md border border-neutral-800 text-[10px] font-mono text-neutral-400 flex items-center gap-2 pointer-events-none opacity-80 z-30">
           <Compass size={12} className="text-accent animate-spin" />
           <span>Click &amp; Drag in Any Direction to Rotate 360°</span>
         </div>
@@ -510,7 +351,7 @@ export default function Vehicle360Viewer({ vehicle }: Vehicle360ViewerProps) {
               >
                 <div 
                   className="w-3.5 h-3.5 rounded-full border border-white/30"
-                  style={{ backgroundColor: c.highlight }}
+                  style={{ backgroundColor: c.hex }}
                 />
                 <span className="text-[11px]">{c.name}</span>
               </button>
