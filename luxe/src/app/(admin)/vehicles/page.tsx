@@ -7,9 +7,10 @@ import { vehicleClassConverter, vehicleConverter, driverConverter } from '@/lib/
 import { VehicleClass, Vehicle, VehicleAmenityTags } from '@/lib/types/vehicle';
 import { Driver } from '@/lib/types/driver';
 import { uploadImage } from '@/lib/uploadImage';
-import { Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Sparkles, ShieldCheck, UserCheck } from 'lucide-react';
+import { Plus, Trash2, Edit2, Loader2, Image as ImageIcon, Sparkles, ShieldCheck, UserCheck, Zap } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 import Image from 'next/image';
+import VinDecoderModal from '@/components/VinDecoderModal';
 
 const toDateString = (ts: Timestamp | null | undefined): string => {
   if (!ts) return '';
@@ -215,6 +216,7 @@ function VehiclesTab() {
   const [classes, setClasses] = useState<VehicleClass[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [isVinModalOpen, setIsVinModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -244,7 +246,15 @@ function VehiclesTab() {
 
   return (
     <div>
-      <div className="flex justify-end mb-6">
+      <div className="flex flex-wrap items-center justify-end gap-3 mb-6">
+        <button
+          onClick={() => setIsVinModalOpen(true)}
+          className="min-h-[44px] flex items-center space-x-2 bg-[#121624] border border-accent/40 text-accent px-5 py-2.5 rounded-xl font-bold hover:bg-accent hover:text-neutral-950 shadow-gold-sm text-xs uppercase tracking-wider transition-all"
+        >
+          <Zap size={16} />
+          <span>Add via VIN Decoder</span>
+        </button>
+
         <button
           onClick={() => setEditingVehicle({
             vehicleId: '', classId: classes[0]?.classId || 'suv', year: new Date().getFullYear(), make: '', model: '', trim: '', vin: '', color: 'Black', licensePlate: '', photoUrls: [], maxPassengers: 6, maxLuggage: 6, active: true, assignedDriverId: null, amenityTags: {}, outOfServiceUntil: null
@@ -252,9 +262,16 @@ function VehiclesTab() {
           className="min-h-[44px] flex items-center space-x-2 bg-gold-gradient text-neutral-950 px-5 py-2.5 rounded-xl font-bold hover:brightness-110 shadow-gold-sm text-xs uppercase tracking-wider transition-all"
         >
           <Plus size={16} />
-          <span>Add Flagship Vehicle</span>
+          <span>Manual Fleet Entry</span>
         </button>
       </div>
+
+      <VinDecoderModal
+        isOpen={isVinModalOpen}
+        onClose={() => setIsVinModalOpen(false)}
+        classes={classes}
+        drivers={drivers}
+      />
 
       {editingVehicle ? (
         <VehicleForm 
