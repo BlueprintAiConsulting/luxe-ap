@@ -178,5 +178,23 @@ service cloud.firestore {
         (request.resource.data.driverId != null && request.resource.data.driverId == request.auth.uid)
       ));
     }
+
+    // -------------------------------------------------------------------------
+    // Corporate Accounts & Invoices
+    // -------------------------------------------------------------------------
+    match /corporateAccounts/{accountId} {
+      allow read: if isAdmin() || (isAuthenticated() && (
+        resource.data.authorizedUserIds != null && request.auth.uid in resource.data.authorizedUserIds
+      ));
+      allow write: if isAdmin();
+      
+      match /invoices/{invoiceId} {
+        allow read: if isAdmin() || (isAuthenticated() && (
+          get(/databases/$(database)/documents/corporateAccounts/$(accountId)).data.authorizedUserIds != null &&
+          request.auth.uid in get(/databases/$(database)/documents/corporateAccounts/$(accountId)).data.authorizedUserIds
+        ));
+        allow write: if false;
+      }
+    }
   }
 }

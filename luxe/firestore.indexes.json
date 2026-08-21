@@ -43,11 +43,28 @@
       ]
     },
     {
+      "collectionGroup": "reservations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "corporateAccountId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "pickupAt", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "driverPayouts",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "driverId", "order": "ASCENDING" },
         { "fieldPath": "periodStart", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "invoices",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "accountId", "order": "ASCENDING" },
+        { "fieldPath": "billingPeriodEnd", "order": "DESCENDING" }
       ]
     }
   ],
