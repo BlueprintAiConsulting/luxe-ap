@@ -171,7 +171,7 @@ export default function AdminDashboardPage() {
         <div className="flex bg-[#0e0e13] border border-neutral-800 p-1.5 rounded-2xl shadow-gold-sm self-start sm:self-auto font-mono text-xs">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "overview" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
           </button>
           <button
             onClick={() => setActiveTab("financials")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "financials" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
           </button>
           <button
             onClick={() => setActiveTab("credentials")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "credentials" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >

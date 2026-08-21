@@ -146,7 +146,7 @@ function DriverPortalInner() {
         <div className="flex bg-[#0e0e13] border border-neutral-800 p-1.5 rounded-2xl shadow-gold-sm self-start sm:self-auto font-mono text-xs">
           <button
             onClick={() => setActiveTab("weekly")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "weekly" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -154,7 +154,7 @@ function DriverPortalInner() {
           </button>
           <button
             onClick={() => setActiveTab("tax_1099")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "tax_1099" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -162,7 +162,7 @@ function DriverPortalInner() {
           </button>
           <button
             onClick={() => setActiveTab("ledger")}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`px-4 py-2.5 min-h-[44px] rounded-xl font-bold transition-all active:scale-95 ${
               activeTab === "ledger" ? "bg-gold-gradient text-neutral-950 shadow-gold-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
