@@ -28,22 +28,32 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://luxe-app-1786335311.web.app"),
-  title: "LUXE — Private Aviation Livery & Executive Chauffeur",
-  description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services. World-class Mercedes S-Class, Cadillac Escalade ESV, and Sprinter Jet Charters.",
-  applicationName: "LUXE",
-  authors: [{ name: "LUXE Livery Group" }],
-  keywords: ["Luxury Chauffeur", "Private Jet Livery", "Executive Transportation", "FBO Airport Transfer", "AI Voice Dispatch", "LAX VIP Chauffeur"],
+  title: "KLS Luxe — Executive Black Car & Luxury Chauffeur Service",
+  description: "Premier executive black car, luxury airport transfers (LAX, JFK, LGA, FBOs), and 24/7 AI-powered precision chauffeur service. Pristine Cadillac Escalade ESV, Mercedes-Benz S-Class, and Executive Sprinter charters.",
+  applicationName: "KLS Luxe",
+  authors: [{ name: "KLS Luxe Livery Group" }],
+  keywords: [
+    "KLS Luxe",
+    "Luxury Chauffeur",
+    "Executive Black Car",
+    "Airport Transfer",
+    "LAX VIP Chauffeur",
+    "Private Aviation Livery",
+    "AI Voice Dispatch",
+    "Cadillac Escalade ESV",
+    "Mercedes S-Class"
+  ],
   openGraph: {
-    title: "LUXE — Private Aviation Livery & Executive Chauffeur",
-    description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services. World-class Mercedes S-Class, Cadillac Escalade ESV, and Sprinter Jet Charters.",
+    title: "KLS Luxe — Executive Black Car & Luxury Chauffeur Service",
+    description: "Premier executive black car, luxury airport transfers (LAX, JFK, LGA, FBOs), and 24/7 AI-powered precision chauffeur service.",
     url: "https://luxe-app-1786335311.web.app",
-    siteName: "LUXE Livery Group",
+    siteName: "KLS Luxe",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og-image.svg",
         width: 1200,
         height: 675,
-        alt: "LUXE Executive Livery & Private Aviation Monogram",
+        alt: "KLS Luxe Premier Executive Chauffeur & Livery",
       },
     ],
     locale: "en_US",
@@ -51,18 +61,18 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LUXE — Private Aviation Livery & Executive Chauffeur",
-    description: "24/7 AI Voice Dispatch, Live Flight Radar & Bespoke Executive Chauffeur Services.",
-    images: ["/og-image.jpg"],
+    title: "KLS Luxe — Executive Black Car & Luxury Chauffeur Service",
+    description: "Premier executive black car, luxury airport transfers, and 24/7 AI-powered chauffeur service.",
+    images: ["/og-image.svg"],
   },
   icons: {
-    icon: "/og-image.png",
-    apple: "/og-image.png",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
   appleWebApp: { 
     capable: true, 
     statusBarStyle: "black-translucent", 
-    title: "LUXE" 
+    title: "KLS Luxe" 
   },
 };
 

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="ogRadial" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#181826" />
+      <stop offset="60%" stop-color="#09090e" />
+      <stop offset="100%" stop-color="#030305" />
+    </radialGradient>
+
+    <!-- 18K Champagne Gold Gradient -->
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef3c7" />
+      <stop offset="25%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="75%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#92400e" />
+    </linearGradient>
+
+    <!-- Subtle Glow -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="675" fill="url(#ogRadial)" />
+
+  <!-- Outer Luxury Border -->
+  <rect width="1160" height="635" x="20" y="20" rx="32" fill="none" stroke="url(#goldText)" stroke-width="2" opacity="0.4" />
+  <rect width="1144" height="619" x="28" y="28" rx="26" fill="none" stroke="#262638" stroke-width="1" />
+
+  <!-- Corner Gold Accents -->
+  <circle cx="40" cy="40" r="4" fill="url(#goldText)" />
+  <circle cx="1160" cy="40" r="4" fill="url(#goldText)" />
+  <circle cx="40" cy="635" r="4" fill="url(#goldText)" />
+  <circle cx="1160" cy="635" r="4" fill="url(#goldText)" />
+
+  <!-- Central Star Sparkle Monogram -->
+  <g transform="translate(600, 160) scale(1.6)">
+    <path d="M0 -30 Q0 0 30 0 Q0 0 0 30 Q0 0 -30 0 Q0 0 0 -30 Z" fill="url(#goldText)" filter="url(#goldGlow)" />
+  </g>
+
+  <!-- KLS Brand Headline -->
+  <text 
+    x="600" 
+    y="280" 
+    font-family="'Cinzel', 'Playfair Display', 'Didot', 'Georgia', serif" 
+    font-weight="900" 
+    font-size="82" 
+    fill="url(#goldText)" 
+    text-anchor="middle" 
+    letter-spacing="14"
+    filter="url(#goldGlow)"
+  >KLS LUXE</text>
+
+  <!-- Category Tagline -->
+  <text 
+    x="600" 
+    y="340" 
+    font-family="'Cinzel', 'Helvetica Neue', 'Arial', sans-serif" 
+    font-weight="700" 
+    font-size="20" 
+    fill="#ffffff" 
+    text-anchor="middle" 
+    letter-spacing="10"
+    opacity="0.9"
+  >PREMIER EXECUTIVE CHAUFFEUR &amp; LIVERY</text>
+
+  <!-- Divider Line -->
+  <line x1="380" y1="375" x2="820" y2="375" stroke="url(#goldText)" stroke-width="1.5" opacity="0.6" />
+
+  <!-- Value Propositions Description -->
+  <text 
+    x="600" 
+    y="420" 
+    font-family="'Helvetica Neue', 'Arial', sans-serif" 
+    font-weight="400" 
+    font-size="18" 
+    fill="#a1a1aa" 
+    text-anchor="middle" 
+    letter-spacing="1"
+  >Punctual Airport Transfers • 24/7 AI Precision Dispatch • Flagship Mercedes &amp; Escalade Fleet</text>
+
+  <!-- 3 Trust Badges at Bottom -->
+  <g transform="translate(230, 520)">
+    <rect width="210" height="56" rx="16" fill="#101018" stroke="#262638" stroke-width="1" />
+    <text x="105" y="34" font-family="'Helvetica Neue', sans-serif" font-weight="700" font-size="13" fill="#d4af37" text-anchor="middle" letter-spacing="1">✈️ LIVE RADAR SYNC</text>
+  </g>
+
+  <g transform="translate(495, 520)">
+    <rect width="210" height="56" rx="16" fill="#101018" stroke="#262638" stroke-width="1" />
+    <text x="105" y="34" font-family="'Helvetica Neue', sans-serif" font-weight="700" font-size="13" fill="#10b981" text-anchor="middle" letter-spacing="1">🛡️ $10M COMMERCIAL LIAB</text>
+  </g>
+
+  <g transform="translate(760, 520)">
+    <rect width="210" height="56" rx="16" fill="#101018" stroke="#262638" stroke-width="1" />
+    <text x="105" y="34" font-family="'Helvetica Neue', sans-serif" font-weight="700" font-size="13" fill="#d4af37" text-anchor="middle" letter-spacing="1">💳 SQUARE VERIFIED</text>
+  </g>
+
+  <!-- Bottom URL -->
+  <text 
+    x="600" 
+    y="615" 
+    font-family="'Courier New', monospace" 
+    font-weight="600" 
+    font-size="12" 
+    fill="#71717a" 
+    text-anchor="middle" 
+    letter-spacing="3"
+  >WWW.KLSLUXE.COM</text>
+</svg>

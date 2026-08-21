@@ -125,7 +125,7 @@ export function AdminNav() {
             <Globe size={16} />
           </div>
           <div>
-            <div className="font-bold text-sm text-white tracking-wider uppercase font-serif">LUXE</div>
+            <div className="font-bold text-sm text-white tracking-wider uppercase font-serif">KLS LUXE</div>
             <div className="text-[10px] text-accent font-mono leading-none">OPERATIONS</div>
           </div>
         </div>
@@ -152,8 +152,8 @@ export function AdminNav() {
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest mb-2 shadow-gold-sm font-mono">
             <Sparkles size={11} className="text-accent" /> Operations
           </div>
-          <h1 className="font-bold text-2xl text-white tracking-tight font-serif uppercase">LUXE</h1>
-          <div className="text-[11px] font-medium text-slate-400 mt-0.5 tracking-wider uppercase font-mono">Airspace & Dispatch</div>
+          <h1 className="font-bold text-2xl text-white tracking-tight font-serif uppercase">KLS LUXE</h1>
+          <div className="text-[11px] font-medium text-slate-400 mt-0.5 tracking-wider uppercase font-mono">Airspace &amp; Dispatch</div>
         </div>
         <NavLinks />
       </aside>

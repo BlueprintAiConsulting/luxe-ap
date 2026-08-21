@@ -119,7 +119,7 @@ export default function HomePage() {
             </div>
             <div>
               <span className="font-serif text-xl sm:text-2xl font-bold tracking-widest text-white uppercase group-hover:text-accent transition-colors">
-                LUXE
+                KLS LUXE
               </span>
               <span className="block text-[9px] font-mono text-accent uppercase tracking-widest -mt-1">
                 Executive Chauffeur Service
@@ -609,7 +609,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-neutral-800/80">
           
           <div className="space-y-3">
-            <div className="font-serif text-2xl font-bold text-white uppercase tracking-widest">LUXE</div>
+            <div className="font-serif text-2xl font-bold text-white uppercase tracking-widest">KLS LUXE</div>
             <p className="text-[11px] leading-relaxed text-neutral-500">
               Premier executive black car and luxury chauffeur ground transportation. Serving major airports, metropolitan corridors, and corporate travel desks worldwide.
             </p>
