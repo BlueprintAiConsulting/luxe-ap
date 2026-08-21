@@ -631,7 +631,7 @@ export default function HomePage() {
               <li><Link href="/dashboard" className="hover:text-accent transition-colors">VIP Rider Dashboard</Link></li>
               <li><Link href="/today" className="hover:text-accent transition-colors">Chauffeur Cockpit</Link></li>
               <li><Link href="/dispatch" className="hover:text-accent transition-colors">Admin Dispatch Matrix</Link></li>
-              <li><Link href="/presentation" className="hover:text-accent transition-colors">Executive Pitch Deck</Link></li>
+              <li><Link href="/corporate" className="hover:text-accent transition-colors">Corporate Portal</Link></li>
             </ul>
           </div>
 
