@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { decodeVinNumber, SAMPLE_LUXURY_VINS } from "../../lib/services/vinDecoder";
 
-describe("NHTSA VIN Decoder & Fleet Auto-Provisioning Smoke Tests", () => {
+describe("NHTSA VIN Decoder & Fleet Auto-Provisioning Smoke Tests", { timeout: 10000 }, () => {
   
   it("should accurately decode Cadillac Escalade ESV VIN and map to SUV class with luxury amenities", async () => {
     const vin = "1GYS4HKL7RR123456";

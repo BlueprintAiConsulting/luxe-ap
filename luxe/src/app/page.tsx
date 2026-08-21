@@ -374,9 +374,10 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/fleet"
-                  className="px-4 py-3.5 rounded-xl border border-neutral-700 hover:border-accent text-neutral-300 hover:text-white font-mono text-xs font-bold transition-all"
+                  className="px-5 py-3.5 rounded-xl bg-[#141824] border border-accent/40 hover:border-accent text-accent hover:text-white font-mono text-xs font-bold transition-all flex items-center gap-1.5 shadow-gold-sm"
                 >
-                  Full Fleet Gallery
+                  <Sparkles size={14} className="text-accent" />
+                  <span>360° Turntable &amp; Interior Tour</span>
                 </Link>
               </div>
             </div>

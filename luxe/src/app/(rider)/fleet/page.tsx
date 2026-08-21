@@ -1,162 +1,164 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { 
+  LUXURY_FLEET_SHOWCASE 
+} from "@/lib/data/fleetShowcase";
+import Vehicle360Viewer from "@/components/fleet/Vehicle360Viewer";
+import InteriorSnapshotGallery from "@/components/fleet/InteriorSnapshotGallery";
+import VehicleSpecHud from "@/components/fleet/VehicleSpecHud";
+import { 
+  Sparkles, 
   Car, 
   Shield, 
   Bus, 
-  Wifi, 
-  Sparkles, 
-  User, 
-  Luggage, 
   ArrowRight, 
   CheckCircle2, 
-  Zap,
-  Coffee,
-  VolumeX,
-  Smartphone
+  DollarSign, 
+  Lock,
+  Star
 } from "lucide-react";
 
-const FLEET_CLASSES = [
-  {
-    id: "sedan",
-    name: "Executive Sedan",
-    model: "Mercedes-Benz S580 / Maybach & BMW 7-Series",
-    tagline: "Ultra-quiet flagship luxury for executive 1-to-3 passenger transfers",
-    passengers: 3,
-    luggage: 3,
-    icon: Car,
-    image: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80",
-    features: [
-      "Executive rear reclining heated & ventilated massage seats",
-      "High-speed Starlink / 5G encrypted In-Cabin Wi-Fi",
-      "Complimentary chilled San Pellegrino & Fiji Water",
-      "Acoustic noise-canceling cabin glass & wireless phone charging",
-      "Curbside baggage assistance & flight arrival monitoring"
-    ],
-    startingFare: "$145.00"
-  },
-  {
-    id: "suv",
-    name: "Luxury SUV",
-    model: "Cadillac Escalade ESV & Lincoln Navigator L Extended",
-    tagline: "First-class spacious comfort for families, VIP security details, & luggage",
-    passengers: 6,
-    luggage: 6,
-    icon: Shield,
-    image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80",
-    features: [
-      "Extended wheelbase (ESV) with oversized luggage cargo space",
-      "Tri-zone rear climate control & privacy window tint",
-      "Complimentary refreshments & artisan confectionery",
-      "Dual rear 12.6-inch entertainment screens & HDMI inputs",
-      "All-wheel drive with certified defensive-driving chauffeurs"
-    ],
-    startingFare: "$195.00"
-  },
-  {
-    id: "sprinter",
-    name: "Executive Jet Sprinter",
-    model: "Mercedes-Benz Custom Jet Van (Maybach Interior)",
-    tagline: "A private jet cabin on wheels for corporate boards & roadshows",
-    passengers: 12,
-    luggage: 12,
-    icon: Bus,
-    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
-    features: [
-      "6-foot 4-inch standing headroom with aircraft-style ambient lighting",
-      "Custom Italian leather captain chairs with motorized footrests",
-      "43-inch Smart 4K TV with Apple TV / HDMI conference casting",
-      "Built-in bar refrigerator stocked with premium beverages",
-      "Dedicated partition wall for total corporate confidentiality"
-    ],
-    startingFare: "$285.00"
-  }
-];
-
 export default function FleetPage() {
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>("escalade_esv");
+
+  const currentVehicle = 
+    LUXURY_FLEET_SHOWCASE.find((v) => v.id === selectedVehicleId) || 
+    LUXURY_FLEET_SHOWCASE[0];
+
   return (
-    <div className="p-4 max-w-lg mx-auto w-full pt-6 pb-28 space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 selection:bg-accent selection:text-neutral-950">
+    <div className="min-h-screen bg-[#050609] text-white selection:bg-accent selection:text-neutral-950 font-sans">
       
-      {/* Header */}
-      <div className="mb-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold uppercase tracking-widest mb-1 font-mono">
-          <Sparkles size={11} /> Executive Fleet
+      {/* Hero Header Section */}
+      <div className="relative pt-10 pb-8 px-4 sm:px-8 max-w-7xl mx-auto border-b border-neutral-800/80">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 border border-accent/30 text-accent text-[11px] font-bold uppercase tracking-widest font-mono shadow-gold-sm">
+              <Sparkles size={12} className="text-accent" /> KLS Luxe Flagship Fleet Experience
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-serif text-white tracking-tight">
+              Bespoke Luxury Livery
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-400 font-mono max-w-2xl mt-1">
+              Explore our owned collection of pristine, late-model Cadillac Escalade ESVs, Mercedes-Benz S-Class sedans, and Custom Executive Sprinter Jet vans.
+            </p>
+          </div>
+
+          {/* Quick Stats Banner */}
+          <div className="flex items-center gap-4 bg-[#0a0d16] border border-neutral-800 p-3 rounded-2xl font-mono text-xs text-neutral-300">
+            <div className="flex items-center gap-1.5">
+              <Star size={14} className="text-accent fill-accent" />
+              <span className="font-bold text-white">5.0★ Chauffeurs</span>
+            </div>
+            <div className="h-4 w-px bg-neutral-700" />
+            <div className="flex items-center gap-1.5">
+              <Shield size={14} className="text-emerald-400" />
+              <span className="font-bold text-white">$10M Liability</span>
+            </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold font-serif text-white tracking-tight">Vehicle Showcase</h1>
-        <p className="text-xs text-neutral-400 mt-1 font-medium">
-          Meticulously detailed, late-model luxury vehicles piloted by executive-certified chauffeurs.
-        </p>
+
+        {/* Fleet Model Switcher Tabs */}
+        <div className="flex overflow-x-auto no-scrollbar gap-3 pt-8 font-mono text-xs">
+          {LUXURY_FLEET_SHOWCASE.map((vehicle) => {
+            const isSelected = vehicle.id === selectedVehicleId;
+            return (
+              <button
+                key={vehicle.id}
+                onClick={() => setSelectedVehicleId(vehicle.id)}
+                className={`min-h-[48px] px-6 py-3 rounded-2xl font-bold transition-all shrink-0 flex items-center gap-2.5 active:scale-95 ${
+                  isSelected
+                    ? "bg-gold-gradient text-neutral-950 shadow-gold-sm"
+                    : "bg-[#0b0e17] border border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                }`}
+              >
+                {vehicle.classId === "suv" ? (
+                  <Shield size={16} />
+                ) : vehicle.classId === "sedan" ? (
+                  <Car size={16} />
+                ) : (
+                  <Bus size={16} />
+                )}
+                <span>{vehicle.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Fleet Cards */}
-      <div className="space-y-6">
-        {FLEET_CLASSES.map((vehicle) => {
-          const Icon = vehicle.icon;
-          return (
-            <div 
-              key={vehicle.id}
-              className="bg-[#0e0e13]/90 backdrop-blur-xl border border-neutral-800 hover:border-amber-400/30 rounded-3xl overflow-hidden shadow-2xl space-y-4 group transition-all"
-            >
-              {/* Image Banner with Badge */}
-              <div className="relative h-44 w-full overflow-hidden bg-neutral-950">
-                <img 
-                  src={vehicle.image} 
-                  alt={vehicle.name} 
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-80"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
-                
-                <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-accent bg-[#060608]/90 px-2.5 py-0.5 rounded-md border border-amber-400/30 shadow-gold-sm">
-                      {vehicle.startingFare} Base
-                    </span>
-                    <h2 className="text-xl font-bold font-serif text-white mt-1">{vehicle.name}</h2>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 bg-[#060608]/90 border border-neutral-800 px-2.5 py-1 rounded-xl text-xs text-neutral-300 font-mono">
-                    <div className="flex items-center gap-1">
-                      <User size={12} className="text-accent" />
-                      <span>{vehicle.passengers}</span>
-                    </div>
-                    <span>&bull;</span>
-                    <div className="flex items-center gap-1">
-                      <Luggage size={12} className="text-neutral-400" />
-                      <span>{vehicle.luggage}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Details & Amenities */}
-              <div className="p-5 pt-0 space-y-4">
-                <p className="text-xs text-neutral-400 leading-relaxed font-medium">
-                  {vehicle.tagline}
-                </p>
-
-                <div className="space-y-2 pt-2 border-t border-neutral-800/80">
-                  {vehicle.features.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs text-neutral-300">
-                      <CheckCircle2 size={14} className="text-accent shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-2">
-                  <Link
-                    href={`/book`}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-gold-gradient hover:bg-gold-gradient-hover text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-gold-sm hover:shadow-gold-md"
-                  >
-                    <span>Reserve {vehicle.name}</span>
-                    <ArrowRight size={14} />
-                  </Link>
-                </div>
-              </div>
+      {/* Main Interactive Showcase Body */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 space-y-12 animate-in fade-in duration-300">
+        
+        {/* Vehicle Headline & Reserve Banner */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#101424] via-[#090b14] to-[#05060a] border border-accent/30 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
+              {currentVehicle.model}
             </div>
-          );
-        })}
+            <h2 className="text-3xl sm:text-4xl font-bold font-serif text-white">
+              {currentVehicle.name}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-300 font-sans max-w-xl">
+              {currentVehicle.tagline}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 shrink-0">
+            <div className="font-mono text-right sm:text-left">
+              <span className="text-[10px] uppercase text-neutral-400 font-bold block">Starting Estimate</span>
+              <span className="text-xl font-bold text-accent font-serif">{currentVehicle.priceEstimate}</span>
+            </div>
+
+            <Link
+              href={`/book?classId=${currentVehicle.classId}`}
+              className="px-7 py-3.5 min-h-[48px] rounded-2xl bg-gold-gradient text-neutral-950 font-bold uppercase tracking-wider font-mono text-xs shadow-gold-sm hover:brightness-110 flex items-center gap-2 transition-all active:scale-95"
+            >
+              <span>Reserve This Flagship</span>
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+        </div>
+
+        {/* 1. 360-Degree Virtual Exterior Turntable */}
+        <div className="space-y-3">
+          <Vehicle360Viewer vehicle={currentVehicle} />
+        </div>
+
+        {/* 2. Interior Snapshot Gallery & Ambience Tour */}
+        <div className="space-y-3">
+          <InteriorSnapshotGallery 
+            snapshots={currentVehicle.interiorSnapshots} 
+            vehicleName={currentVehicle.name} 
+          />
+        </div>
+
+        {/* 3. Aviation-Inspired Telemetry & Cabin Spec HUD */}
+        <div className="space-y-3">
+          <VehicleSpecHud 
+            passengers={currentVehicle.passengers} 
+            luggage={currentVehicle.luggage} 
+            classId={currentVehicle.classId} 
+          />
+        </div>
+
+        {/* Final Bottom Reservation Banner */}
+        <div className="p-8 rounded-3xl bg-[#0a0d16] border border-neutral-800 text-center space-y-4 shadow-xl">
+          <h3 className="text-2xl font-bold font-serif text-white">Experience Unmatched Executive Standard</h3>
+          <p className="text-xs font-mono text-neutral-400 max-w-xl mx-auto">
+            All charters include complimentary flight tracking, 15-minute curbside buffer, and dedicated chauffeur dispatch coordination.
+          </p>
+          <div className="pt-2">
+            <Link
+              href={`/book?classId=${currentVehicle.classId}`}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gold-gradient text-neutral-950 font-bold uppercase tracking-wider font-mono text-xs shadow-gold-sm hover:brightness-110 transition-all active:scale-95"
+            >
+              <span>Book Your Chauffeur Now</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
       </div>
 
     </div>

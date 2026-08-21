@@ -76,7 +76,7 @@ export async function decodeVinNumber(rawVin: string): Promise<DecodedVinResult>
 
   try {
     const url = `https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`;
-    const response = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(2500) });
 
     if (response.ok) {
       const data = await response.json();

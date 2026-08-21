@@ -1,11 +1,4 @@
 {
-  "auth": {
-    "providers": {
-      "emailPassword": true,
-      "phone": true,
-      "anonymous": true
-    }
-  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
