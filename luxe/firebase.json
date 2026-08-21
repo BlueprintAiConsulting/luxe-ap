@@ -20,6 +20,7 @@
     }
   ],
   "hosting": {
+    "site": "luxe-app-1786335311",
     "public": "out",
     "cleanUrls": true,
     "ignore": [
