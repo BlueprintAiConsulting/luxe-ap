@@ -12,13 +12,6 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     luggage: 6,
     exterior360Images: [
       "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80",
     ],
     interiorSnapshots: [
       {
@@ -58,9 +51,10 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { x: 30, y: 45, title: "Acoustic Noise-Canceling Glass", detail: "Double-laminated windows creating a 54 dB whisper-quiet cabin." },
-      { x: 55, y: 50, title: "Extended ESV Wheelbase", detail: "+15.9 inches of additional rear cabin stretch and luggage volume." },
-      { x: 75, y: 40, title: "Starlink 5G Satellite Link", detail: "Encrypted high-speed WiFi for continuous Zoom video conferences." },
+      { angle: 0, elevation: 48, title: "Galvano Chrome Mesh Grille", detail: "Signature illuminated Cadillac shield with active aerodynamic shutters." },
+      { angle: 90, elevation: 52, title: "Extended ESV Wheelbase (+15.9\")", detail: "+15.9 inches of additional rear cabin stretch and luggage volume." },
+      { angle: 180, elevation: 42, title: "Vertical LED Tailblade Lighting", detail: "Full 3-foot light blade signature with hands-free gesture tailgate." },
+      { angle: 270, elevation: 35, title: "Acoustic Double-Pane Glass", detail: "Double-laminated windows creating a 54 dB whisper-quiet cabin." },
     ],
     specs: [
       { label: "Cabin Decibel", value: "54 dB", detail: "Whisper-quiet acoustic glass" },
@@ -79,13 +73,6 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     luggage: 3,
     exterior360Images: [
       "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
     ],
     interiorSnapshots: [
       {
@@ -118,8 +105,10 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { x: 35, y: 50, title: "4MATIC All-Wheel Drive", detail: "Uncompromised wet & dry road stability under all conditions." },
-      { x: 60, y: 45, title: "Soft-Close Motorized Doors", detail: "Acoustically dampened silent latching for seamless arrivals." },
+      { angle: 0, elevation: 50, title: "DIGITAL LIGHT LED Headlamps", detail: "1.3 million micro-mirror projection with welcome lighting." },
+      { angle: 90, elevation: 52, title: "Flush Motorized Door Handles", detail: "Electrically extend seamlessly upon VIP passenger approach." },
+      { angle: 180, elevation: 44, title: "3D Ruby OLED Tail Lamp Array", detail: "Animated horizontal light signature with chrome garnish." },
+      { angle: 270, elevation: 36, title: "4MATIC All-Wheel Drive Chassis", detail: "AIRMATIC adaptive air suspension for cloud-like road isolation." },
     ],
     specs: [
       { label: "Cabin Decibel", value: "52 dB", detail: "Industry-leading acoustic glass" },
@@ -138,13 +127,6 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
     luggage: 14,
     exterior360Images: [
       "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80",
     ],
     interiorSnapshots: [
       {
@@ -170,8 +152,10 @@ export const LUXURY_FLEET_SHOWCASE: VehicleShowcaseData[] = [
       },
     ],
     hotspots: [
-      { x: 30, y: 35, title: "6ft 4in Standing Headroom", detail: "Walk-in comfort with overhead aviation luggage bins." },
-      { x: 65, y: 40, title: "Acoustic Partition Wall", detail: "Motorized glass and solid partition for corporate discretion." },
+      { angle: 0, elevation: 42, title: "Aerodynamic Executive Nose", detail: "High-visibility LED projection optics and active radar sensors." },
+      { angle: 90, elevation: 30, title: "6ft 4in Full Standing Headroom", detail: "Walk-in luxury cabin with motorized automatic entrance step." },
+      { angle: 180, elevation: 45, title: "Rear VIP Luggage Cargo Bay", detail: "Accommodates up to 14 checked flight cases with ease." },
+      { angle: 270, elevation: 36, title: "Deep Privacy Limo Tint", detail: "99% UV and solar thermal reflection for complete client confidentiality." },
     ],
     specs: [
       { label: "Headroom", value: "6 ft 4 in", detail: "Full upright standing height" },

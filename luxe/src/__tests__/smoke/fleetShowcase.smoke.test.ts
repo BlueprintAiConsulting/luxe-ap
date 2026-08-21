@@ -12,7 +12,6 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
     expect(escalade?.classId).toBe("suv");
     expect(escalade?.passengers).toBe(6);
     expect(escalade?.luggage).toBe(6);
-    expect(escalade?.exterior360Images.length).toBeGreaterThanOrEqual(6);
     expect(escalade?.interiorSnapshots.length).toBeGreaterThanOrEqual(4);
 
     const sClass = LUXURY_FLEET_SHOWCASE.find((v) => v.id === "mercedes_s580");
@@ -29,18 +28,18 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
     expect(sprinter?.luggage).toBe(14);
   });
 
-  it("should verify 360 turntable frame calculations and degree angles", () => {
-    const frameCount = 8;
-    const calculateAngle = (frame: number) => Math.round((frame / frameCount) * 360);
+  it("should verify 360 degree turntable continuous rotational calculations", () => {
+    const normalizeAngle = (deg: number) => (deg + 360) % 360;
 
-    expect(calculateAngle(0)).toBe(0);
-    expect(calculateAngle(2)).toBe(90);
-    expect(calculateAngle(4)).toBe(180);
-    expect(calculateAngle(6)).toBe(270);
-    expect(calculateAngle(8)).toBe(360);
+    expect(normalizeAngle(0)).toBe(0);
+    expect(normalizeAngle(90)).toBe(90);
+    expect(normalizeAngle(180)).toBe(180);
+    expect(normalizeAngle(270)).toBe(270);
+    expect(normalizeAngle(360)).toBe(0);
+    expect(normalizeAngle(-45)).toBe(315);
   });
 
-  it("should verify interior snapshot metadata and hotspot coordinate boundaries", () => {
+  it("should verify interior snapshot metadata and 3D orbital hotspot coordinate boundaries", () => {
     LUXURY_FLEET_SHOWCASE.forEach((vehicle) => {
       // Verify snapshots
       vehicle.interiorSnapshots.forEach((snap) => {
@@ -51,12 +50,12 @@ describe("360 Fleet Showcase, Interior Gallery & Telemetry Smoke Tests", () => {
         expect(snap.tag).toBeDefined();
       });
 
-      // Verify hotspots are within 0-100% boundary
+      // Verify 3D orbital hotspots are within [0, 360] degrees and [0, 100] elevation
       vehicle.hotspots.forEach((hotspot) => {
-        expect(hotspot.x).toBeGreaterThanOrEqual(0);
-        expect(hotspot.x).toBeLessThanOrEqual(100);
-        expect(hotspot.y).toBeGreaterThanOrEqual(0);
-        expect(hotspot.y).toBeLessThanOrEqual(100);
+        expect(hotspot.angle).toBeGreaterThanOrEqual(0);
+        expect(hotspot.angle).toBeLessThanOrEqual(360);
+        expect(hotspot.elevation).toBeGreaterThanOrEqual(0);
+        expect(hotspot.elevation).toBeLessThanOrEqual(100);
         expect(hotspot.title).toBeDefined();
         expect(hotspot.detail).toBeDefined();
       });
